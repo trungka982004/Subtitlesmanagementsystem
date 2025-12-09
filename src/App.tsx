@@ -4,6 +4,7 @@ import { SubtitleList } from './components/SubtitleList';
 import { SubtitleEditor } from './components/SubtitleEditor';
 import { SubtitleAnalysis } from './components/SubtitleAnalysis';
 import { SubtitleComparison } from './components/SubtitleComparison';
+import { QuickTranslate } from './components/QuickTranslate';
 import { Sidebar } from './components/Sidebar';
 import { ProjectDashboard } from './components/ProjectDashboard';
 import { Settings } from './components/Settings';
@@ -30,7 +31,7 @@ export interface SubtitleFile {
 
 export default function App() {
   const [subtitleFiles, setSubtitleFiles] = useState<SubtitleFile[]>([]);
-  const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'analysis' | 'compare' | 'settings'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings'>('upload');
   const [selectedFile, setSelectedFile] = useState<SubtitleFile | null>(null);
 
   const handleFileUpload = (file: SubtitleFile) => {
@@ -115,6 +116,10 @@ export default function App() {
 
               {activeTab === 'compare' && (
                 <SubtitleComparison files={subtitleFiles} />
+              )}
+
+              {activeTab === 'quick-translate' && (
+                <QuickTranslate />
               )}
 
               {activeTab === 'settings' && (

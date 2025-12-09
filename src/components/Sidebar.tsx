@@ -1,14 +1,15 @@
-import { Upload, FileText, BarChart3, GitCompare, Settings, LogOut, User } from 'lucide-react';
+import { Upload, FileText, BarChart3, GitCompare, Settings, LogOut, User, Languages } from 'lucide-react';
 
 interface SidebarProps {
-  activeTab: 'upload' | 'manage' | 'analysis' | 'compare' | 'settings';
-  onTabChange: (tab: 'upload' | 'manage' | 'analysis' | 'compare' | 'settings') => void;
+  activeTab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings';
+  onTabChange: (tab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings') => void;
 }
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const menuItems = [
     { id: 'upload' as const, label: 'Upload', icon: Upload },
     { id: 'manage' as const, label: 'Manage & Translate', icon: FileText },
+    { id: 'quick-translate' as const, label: 'Quick Translate', icon: Languages },
     { id: 'analysis' as const, label: 'Analysis', icon: BarChart3 },
     { id: 'compare' as const, label: 'Compare', icon: GitCompare },
     { id: 'settings' as const, label: 'Settings', icon: Settings },
