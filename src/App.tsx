@@ -20,8 +20,16 @@ export interface SubtitleEntry {
   nlpTranslation?: string;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  createdAt: Date;
+  description?: string;
+}
+
 export interface SubtitleFile {
   id: string;
+  projectId?: string;
   name: string;
   entries: SubtitleEntry[];
   uploadedAt: Date;
@@ -31,20 +39,52 @@ export interface SubtitleFile {
 
 export default function App() {
   const [subtitleFiles, setSubtitleFiles] = useState<SubtitleFile[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings'>('upload');
   const [selectedFile, setSelectedFile] = useState<SubtitleFile | null>(null);
 
   const handleFileUpload = (file: SubtitleFile) => {
+    console.log('Uploading file:', file.name, 'Project ID:', file.projectId);
     setSubtitleFiles(prev => [...prev, file]);
-    setActiveTab('manage');
+  };
+
+  const handleCreateProject = (name: string, description?: string) => {
+    const newProject: Project = {
+      id: Date.now().toString(),
+      name,
+      description,
+      createdAt: new Date(),
+    };
+    setProjects(prev => [...prev, newProject]);
+    return newProject.id;
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    // Optionally remove files or unassign them. For now, let's unassign them.
+    setSubtitleFiles(prev => prev.map(f => f.projectId === projectId ? { ...f, projectId: undefined } : f));
+  };
+
+  const handleMoveFileToProject = (fileId: string, projectId: string) => {
+    setSubtitleFiles(prev =>
+      prev.map(f => f.id === fileId ? { ...f, projectId } : f)
+    );
   };
 
   const handleFileSelect = (file: SubtitleFile) => {
-    setSelectedFile(file);
+    if (file.status === 'not-started') {
+      const updatedFile: SubtitleFile = { ...file, status: 'in-progress' };
+      setSubtitleFiles(prev =>
+        prev.map(f => f.id === file.id ? updatedFile : f)
+      );
+      setSelectedFile(updatedFile);
+    } else {
+      setSelectedFile(file);
+    }
   };
 
   const handleUpdateFile = (updatedFile: SubtitleFile) => {
-    setSubtitleFiles(prev => 
+    setSubtitleFiles(prev =>
       prev.map(f => f.id === updatedFile.id ? updatedFile : f)
     );
     setSelectedFile(updatedFile);
@@ -76,8 +116,23 @@ export default function App() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors">
               {activeTab === 'upload' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <SubtitleUploader onFileUpload={handleFileUpload} />
-                  <ProjectDashboard files={subtitleFiles} />
+                  <SubtitleUploader
+                    onFileUpload={handleFileUpload}
+                    projects={projects}
+                    onCreateProject={handleCreateProject}
+                  />
+                  <ProjectDashboard
+                    files={subtitleFiles}
+                    projects={projects}
+                    onCreateProject={handleCreateProject}
+                    onDeleteProject={handleDeleteProject}
+                    onMoveFile={handleMoveFileToProject}
+                    onFileUpload={handleFileUpload}
+                    onFileSelect={(file) => {
+                      handleFileSelect(file);
+                      setActiveTab('manage');
+                    }}
+                  />
                 </div>
               )}
 
@@ -86,6 +141,7 @@ export default function App() {
                   <div className="lg:col-span-1">
                     <SubtitleList
                       files={subtitleFiles}
+                      projects={projects}
                       selectedFile={selectedFile}
                       onSelectFile={handleFileSelect}
                       onDeleteFile={handleDeleteFile}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { SubtitleFile, SubtitleEntry } from '../App';
-import { Download, Sparkles, Globe } from 'lucide-react';
+import { Download, Sparkles, Globe, CheckCircle2 } from 'lucide-react';
 
 interface SubtitleEditorProps {
   file: SubtitleFile;
@@ -17,7 +17,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
       'Bạn có thể phân tích thời gian, số lượng ký tự và chất lượng dịch thuật',
       'So sánh nhiều phiên bản cạnh nhau'
     ];
-    
+
     const mockNlpTranslations = [
       'Chào mừng bạn đến với Hệ thống Quản lý và Phân tích Dịch Phụ đề',
       'Công cụ này hỗ trợ bạn trong việc quản lý và dịch các file phụ đề',
@@ -25,7 +25,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
       'Bạn có thể phân tích về thời gian, số ký tự và chất lượng của bản dịch',
       'So sánh các phiên bản khác nhau một cách dễ dàng'
     ];
-    
+
     return file.entries.map((entry, index) => ({
       ...entry,
       googleTranslation: entry.googleTranslation || mockGoogleTranslations[index % mockGoogleTranslations.length],
@@ -46,12 +46,12 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
       entry.id === id ? { ...entry, googleTranslation: translation } : entry
     );
     setEditedEntries(updated);
-    
+
     // Auto-update file with progress
     const translatedCount = updated.filter(e => e.googleTranslation || e.nlpTranslation).length;
     const progress = Math.round((translatedCount / updated.length) * 100);
     const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
-    
+
     onUpdate({ ...file, entries: updated, progress, status });
   };
 
@@ -60,12 +60,12 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
       entry.id === id ? { ...entry, nlpTranslation: translation } : entry
     );
     setEditedEntries(updated);
-    
+
     // Auto-update file with progress
     const translatedCount = updated.filter(e => e.googleTranslation || e.nlpTranslation).length;
     const progress = Math.round((translatedCount / updated.length) * 100);
     const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
-    
+
     onUpdate({ ...file, entries: updated, progress, status });
   };
 
@@ -75,20 +75,20 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
 
   const handleAutoTranslate = (type: 'google' | 'nlp') => {
     setIsTranslating(true);
-    
+
     // Simulate translation API call
     setTimeout(() => {
       const updated = editedEntries.map(entry => {
         // Mock translation - in reality, this would call an API
         const mockTranslation = `[${type.toUpperCase()}] ${entry.text}`;
-        
+
         if (type === 'google') {
           return { ...entry, googleTranslation: mockTranslation };
         } else {
           return { ...entry, nlpTranslation: mockTranslation };
         }
       });
-      
+
       setEditedEntries(updated);
       setIsTranslating(false);
     }, 1500);
@@ -99,7 +99,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     editedEntries.forEach(entry => {
       srtContent += `${entry.id}\n`;
       srtContent += `${entry.startTime} --> ${entry.endTime}\n`;
-      
+
       if (translationType === 'google' && entry.googleTranslation) {
         srtContent += `${entry.googleTranslation}\n\n`;
       } else if (translationType === 'nlp' && entry.nlpTranslation) {
@@ -141,6 +141,20 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const newStatus = file.status === 'done' ? 'in-progress' : 'done';
+              onUpdate({ ...file, status: newStatus, progress: newStatus === 'done' ? 100 : file.progress });
+            }}
+            className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${file.status === 'done'
+              ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            {file.status === 'done' ? 'Completed' : 'Mark as Done'}
+          </button>
+
           <div className="relative group">
             <button
               className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -229,9 +243,8 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   </span>
                 </div>
                 {(isSlowReading || isFastReading) && (
-                  <span className={`px-2 py-1 rounded ${
-                    isFastReading ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
+                  <span className={`px-2 py-1 rounded ${isFastReading ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
                     {isFastReading ? 'Fast read' : 'Slow read'}
                   </span>
                 )}

@@ -1,13 +1,17 @@
 import { useState, useRef } from 'react';
-import { Upload, FileText } from 'lucide-react';
-import { SubtitleFile, SubtitleEntry } from '../App';
+import { Upload, FileText, FolderPlus, Folder } from 'lucide-react';
+import { SubtitleFile, SubtitleEntry, Project } from '../App';
 
 interface SubtitleUploaderProps {
   onFileUpload: (file: SubtitleFile) => void;
+  projects: Project[];
+  onCreateProject: (name: string) => string;
 }
 
-export function SubtitleUploader({ onFileUpload }: SubtitleUploaderProps) {
+export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: SubtitleUploaderProps) {
   const [dragActive, setDragActive] = useState(false);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const parseSRT = (content: string): SubtitleEntry[] => {
@@ -19,7 +23,7 @@ export function SubtitleUploader({ onFileUpload }: SubtitleUploaderProps) {
       if (lines.length >= 3) {
         const id = parseInt(lines[0]);
         const timeMatch = lines[1].match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
-        
+
         if (timeMatch) {
           const text = lines.slice(2).join('\n');
           entries.push({
@@ -37,7 +41,7 @@ export function SubtitleUploader({ onFileUpload }: SubtitleUploaderProps) {
 
   const handleFileRead = (content: string, fileName: string) => {
     const entries = parseSRT(content);
-    
+
     if (entries.length > 0) {
       const newFile: SubtitleFile = {
         id: `${Date.now()}-${Math.random()}`,
@@ -46,6 +50,7 @@ export function SubtitleUploader({ onFileUpload }: SubtitleUploaderProps) {
         uploadedAt: new Date(),
         status: 'not-started',
         progress: 0,
+        projectId: undefined,
       };
       onFileUpload(newFile);
     }
@@ -63,9 +68,17 @@ export function SubtitleUploader({ onFileUpload }: SubtitleUploaderProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileSelect(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleManualCreateProject = () => {
+    if (newProjectName.trim()) {
+      onCreateProject(newProjectName.trim());
+      setNewProjectName('');
+      setIsCreatingProject(false);
     }
   };
 
@@ -108,15 +121,56 @@ export function SubtitleUploader({ onFileUpload }: SubtitleUploaderProps) {
 
   return (
     <div className="space-y-6">
+      {/* Project Creation Only - No Selection */}
+      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+          <FolderPlus className="w-4 h-4" />
+          Create New Project
+        </h3>
+
+        {!isCreatingProject ? (
+          <button
+            onClick={() => setIsCreatingProject(true)}
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2"
+          >
+            <FolderPlus className="w-4 h-4" />
+            Create Project
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleManualCreateProject()}
+              placeholder="Enter project name..."
+              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              autoFocus
+            />
+            <button
+              onClick={handleManualCreateProject}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-sm"
+            >
+              Create
+            </button>
+            <button
+              onClick={() => setIsCreatingProject(false)}
+              className="px-3 py-2 text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-          dragActive
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 hover:border-gray-400'
-        }`}
+        className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive
+          ? 'border-blue-500 bg-blue-50'
+          : 'border-gray-300 hover:border-gray-400'
+          }`}
       >
         <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
         <p className="text-gray-700 mb-2">
