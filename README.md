@@ -9,3 +9,6 @@
 
   Run `npm run dev` to start the development server.
   
+  run `python scripts/mock_libretranslate.py` for libretranslate mock server  
+  
+  run `npm run server` to start the backend server

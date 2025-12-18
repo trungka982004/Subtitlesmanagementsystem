@@ -5,7 +5,7 @@ import { CheckCircle2, Clock, AlertCircle, Folder, Trash2, FolderOpen } from 'lu
 interface ProjectDashboardProps {
   files: SubtitleFile[];
   projects: Project[];
-  onCreateProject: (name: string) => string;
+  onCreateProject: (name: string) => Promise<string> | string;
   onDeleteProject: (projectId: string) => void;
   onMoveFile: (fileId: string, projectId: string) => void;
   onFileUpload: (file: SubtitleFile) => void;

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from './services/db';
 import { SubtitleUploader } from './components/SubtitleUploader';
 import { SubtitleList } from './components/SubtitleList';
 import { SubtitleEditor } from './components/SubtitleEditor';
@@ -43,57 +44,112 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings'>('upload');
   const [selectedFile, setSelectedFile] = useState<SubtitleFile | null>(null);
 
-  const handleFileUpload = (file: SubtitleFile) => {
-    console.log('Uploading file:', file.name, 'Project ID:', file.projectId);
-    setSubtitleFiles(prev => [...prev, file]);
-  };
-
-  const handleCreateProject = (name: string, description?: string) => {
-    const newProject: Project = {
-      id: Date.now().toString(),
-      name,
-      description,
-      createdAt: new Date(),
+  // Load initial data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [loadedProjects, loadedFiles] = await Promise.all([
+          db.getProjects(),
+          db.getFiles()
+        ]);
+        setProjects(loadedProjects);
+        setSubtitleFiles(loadedFiles);
+      } catch (err) {
+        console.error('Failed to load data:', err);
+      }
     };
-    setProjects(prev => [...prev, newProject]);
-    return newProject.id;
+    loadData();
+  }, []);
+
+  const handleFileUpload = async (file: SubtitleFile) => {
+    console.log('Uploading file:', file.name, 'Project ID:', file.projectId);
+    try {
+      const newFile = await db.createFile({
+        name: file.name,
+        content: file.entries.map(e => `${e.id}\n${e.startTime} --> ${e.endTime}\n${e.text}`).join('\n\n'),
+        projectId: file.projectId || null,
+      });
+      // We might need to re-parse entries here or trust the backend to return them (if we implemented parsing there)
+      // For now, let's keep the local file object's entries but use the DB ID
+      const fileWithEntries = { ...file, id: newFile.id, uploadedAt: newFile.uploadedAt };
+      setSubtitleFiles(prev => [...prev, fileWithEntries]);
+    } catch (err) {
+      console.error('Failed to upload file:', err);
+    }
   };
 
-  const handleDeleteProject = (projectId: string) => {
-    setProjects(prev => prev.filter(p => p.id !== projectId));
-    // Optionally remove files or unassign them. For now, let's unassign them.
-    setSubtitleFiles(prev => prev.map(f => f.projectId === projectId ? { ...f, projectId: undefined } : f));
+  const handleCreateProject = async (name: string, description?: string) => {
+    try {
+      const newProject = await db.createProject(name, description);
+      setProjects(prev => [...prev, newProject]);
+      return newProject.id;
+    } catch (err) {
+      console.error('Failed to create project:', err);
+      return '';
+    }
   };
 
-  const handleMoveFileToProject = (fileId: string, projectId: string) => {
-    setSubtitleFiles(prev =>
-      prev.map(f => f.id === fileId ? { ...f, projectId } : f)
-    );
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await db.deleteProject(projectId);
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      setSubtitleFiles(prev => prev.map(f => f.projectId === projectId ? { ...f, projectId: undefined } : f));
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+    }
+  };
+
+  const handleMoveFileToProject = async (fileId: string, projectId: string) => {
+    try {
+      await db.updateFile(fileId, { projectId });
+      setSubtitleFiles(prev =>
+        prev.map(f => f.id === fileId ? { ...f, projectId } : f)
+      );
+    } catch (err) {
+      console.error('Failed to move file:', err);
+    }
   };
 
   const handleFileSelect = (file: SubtitleFile) => {
     if (file.status === 'not-started') {
       const updatedFile: SubtitleFile = { ...file, status: 'in-progress' };
+      // Optimistic update, background save
       setSubtitleFiles(prev =>
         prev.map(f => f.id === file.id ? updatedFile : f)
       );
       setSelectedFile(updatedFile);
+      db.updateFile(file.id, { status: 'in-progress' }).catch(console.error);
     } else {
       setSelectedFile(file);
     }
   };
 
-  const handleUpdateFile = (updatedFile: SubtitleFile) => {
+  const handleUpdateFile = async (updatedFile: SubtitleFile) => {
     setSubtitleFiles(prev =>
       prev.map(f => f.id === updatedFile.id ? updatedFile : f)
     );
     setSelectedFile(updatedFile);
+    // Save to DB (debouncing might be good here, but for now direct save)
+    try {
+      await db.updateFile(updatedFile.id, {
+        // content: ... (serialize entries),
+        status: updatedFile.status,
+        progress: updatedFile.progress
+      });
+    } catch (err) {
+      console.error('Failed to update file:', err);
+    }
   };
 
-  const handleDeleteFile = (fileId: string) => {
-    setSubtitleFiles(prev => prev.filter(f => f.id !== fileId));
-    if (selectedFile?.id === fileId) {
-      setSelectedFile(null);
+  const handleDeleteFile = async (fileId: string) => {
+    try {
+      await db.deleteFile(fileId);
+      setSubtitleFiles(prev => prev.filter(f => f.id !== fileId));
+      if (selectedFile?.id === fileId) {
+        setSelectedFile(null);
+      }
+    } catch (err) {
+      console.error('Failed to delete file:', err);
     }
   };
 

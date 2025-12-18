@@ -5,7 +5,7 @@ import { SubtitleFile, SubtitleEntry, Project } from '../App';
 interface SubtitleUploaderProps {
   onFileUpload: (file: SubtitleFile) => void;
   projects: Project[];
-  onCreateProject: (name: string) => string;
+  onCreateProject: (name: string) => Promise<string> | string;
 }
 
 export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: SubtitleUploaderProps) {

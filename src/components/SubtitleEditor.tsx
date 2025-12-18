@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SubtitleFile, SubtitleEntry } from '../App';
 import { Download, Sparkles, Globe, CheckCircle2 } from 'lucide-react';
+import { translateText } from '../services/libreTranslate';
 
 interface SubtitleEditorProps {
   file: SubtitleFile;
@@ -73,25 +74,40 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     onUpdate({ ...file, entries: editedEntries });
   };
 
-  const handleAutoTranslate = (type: 'google' | 'nlp') => {
+  const handleAutoTranslate = async (type: 'google' | 'nlp') => {
     setIsTranslating(true);
 
-    // Simulate translation API call
-    setTimeout(() => {
-      const updated = editedEntries.map(entry => {
-        // Mock translation - in reality, this would call an API
-        const mockTranslation = `[${type.toUpperCase()}] ${entry.text}`;
+    if (type === 'google') {
+      try {
+        // Create an array of promises for concurrent translation
+        const translationPromises = editedEntries.map(async (entry) => {
+          const translated = await translateText(entry.text, 'vi', 'auto');
+          return { ...entry, googleTranslation: translated };
+        });
 
-        if (type === 'google') {
-          return { ...entry, googleTranslation: mockTranslation };
-        } else {
+        const updated = await Promise.all(translationPromises);
+        setEditedEntries(updated);
+      } catch (error) {
+        console.error("Translation failed", error);
+        // You might want to show a toast or error message here
+      } finally {
+        setIsTranslating(false);
+      }
+    } else {
+      // Keep mocking NLP for now as per previous logic, or leave as is if only Google was requested to be replaced.
+      // The user specially asked "replace the Model translate: Google translate into self-hosted LibreTranslate API".
+      // They didn't explicitly say replace the NLP one, so I'll leave the NLP one mocked as placeholder.
+      setTimeout(() => {
+        const updated = editedEntries.map(entry => {
+          // Mock translation - in reality, this would call an API
+          const mockTranslation = `[${type.toUpperCase()}] ${entry.text}`;
           return { ...entry, nlpTranslation: mockTranslation };
-        }
-      });
+        });
 
-      setEditedEntries(updated);
-      setIsTranslating(false);
-    }, 1500);
+        setEditedEntries(updated);
+        setIsTranslating(false);
+      }, 1500);
+    }
   };
 
   const handleExport = (translationType: 'google' | 'nlp' | 'original') => {
@@ -173,7 +189,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 onClick={() => handleExport('google')}
                 className="w-full px-4 py-2 text-left hover:bg-gray-50"
               >
-                Export Google ({googleTranslatedCount})
+                Export LibreTranslate ({googleTranslatedCount})
               </button>
               <button
                 onClick={() => handleExport('nlp')}
@@ -193,7 +209,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
           className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
         >
           <Globe className="w-4 h-4" />
-          {isTranslating ? 'Translating...' : 'Auto-translate with Google'}
+          {isTranslating ? 'Translating...' : 'Auto-translate with LibreTranslate'}
         </button>
         <button
           onClick={() => handleAutoTranslate('nlp')}
@@ -215,7 +231,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
         </div>
         <div className="col-span-4 text-gray-700 flex items-center gap-2">
           <Globe className="w-4 h-4" />
-          Vietnamese - Google Translate
+          Vietnamese - LibreTranslate
         </div>
         <div className="col-span-4 text-gray-700 flex items-center gap-2">
           <Sparkles className="w-4 h-4" />

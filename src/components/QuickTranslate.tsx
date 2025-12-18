@@ -6,6 +6,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useTranslation } from '../hooks/useTranslation';
+import { translateText } from '../services/libreTranslate';
 
 export function QuickTranslate() {
   const { t } = useTranslation();
@@ -46,21 +47,22 @@ export function QuickTranslate() {
     if (!sourceText.trim() || !contentType || !relationship) return;
 
     setIsTranslating(true);
-    
-    // Simulate API call - In production, this would call actual translation APIs
-    // The context (contentType, relationship, additionalContext) would be passed to the API
-    setTimeout(() => {
-      // Mock Google Translate result (placeholder)
-      // When integrating real API: Pass sourceText to Google Translate API
-      setGoogleResult('Kết quả từ Google Translate sẽ xuất hiện tại đây khi tích hợp API. Đây là bản dịch tự động không tính đến ngữ cảnh chi tiết.');
-      
+
+    try {
+      // Call LibreTranslate API
+      const translatedText = await translateText(sourceText, 'vi', 'auto'); // Defaulting to Vietnamese as per context
+      setGoogleResult(translatedText);
+
       // Mock Custom NLP Model result (placeholder)
       // When integrating real API: Pass sourceText, contentType, relationship, and additionalContext to your custom NLP model
       const contextInfo = `Loại nội dung: ${contentTypes.find(ct => ct.value === contentType)?.label}, Mối quan hệ: ${relationships.find(r => r.value === relationship)?.label}`;
       setNlpResult(`Kết quả từ Custom NLP Model sẽ xuất hiện tại đây khi tích hợp API.\n\nNgữ cảnh đã chọn: ${contextInfo}\n${additionalContext ? `\nThông tin bổ sung: ${additionalContext}` : ''}\n\nBản dịch này sẽ được tối ưu hóa dựa trên ngữ cảnh và mối quan hệ giữa các nhân vật.`);
-      
+    } catch (error) {
+      console.error("Translation failed", error);
+      setGoogleResult("Translation failed. Please check if LibreTranslate is running at http://localhost:5000");
+    } finally {
       setIsTranslating(false);
-    }, 1500);
+    }
   };
 
   const handleCopy = (text: string, type: 'google' | 'nlp') => {
@@ -121,16 +123,16 @@ export function QuickTranslate() {
                   {t('contentType')} <span className="text-red-500">*</span>
                 </Label>
                 <Select value={contentType} onValueChange={setContentType}>
-                  <SelectTrigger 
-                    id="contentType" 
+                  <SelectTrigger
+                    id="contentType"
                     className="mt-2 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   >
                     <SelectValue placeholder={t('selectContentType')} />
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                     {contentTypes.map((type) => (
-                      <SelectItem 
-                        key={type.value} 
+                      <SelectItem
+                        key={type.value}
                         value={type.value}
                         className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
@@ -147,16 +149,16 @@ export function QuickTranslate() {
                   {t('characterRelationship')} <span className="text-red-500">*</span>
                 </Label>
                 <Select value={relationship} onValueChange={setRelationship}>
-                  <SelectTrigger 
-                    id="relationship" 
+                  <SelectTrigger
+                    id="relationship"
                     className="mt-2 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   >
                     <SelectValue placeholder={t('selectRelationship')} />
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                     {relationships.map((rel) => (
-                      <SelectItem 
-                        key={rel.value} 
+                      <SelectItem
+                        key={rel.value}
                         value={rel.value}
                         className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
@@ -210,7 +212,7 @@ export function QuickTranslate() {
             <h3 className="text-gray-900 dark:text-white mb-4">
               {t('translationResults')}
             </h3>
-            
+
             {/* Google Translate Result */}
             <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-4">
               <div className="flex items-center justify-between mb-3">

@@ -9,7 +9,7 @@ export const translations = {
     comparison: 'So sánh',
     settings: 'Cài đặt',
     logout: 'Đăng xuất',
-    
+
     // Dashboard
     projectDashboard: 'Dashboard Dự án',
     totalProjects: 'Tổng số dự án',
@@ -21,7 +21,7 @@ export const translations = {
     status: 'Trạng thái',
     progress: 'Tiến độ',
     lastUpdated: 'Cập nhật lần cuối',
-    
+
     // Upload
     uploadSubtitleFiles: 'Tải file phụ đề lên',
     dragDropSRT: 'Kéo thả file .SRT vào đây',
@@ -33,16 +33,16 @@ export const translations = {
     uploadDate: 'Ngày tải lên',
     actions: 'Thao tác',
     delete: 'Xóa',
-    
+
     // Manage & Translate
     manageTranslateSubtitles: 'Quản lý & Dịch phụ đề',
     subtitleFiles: 'File phụ đề',
     originalText: 'Văn bản gốc',
-    googleTranslate: 'Google Translate',
+    googleTranslate: 'LibreTranslate',
     customNLPModel: 'Custom NLP Model',
     selectFile: 'Chọn file để xem',
     exportSRT: 'Xuất SRT',
-    
+
     // Analysis
     subtitleAnalysis: 'Phân tích phụ đề',
     totalSubtitles: 'Tổng số phụ đề',
@@ -52,7 +52,7 @@ export const translations = {
     timingDistribution: 'Phân bố thời gian',
     readingSpeedAnalysis: 'Phân tích tốc độ đọc',
     characterCountDistribution: 'Phân bố số ký tự',
-    
+
     // Comparison
     subtitleComparison: 'So sánh phụ đề',
     selectFilesToCompare: 'Chọn file để so sánh',
@@ -63,7 +63,7 @@ export const translations = {
     metrics: 'Chỉ số',
     differences: 'Khác biệt',
     timingDifference: 'Chênh lệch thời gian',
-    
+
     // Quick Translate
     quickTranslateTitle: 'Dịch nhanh theo ngữ cảnh',
     quickTranslateDesc: 'Dịch 1-2 câu với tùy chọn ngữ cảnh chi tiết để có kết quả chính xác hơn',
@@ -100,7 +100,7 @@ export const translations = {
     translating: 'Đang dịch...',
     exampleSentences: 'Câu ví dụ',
     tryExample: 'Thử ví dụ',
-    
+
     // Settings
     settingsTitle: 'Cài đặt',
     translationSettings: 'Dịch thuật',
@@ -108,7 +108,7 @@ export const translations = {
     appearanceSettings: 'Giao diện',
     notificationSettings: 'Thông báo',
     systemSettings: 'Hệ thống',
-    
+
     // Translation Settings
     usingModel: 'Đang sử dụng Model: VietSub-Custom (Latest)',
     translationContext: 'Ngữ cảnh Dịch thuật',
@@ -129,7 +129,7 @@ export const translations = {
     timeShift: 'Đồng bộ thời gian (Time Shift)',
     timeShiftHelper: 'Nhập giá trị âm (ví dụ -500ms) nếu phụ đề chạy chậm hơn tiếng.',
     exportFormat: 'File xuất mặc định: .SRT (UTF-8 Standard)',
-    
+
     // Account Settings
     personalInfo: 'Thông tin cá nhân',
     username: 'Tên người dùng',
@@ -141,7 +141,7 @@ export const translations = {
     updatePassword: 'Cập nhật mật khẩu',
     deleteAccount: 'Xóa tài khoản',
     deleteAccountWarning: 'Khi bạn xóa tài khoản, tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục.',
-    
+
     // Appearance Settings
     themeSettings: 'Chủ đề giao diện',
     lightMode: 'Sáng',
@@ -154,7 +154,7 @@ export const translations = {
     vietnamese: 'Tiếng Việt',
     english: 'English',
     chinese: '中文',
-    
+
     // Notification Settings
     emailNotifications: 'Thông báo Email',
     enableEmailNotif: 'Bật thông báo qua Email',
@@ -164,7 +164,7 @@ export const translations = {
     systemUpdatesNotif: 'Cập nhật hệ thống',
     systemUpdatesDesc: 'Thông báo về các bản cập nhật mới',
     notifInfo: '💡 Bạn có thể tắt thông báo bất kỳ lúc nào. Một số thông báo quan trọng về bảo mật sẽ vẫn được gửi.',
-    
+
     // System Settings
     automation: 'Tự động hóa',
     autoSave: 'Tự động lưu',
@@ -179,13 +179,13 @@ export const translations = {
     projects: 'projects',
     clearAllData: 'Xóa tất cả dữ liệu',
     clearAllDataWarning: 'Xóa tất cả các file phụ đề, bản dịch và cài đặt. Hành động này không thể hoàn tác.',
-    
+
     // Common
     reset: 'Mặc định',
     save: 'Lưu Cấu hình',
     close: 'Đóng',
   },
-  
+
   en: {
     // Sidebar
     dashboard: 'Dashboard',
@@ -196,7 +196,7 @@ export const translations = {
     comparison: 'Comparison',
     settings: 'Settings',
     logout: 'Logout',
-    
+
     // Dashboard
     projectDashboard: 'Project Dashboard',
     totalProjects: 'Total Projects',
@@ -208,7 +208,7 @@ export const translations = {
     status: 'Status',
     progress: 'Progress',
     lastUpdated: 'Last Updated',
-    
+
     // Upload
     uploadSubtitleFiles: 'Upload Subtitle Files',
     dragDropSRT: 'Drag and drop .SRT files here',
@@ -220,16 +220,16 @@ export const translations = {
     uploadDate: 'Upload Date',
     actions: 'Actions',
     delete: 'Delete',
-    
+
     // Manage & Translate
     manageTranslateSubtitles: 'Manage & Translate Subtitles',
     subtitleFiles: 'Subtitle Files',
     originalText: 'Original Text',
-    googleTranslate: 'Google Translate',
+    googleTranslate: 'LibreTranslate',
     customNLPModel: 'Custom NLP Model',
     selectFile: 'Select a file to view',
     exportSRT: 'Export SRT',
-    
+
     // Analysis
     subtitleAnalysis: 'Subtitle Analysis',
     totalSubtitles: 'Total Subtitles',
@@ -239,7 +239,7 @@ export const translations = {
     timingDistribution: 'Timing Distribution',
     readingSpeedAnalysis: 'Reading Speed Analysis',
     characterCountDistribution: 'Character Count Distribution',
-    
+
     // Comparison
     subtitleComparison: 'Subtitle Comparison',
     selectFilesToCompare: 'Select files to compare',
@@ -250,7 +250,7 @@ export const translations = {
     metrics: 'Metrics',
     differences: 'Differences',
     timingDifference: 'Timing Difference',
-    
+
     // Quick Translate
     quickTranslateTitle: 'Quick Contextual Translation',
     quickTranslateDesc: 'Translate 1-2 sentences with detailed context options for more accurate results',
@@ -287,7 +287,7 @@ export const translations = {
     translating: 'Translating...',
     exampleSentences: 'Example Sentences',
     tryExample: 'Try Example',
-    
+
     // Settings
     settingsTitle: 'Settings',
     translationSettings: 'Translation',
@@ -295,7 +295,7 @@ export const translations = {
     appearanceSettings: 'Appearance',
     notificationSettings: 'Notifications',
     systemSettings: 'System',
-    
+
     // Translation Settings
     usingModel: 'Using Model: VietSub-Custom (Latest)',
     translationContext: 'Translation Context',
@@ -316,7 +316,7 @@ export const translations = {
     timeShift: 'Time Shift',
     timeShiftHelper: 'Enter negative value (e.g., -500ms) if subtitles lag behind audio.',
     exportFormat: 'Default export format: .SRT (UTF-8 Standard)',
-    
+
     // Account Settings
     personalInfo: 'Personal Information',
     username: 'Username',
@@ -328,7 +328,7 @@ export const translations = {
     updatePassword: 'Update Password',
     deleteAccount: 'Delete Account',
     deleteAccountWarning: 'When you delete your account, all related data will be permanently deleted and cannot be recovered.',
-    
+
     // Appearance Settings
     themeSettings: 'Theme',
     lightMode: 'Light',
@@ -341,7 +341,7 @@ export const translations = {
     vietnamese: 'Tiếng Việt',
     english: 'English',
     chinese: '中文',
-    
+
     // Notification Settings
     emailNotifications: 'Email Notifications',
     enableEmailNotif: 'Enable Email Notifications',
@@ -351,7 +351,7 @@ export const translations = {
     systemUpdatesNotif: 'System Updates',
     systemUpdatesDesc: 'Notifications about new updates',
     notifInfo: '💡 You can turn off notifications at any time. Some important security notifications will still be sent.',
-    
+
     // System Settings
     automation: 'Automation',
     autoSave: 'Auto Save',
@@ -366,13 +366,13 @@ export const translations = {
     projects: 'projects',
     clearAllData: 'Clear All Data',
     clearAllDataWarning: 'Delete all subtitle files, translations, and settings. This action cannot be undone.',
-    
+
     // Common
     reset: 'Reset',
     save: 'Save Configuration',
     close: 'Close',
   },
-  
+
   zh: {
     // Sidebar
     dashboard: '仪表板',
@@ -383,7 +383,7 @@ export const translations = {
     comparison: '比较',
     settings: '设置',
     logout: '登出',
-    
+
     // Dashboard
     projectDashboard: '项目仪表板',
     totalProjects: '总项目数',
@@ -395,7 +395,7 @@ export const translations = {
     status: '状态',
     progress: '进度',
     lastUpdated: '最后更新',
-    
+
     // Upload
     uploadSubtitleFiles: '上传字幕文件',
     dragDropSRT: '拖放 .SRT 文件到这里',
@@ -407,16 +407,16 @@ export const translations = {
     uploadDate: '上传日期',
     actions: '操作',
     delete: '删除',
-    
+
     // Manage & Translate
     manageTranslateSubtitles: '管理与翻译字幕',
     subtitleFiles: '字幕文件',
     originalText: '原文',
-    googleTranslate: '谷歌翻译',
+    googleTranslate: 'LibreTranslate',
     customNLPModel: '自定义 NLP 模型',
     selectFile: '选择文件查看',
     exportSRT: '导出 SRT',
-    
+
     // Analysis
     subtitleAnalysis: '字幕分析',
     totalSubtitles: '总字幕数',
@@ -426,7 +426,7 @@ export const translations = {
     timingDistribution: '时间分布',
     readingSpeedAnalysis: '阅读速度分析',
     characterCountDistribution: '字符数分布',
-    
+
     // Comparison
     subtitleComparison: '字幕比较',
     selectFilesToCompare: '选择要比较的文件',
@@ -437,7 +437,7 @@ export const translations = {
     metrics: '指标',
     differences: '差异',
     timingDifference: '时间差异',
-    
+
     // Quick Translate
     quickTranslateTitle: '快速上下文翻译',
     quickTranslateDesc: '翻译1-2个句子，提供详细的上下文选项以获得更准确的结果',
@@ -474,7 +474,7 @@ export const translations = {
     translating: '翻译中...',
     exampleSentences: '示例句子',
     tryExample: '试用示例',
-    
+
     // Settings
     settingsTitle: '设置',
     translationSettings: '翻译',
@@ -482,7 +482,7 @@ export const translations = {
     appearanceSettings: '外观',
     notificationSettings: '通知',
     systemSettings: '系统',
-    
+
     // Translation Settings
     usingModel: '使用模型：VietSub-Custom (最新版)',
     translationContext: '翻译语境',
@@ -503,7 +503,7 @@ export const translations = {
     timeShift: '时间偏移',
     timeShiftHelper: '如果字幕滞后于音频，请输入负值（例如 -500ms）。',
     exportFormat: '默认导出格式：.SRT (UTF-8 标准)',
-    
+
     // Account Settings
     personalInfo: '个人信息',
     username: '用户名',
@@ -515,7 +515,7 @@ export const translations = {
     updatePassword: '更新密码',
     deleteAccount: '删除账户',
     deleteAccountWarning: '删除账户后，所有相关数据将被永久删除且无法恢复。',
-    
+
     // Appearance Settings
     themeSettings: '主题',
     lightMode: '浅色',
@@ -528,7 +528,7 @@ export const translations = {
     vietnamese: 'Tiếng Việt',
     english: 'English',
     chinese: '中文',
-    
+
     // Notification Settings
     emailNotifications: '邮件通知',
     enableEmailNotif: '启用邮件通知',
@@ -538,7 +538,7 @@ export const translations = {
     systemUpdatesNotif: '系统更新',
     systemUpdatesDesc: '关于新更新的通知',
     notifInfo: '💡 您可以随时关闭通知。某些重要的安全通知仍会发送。',
-    
+
     // System Settings
     automation: '自动化',
     autoSave: '自动保存',
@@ -553,7 +553,7 @@ export const translations = {
     projects: '个项目',
     clearAllData: '清除所有数据',
     clearAllDataWarning: '删除所有字幕文件、翻译和设置。此操作无法撤销。',
-    
+
     // Common
     reset: '重置',
     save: '保存配置',
