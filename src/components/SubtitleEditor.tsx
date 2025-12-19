@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SubtitleFile, SubtitleEntry } from '../App';
-import { Download, Sparkles, Globe, CheckCircle2 } from 'lucide-react';
+import { Download, Sparkles, Globe, Clock, Save, CheckCircle2 } from 'lucide-react';
 import { translateText } from '../services/libreTranslate';
 
 interface SubtitleEditorProps {
@@ -9,69 +9,33 @@ interface SubtitleEditorProps {
 }
 
 export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
-  const [editedEntries, setEditedEntries] = useState<SubtitleEntry[]>(() => {
-    // Add mock Vietnamese translations for demonstration
-    const mockGoogleTranslations = [
-      'Chào mừng đến với Hệ thống Phân tích và Quản lý Phiên dịch Phụ đề',
-      'Công cụ này giúp bạn quản lý và dịch các tệp phụ đề',
-      'Tải lên tệp SRT của bạn để bắt đầu',
-      'Bạn có thể phân tích thời gian, số lượng ký tự và chất lượng dịch thuật',
-      'So sánh nhiều phiên bản cạnh nhau'
-    ];
-
-    const mockNlpTranslations = [
-      'Chào mừng bạn đến với Hệ thống Quản lý và Phân tích Dịch Phụ đề',
-      'Công cụ này hỗ trợ bạn trong việc quản lý và dịch các file phụ đề',
-      'Hãy tải file SRT của bạn lên để bắt đầu sử dụng',
-      'Bạn có thể phân tích về thời gian, số ký tự và chất lượng của bản dịch',
-      'So sánh các phiên bản khác nhau một cách dễ dàng'
-    ];
-
-    return file.entries.map((entry, index) => ({
-      ...entry,
-      googleTranslation: entry.googleTranslation || mockGoogleTranslations[index % mockGoogleTranslations.length],
-      nlpTranslation: entry.nlpTranslation || mockNlpTranslations[index % mockNlpTranslations.length],
-    }));
-  });
+  const [editedEntries, setEditedEntries] = useState<SubtitleEntry[]>(file.entries);
   const [isTranslating, setIsTranslating] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleTextChange = (id: number, text: string) => {
+  // Sync state with props if file changes (e.g. switching files)
+  useEffect(() => {
+    setEditedEntries(file.entries);
+  }, [file.id, file.entries]);
+
+  // Update the translation when user types or selects a suggestion
+  const handleTranslationChange = (id: number, translation: string) => {
     const updated = editedEntries.map(entry =>
-      entry.id === id ? { ...entry, text } : entry
+      entry.id === id ? { ...entry, translation } : entry
     );
     setEditedEntries(updated);
-  };
 
-  const handleGoogleTranslationChange = (id: number, translation: string) => {
-    const updated = editedEntries.map(entry =>
-      entry.id === id ? { ...entry, googleTranslation: translation } : entry
-    );
-    setEditedEntries(updated);
-
-    // Auto-update file with progress
-    const translatedCount = updated.filter(e => e.googleTranslation || e.nlpTranslation).length;
+    // Calculate progress
+    const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
     const progress = Math.round((translatedCount / updated.length) * 100);
     const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
 
+    // Propagate up
     onUpdate({ ...file, entries: updated, progress, status });
   };
 
-  const handleNlpTranslationChange = (id: number, translation: string) => {
-    const updated = editedEntries.map(entry =>
-      entry.id === id ? { ...entry, nlpTranslation: translation } : entry
-    );
-    setEditedEntries(updated);
-
-    // Auto-update file with progress
-    const translatedCount = updated.filter(e => e.googleTranslation || e.nlpTranslation).length;
-    const progress = Math.round((translatedCount / updated.length) * 100);
-    const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
-
-    onUpdate({ ...file, entries: updated, progress, status });
-  };
-
-  const handleSave = () => {
-    onUpdate({ ...file, entries: editedEntries });
+  const applySuggestion = (id: number, text: string) => {
+    handleTranslationChange(id, text);
   };
 
   const handleAutoTranslate = async (type: 'google' | 'nlp') => {
@@ -79,47 +43,50 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
 
     if (type === 'google') {
       try {
-        // Create an array of promises for concurrent translation
         const translationPromises = editedEntries.map(async (entry) => {
+          // If already has google trans, ensure it's selected
+          if (entry.googleTranslation) return { ...entry, translation: entry.googleTranslation };
+
+          // Otherwise fetch new
           const translated = await translateText(entry.text, 'vi', 'auto');
-          return { ...entry, googleTranslation: translated };
+          return { ...entry, googleTranslation: translated, translation: translated };
         });
 
         const updated = await Promise.all(translationPromises);
+
+        // Update stats
+        const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
+        const progress = Math.round((translatedCount / updated.length) * 100);
+        const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
+
         setEditedEntries(updated);
+        onUpdate({ ...file, entries: updated, progress, status });
       } catch (error) {
         console.error("Translation failed", error);
-        // You might want to show a toast or error message here
       } finally {
         setIsTranslating(false);
       }
     } else {
-      // Keep mocking NLP for now as per previous logic, or leave as is if only Google was requested to be replaced.
-      // The user specially asked "replace the Model translate: Google translate into self-hosted LibreTranslate API".
-      // They didn't explicitly say replace the NLP one, so I'll leave the NLP one mocked as placeholder.
+      // Mock NLP
       setTimeout(() => {
         const updated = editedEntries.map(entry => {
-          // Mock translation - in reality, this would call an API
-          const mockTranslation = `[${type.toUpperCase()}] ${entry.text}`;
-          return { ...entry, nlpTranslation: mockTranslation };
+          if (entry.nlpTranslation) return entry;
+          return { ...entry, nlpTranslation: `[NLP] ${entry.text}` };
         });
-
         setEditedEntries(updated);
+        onUpdate({ ...file, entries: updated });
         setIsTranslating(false);
-      }, 1500);
+      }, 1000);
     }
   };
 
-  const handleExport = (translationType: 'google' | 'nlp' | 'original') => {
+  const handleExport = (translationType: 'target' | 'source') => {
     let srtContent = '';
     editedEntries.forEach(entry => {
       srtContent += `${entry.id}\n`;
       srtContent += `${entry.startTime} --> ${entry.endTime}\n`;
-
-      if (translationType === 'google' && entry.googleTranslation) {
-        srtContent += `${entry.googleTranslation}\n\n`;
-      } else if (translationType === 'nlp' && entry.nlpTranslation) {
-        srtContent += `${entry.nlpTranslation}\n\n`;
+      if (translationType === 'target') {
+        srtContent += `${entry.translation || ''}\n\n`;
       } else {
         srtContent += `${entry.text}\n\n`;
       }
@@ -140,183 +107,167 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     const minutes = parseInt(parts[1]);
     const secondsParts = parts[2].split(',');
     const seconds = parseInt(secondsParts[0]);
-    const milliseconds = parseInt(secondsParts[1]);
+    const milliseconds = parseInt(secondsParts[1]) || 0;
     return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
   };
 
-  const googleTranslatedCount = editedEntries.filter(e => e.googleTranslation).length;
-  const nlpTranslatedCount = editedEntries.filter(e => e.nlpTranslation).length;
+  // Stats
+  const translatedCount = editedEntries.filter(e => e.translation && e.translation.trim().length > 0).length;
+  const progressPercentage = Math.round((translatedCount / editedEntries.length) * 100);
+
+  // Helper for Duration Bar
+  const maxDuration = 10; // Assume 10s is a "long" line for visual scaling cap
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-gray-900">{file.name}</h3>
-          <p className="text-gray-500">
-            {editedEntries.length} subtitle entries
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              const newStatus = file.status === 'done' ? 'in-progress' : 'done';
-              onUpdate({ ...file, status: newStatus, progress: newStatus === 'done' ? 100 : file.progress });
-            }}
-            className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${file.status === 'done'
-              ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            {file.status === 'done' ? 'Completed' : 'Mark as Done'}
-          </button>
+    <div className="flex flex-col h-full w-full bg-white dark:bg-gray-900 font-sans">
 
-          <div className="relative group">
-            <button
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-            <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-300 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-              <button
-                onClick={() => handleExport('original')}
-                className="w-full px-4 py-2 text-left hover:bg-gray-50 rounded-t-lg"
-              >
-                Export Original
-              </button>
-              <button
-                onClick={() => handleExport('google')}
-                className="w-full px-4 py-2 text-left hover:bg-gray-50"
-              >
-                Export LibreTranslate ({googleTranslatedCount})
-              </button>
-              <button
-                onClick={() => handleExport('nlp')}
-                className="w-full px-4 py-2 text-left hover:bg-gray-50 rounded-b-lg"
-              >
-                Export NLP ({nlpTranslatedCount})
-              </button>
-            </div>
+      {/* 1. Slim Header */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-10 sticky top-0 w-full">
+        <div className="flex items-center gap-4">
+          <h2 className="font-semibold text-gray-800 dark:text-gray-100">{file.name}</h2>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-500">SRT</span>
+            <span className={`px-2 py-0.5 rounded font-medium ${progressPercentage === 100
+              ? 'bg-green-100 text-green-700'
+              : 'bg-blue-100 text-blue-700'
+              }`}>
+              {progressPercentage}%
+            </span>
+            <span className="text-gray-400">
+              {translatedCount}/{editedEntries.length}
+            </span>
           </div>
         </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-1 gap-1 ml-2">
+            <span className="text-[10px] uppercase font-bold text-gray-400 px-2 tracking-wider">Model:</span>
+            <button
+              onClick={() => handleAutoTranslate('google')}
+              disabled={isTranslating}
+              className="px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md disabled:opacity-50 transition-all flex items-center gap-2 border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+            >
+              <Globe className="w-3.5 h-3.5 text-blue-500" />
+              <span>Libre</span>
+            </button>
+            <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+            <button
+              onClick={() => handleAutoTranslate('nlp')}
+              disabled={isTranslating}
+              className="px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md disabled:opacity-50 transition-all flex items-center gap-2 border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+              <span>NLP</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => handleExport('target')}
+            className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors" title="Export"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onUpdate({ ...file, status: 'done', progress: 100 })}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded shadow-sm transition-colors"
+          >
+            <Save className="w-3 h-3" /> Save
+          </button>
+        </div>
       </div>
 
-      <div className="flex gap-2">
-        <button
-          onClick={() => handleAutoTranslate('google')}
-          disabled={isTranslating}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
-        >
-          <Globe className="w-4 h-4" />
-          {isTranslating ? 'Translating...' : 'Auto-translate with LibreTranslate'}
-        </button>
-        <button
-          onClick={() => handleAutoTranslate('nlp')}
-          disabled={isTranslating}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 transition-colors"
-        >
-          <Sparkles className="w-4 h-4" />
-          {isTranslating ? 'Translating...' : 'Auto-translate with NLP Model'}
-        </button>
-      </div>
-
-      {/* Column Headers */}
-      <div className="grid grid-cols-12 gap-3 px-4 py-3 bg-gray-100 rounded-lg">
-        <div className="col-span-1 text-gray-700">
-          #
+      {/* 2. Distinct Column Headers */}
+      <div className="flex gap-4 px-4 py-2 border-b border-gray-200 dark:border-gray-800 text-xs font-bold uppercase tracking-wider sticky top-[61px] z-10 bg-white dark:bg-gray-900 shadow-sm w-full">
+        <div style={{ flex: 2 }} className="px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg">
+          Source Text
         </div>
-        <div className="col-span-3 text-gray-700">
-          Chinese (Source)
+        <div style={{ flex: 5 }} className="px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg">
+          LibreTranslate (Machine)
         </div>
-        <div className="col-span-4 text-gray-700 flex items-center gap-2">
-          <Globe className="w-4 h-4" />
-          Vietnamese - LibreTranslate
-        </div>
-        <div className="col-span-4 text-gray-700 flex items-center gap-2">
-          <Sparkles className="w-4 h-4" />
-          Vietnamese - Custom NLP Model
+        <div style={{ flex: 5 }} className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg">
+          NLP Model (Advanced)
         </div>
       </div>
 
-      <div className="max-h-[600px] overflow-y-auto space-y-2 pr-2">
-        {editedEntries.map((entry, index) => {
-          const duration = timeToSeconds(entry.endTime) - timeToSeconds(entry.startTime);
-          const charCount = entry.text.length;
-          const charPerSecond = charCount / duration;
-          const isSlowReading = charPerSecond < 10;
-          const isFastReading = charPerSecond > 20;
+      {/* 3. Main List Content */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 w-full"
+      >
+        {editedEntries.map((entry) => {
+          const isGoogleSelected = entry.translation === entry.googleTranslation && !!entry.googleTranslation;
+          const isNlpSelected = entry.translation === entry.nlpTranslation && !!entry.nlpTranslation;
 
           return (
-            <div key={entry.id} className="p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-600">
-                    {entry.startTime} → {entry.endTime}
-                  </span>
-                  <span className="text-gray-500">
-                    {duration.toFixed(1)}s
-                  </span>
+            <div key={entry.id} className="flex gap-4 px-4 py-4 border-b border-gray-100 dark:border-gray-800 min-h-[100px] hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors w-full">
+
+              {/* Col 1: Source (Gray) */}
+              <div style={{ flex: 2 }} className="p-4 text-sm bg-gray-100 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 flex flex-col gap-2 rounded-lg">
+                <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono mb-1">
+                  <span className="font-bold">#{entry.id}</span>
+                  <span>{entry.startTime}</span>
                 </div>
-                {(isSlowReading || isFastReading) && (
-                  <span className={`px-2 py-1 rounded ${isFastReading ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                    {isFastReading ? 'Fast read' : 'Slow read'}
-                  </span>
+                <p className="leading-relaxed whitespace-pre-wrap">
+                  {entry.text}
+                </p>
+              </div>
+
+              {/* Col 2: LibreTranslate (Green) */}
+              <div
+                style={{ flex: 5 }}
+                onClick={() => entry.googleTranslation && handleTranslationChange(entry.id, entry.googleTranslation)}
+                className={`p-4 text-sm transition-all relative flex flex-col rounded-lg
+                    ${isGoogleSelected
+                    ? 'bg-green-100 dark:bg-green-900/40 ring-2 ring-green-500/20 dark:ring-green-400/20 shadow-sm cursor-pointer'
+                    : entry.googleTranslation
+                      ? 'bg-green-50 hover:bg-green-100 dark:bg-green-900/10 dark:hover:bg-green-900/20 cursor-pointer border border-transparent hover:border-green-200 dark:hover:border-green-800'
+                      : 'bg-green-50/50 dark:bg-green-900/5 cursor-default'
+                  }
+                `}
+              >
+                {isGoogleSelected && (
+                  <div className="absolute top-2 right-2 text-green-600 dark:text-green-400">
+                    <CheckCircle2 className="w-5 h-5 fill-green-100" />
+                  </div>
                 )}
+
+                <p className={`leading-relaxed whitespace-pre-wrap flex-1 mt-1 ${isGoogleSelected
+                    ? 'text-green-900 dark:text-green-100 font-medium'
+                    : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                  {entry.googleTranslation || <span className="text-gray-400 italic">No translation available</span>}
+                </p>
               </div>
 
-              <div className="grid grid-cols-12 gap-3">
-                <div className="col-span-1 flex items-start pt-2">
-                  <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded">
-                    {entry.id}
-                  </span>
-                </div>
+              {/* Col 3: NLP Model (Blue) */}
+              <div
+                style={{ flex: 5 }}
+                onClick={() => entry.nlpTranslation && handleTranslationChange(entry.id, entry.nlpTranslation)}
+                className={`p-4 text-sm transition-all relative flex flex-col rounded-lg
+                    ${isNlpSelected
+                    ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500/20 dark:ring-blue-400/20 shadow-sm cursor-pointer'
+                    : entry.nlpTranslation
+                      ? 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/10 dark:hover:bg-blue-900/20 cursor-pointer border border-transparent hover:border-blue-200 dark:hover:border-blue-800'
+                      : 'bg-blue-50/50 dark:bg-blue-900/5 cursor-default'
+                  }
+                `}
+              >
+                {isNlpSelected && (
+                  <div className="absolute top-2 right-2 text-blue-600 dark:text-blue-400">
+                    <CheckCircle2 className="w-5 h-5 fill-blue-100" />
+                  </div>
+                )}
 
-                <div className="col-span-3">
-                  <textarea
-                    value={entry.text}
-                    onChange={(e) => handleTextChange(entry.id, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    rows={3}
-                  />
-                  <p className="text-gray-500 mt-1">
-                    {charCount} chars
-                  </p>
-                </div>
-
-                <div className="col-span-4">
-                  <textarea
-                    value={entry.googleTranslation || ''}
-                    onChange={(e) => handleGoogleTranslationChange(entry.id, e.target.value)}
-                    placeholder="Google translation..."
-                    className="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50 resize-none"
-                    rows={3}
-                  />
-                  {entry.googleTranslation && (
-                    <p className="text-gray-500 mt-1">
-                      {entry.googleTranslation.length} chars
-                    </p>
-                  )}
-                </div>
-
-                <div className="col-span-4">
-                  <textarea
-                    value={entry.nlpTranslation || ''}
-                    onChange={(e) => handleNlpTranslationChange(entry.id, e.target.value)}
-                    placeholder="NLP model translation..."
-                    className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-purple-50 resize-none"
-                    rows={3}
-                  />
-                  {entry.nlpTranslation && (
-                    <p className="text-gray-500 mt-1">
-                      {entry.nlpTranslation.length} chars
-                    </p>
-                  )}
-                </div>
+                <p className={`leading-relaxed whitespace-pre-wrap flex-1 mt-1 ${isNlpSelected
+                    ? 'text-blue-900 dark:text-blue-100 font-medium'
+                    : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                  {entry.nlpTranslation || <span className="text-gray-400 italic">No translation available</span>}
+                </p>
               </div>
+
             </div>
-          );
+          )
         })}
       </div>
     </div>

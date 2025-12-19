@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from './services/db';
 import { SubtitleUploader } from './components/SubtitleUploader';
-import { SubtitleList } from './components/SubtitleList';
+
 import { SubtitleEditor } from './components/SubtitleEditor';
 import { SubtitleAnalysis } from './components/SubtitleAnalysis';
 import { SubtitleComparison } from './components/SubtitleComparison';
@@ -168,8 +168,8 @@ export default function App() {
             </div>
           </header>
 
-          <div className="p-8">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors">
+          <div className={activeTab === 'manage' ? "" : "p-8"}>
+            <div className={activeTab === 'manage' ? "" : "bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors"}>
               {activeTab === 'upload' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <SubtitleUploader
@@ -193,25 +193,46 @@ export default function App() {
               )}
 
               {activeTab === 'manage' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-1">
-                    <SubtitleList
-                      files={subtitleFiles}
-                      projects={projects}
-                      selectedFile={selectedFile}
-                      onSelectFile={handleFileSelect}
-                      onDeleteFile={handleDeleteFile}
-                    />
+                <div className="flex h-[calc(100vh-theme(spacing.24))]">
+                  {/* File Sidebar */}
+                  <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 overflow-y-auto flex-shrink-0">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="font-semibold text-gray-700 dark:text-gray-200">Files</h3>
+                    </div>
+                    <div className="p-2 space-y-1">
+                      {subtitleFiles.length === 0 ? (
+                        <div className="text-sm text-gray-400 p-4 text-center">No files uploaded</div>
+                      ) : (
+                        subtitleFiles.map(file => (
+                          <button
+                            key={file.id}
+                            onClick={() => handleFileSelect(file)}
+                            className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${selectedFile?.id === file.id
+                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 font-medium'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                              }`}
+                          >
+                            <div className="truncate">{file.name}</div>
+                            <div className="flex justify-between items-center mt-1">
+                              <span className="text-[10px] text-gray-400">{file.entries.length} lines</span>
+                              {file.status === 'done' && <span className="w-2 h-2 rounded-full bg-green-500"></span>}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </div>
-                  <div className="lg:col-span-2">
+
+                  {/* Main Editor Area */}
+                  <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 relative">
                     {selectedFile ? (
                       <SubtitleEditor
                         file={selectedFile}
                         onUpdate={handleUpdateFile}
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-96 text-gray-400 dark:text-gray-500">
-                        Select a subtitle file to edit
+                      <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                        <p>Select a file to begin translating</p>
                       </div>
                     )}
                   </div>

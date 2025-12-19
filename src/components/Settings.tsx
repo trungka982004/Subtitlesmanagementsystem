@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Clock, User, Moon, Bell, Globe as GlobeIcon, Database, Sun, Monitor } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTranslation } from '../hooks/useTranslation';
+import { db } from '../services/db';
 
 interface SettingsProps {
   onClose?: () => void;
@@ -11,7 +12,7 @@ export function Settings({ onClose }: SettingsProps) {
   const { theme, setTheme, language, setLanguage } = useSettings();
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<'translation' | 'account' | 'appearance' | 'notifications' | 'system'>('translation');
-  
+
   // Translation settings
   const [selectedGenre, setSelectedGenre] = useState<string>('modern');
   const [contentPrompt, setContentPrompt] = useState<string>('');
@@ -97,11 +98,10 @@ export function Settings({ onClose }: SettingsProps) {
               <button
                 key={genre.id}
                 onClick={() => setSelectedGenre(genre.id)}
-                className={`p-4 rounded-lg border-2 transition-all text-center ${
-                  selectedGenre === genre.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                className={`p-4 rounded-lg border-2 transition-all text-center ${selectedGenre === genre.id
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
               >
                 <div className="text-2xl mb-2">{genre.icon}</div>
                 <div className="text-gray-900">{genre.label}</div>
@@ -130,7 +130,7 @@ export function Settings({ onClose }: SettingsProps) {
       {/* QC Standards */}
       <div className="space-y-4">
         <h3 className="text-gray-900">Quy chuẩn Phụ đề</h3>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-700 mb-2">
@@ -165,21 +165,19 @@ export function Settings({ onClose }: SettingsProps) {
             <div className="flex border border-gray-300 rounded-lg overflow-hidden">
               <button
                 onClick={() => setMaxLines(1)}
-                className={`flex-1 px-4 py-2 transition-colors ${
-                  maxLines === 1
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`flex-1 px-4 py-2 transition-colors ${maxLines === 1
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 1 Dòng
               </button>
               <button
                 onClick={() => setMaxLines(2)}
-                className={`flex-1 px-4 py-2 transition-colors ${
-                  maxLines === 2
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`flex-1 px-4 py-2 transition-colors ${maxLines === 2
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 2 Dòng
               </button>
@@ -196,14 +194,12 @@ export function Settings({ onClose }: SettingsProps) {
           </div>
           <button
             onClick={() => setSmartLineBreak(!smartLineBreak)}
-            className={`relative w-14 h-7 rounded-full transition-colors ${
-              smartLineBreak ? 'bg-blue-600' : 'bg-gray-300'
-            }`}
+            className={`relative w-14 h-7 rounded-full transition-colors ${smartLineBreak ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
           >
             <div
-              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                smartLineBreak ? 'translate-x-7' : 'translate-x-0'
-              }`}
+              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${smartLineBreak ? 'translate-x-7' : 'translate-x-0'
+                }`}
             />
           </button>
         </div>
@@ -212,7 +208,7 @@ export function Settings({ onClose }: SettingsProps) {
       {/* Sync & Export */}
       <div className="space-y-4">
         <h3 className="text-gray-900">Đồng bộ & Xuất file</h3>
-        
+
         <div>
           <label className="block text-gray-700 mb-2">
             Đồng bộ thời gian (Time Shift)
@@ -246,7 +242,7 @@ export function Settings({ onClose }: SettingsProps) {
     <div className="space-y-6">
       <div className="space-y-4">
         <h3 className="text-gray-900">Thông tin cá nhân</h3>
-        
+
         <div>
           <label className="block text-gray-700 mb-2">Tên người dùng</label>
           <input
@@ -270,7 +266,7 @@ export function Settings({ onClose }: SettingsProps) {
 
       <div className="space-y-4">
         <h3 className="text-gray-900">Đổi mật khẩu</h3>
-        
+
         <div>
           <label className="block text-gray-700 mb-2">Mật khẩu hiện tại</label>
           <input
@@ -325,15 +321,14 @@ export function Settings({ onClose }: SettingsProps) {
     <div className="space-y-6">
       <div className="space-y-4">
         <h3 className="text-gray-900">Chủ đề giao diện</h3>
-        
+
         <div className="grid grid-cols-3 gap-4">
           <button
             onClick={() => setTheme('light')}
-            className={`p-6 rounded-lg border-2 transition-all ${
-              theme === 'light'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+            className={`p-6 rounded-lg border-2 transition-all ${theme === 'light'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
           >
             <Sun className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
             <p className="text-gray-900">Sáng</p>
@@ -342,11 +337,10 @@ export function Settings({ onClose }: SettingsProps) {
 
           <button
             onClick={() => setTheme('dark')}
-            className={`p-6 rounded-lg border-2 transition-all ${
-              theme === 'dark'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+            className={`p-6 rounded-lg border-2 transition-all ${theme === 'dark'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
           >
             <Moon className="w-8 h-8 mx-auto mb-2 text-gray-700" />
             <p className="text-gray-900">Tối</p>
@@ -355,11 +349,10 @@ export function Settings({ onClose }: SettingsProps) {
 
           <button
             onClick={() => setTheme('auto')}
-            className={`p-6 rounded-lg border-2 transition-all ${
-              theme === 'auto'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+            className={`p-6 rounded-lg border-2 transition-all ${theme === 'auto'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
           >
             <Monitor className="w-8 h-8 mx-auto mb-2 text-blue-500" />
             <p className="text-gray-900">Tự động</p>
@@ -370,15 +363,14 @@ export function Settings({ onClose }: SettingsProps) {
 
       <div className="space-y-4">
         <h3 className="text-gray-900">Ngôn ngữ giao diện</h3>
-        
+
         <div className="space-y-2">
           <button
             onClick={() => setLanguage('vi')}
-            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${
-              language === 'vi'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${language === 'vi'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇻🇳</span>
@@ -396,11 +388,10 @@ export function Settings({ onClose }: SettingsProps) {
 
           <button
             onClick={() => setLanguage('en')}
-            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${
-              language === 'en'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${language === 'en'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇬🇧</span>
@@ -418,11 +409,10 @@ export function Settings({ onClose }: SettingsProps) {
 
           <button
             onClick={() => setLanguage('zh')}
-            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${
-              language === 'zh'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${language === 'zh'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇨🇳</span>
@@ -446,7 +436,7 @@ export function Settings({ onClose }: SettingsProps) {
     <div className="space-y-6">
       <div className="space-y-4">
         <h3 className="text-gray-900">Thông báo Email</h3>
-        
+
         <div className="space-y-3">
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div>
@@ -455,14 +445,12 @@ export function Settings({ onClose }: SettingsProps) {
             </div>
             <button
               onClick={() => setEmailNotifications(!emailNotifications)}
-              className={`relative w-14 h-7 rounded-full transition-colors ${
-                emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
+              className={`relative w-14 h-7 rounded-full transition-colors ${emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
             >
               <div
-                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                  emailNotifications ? 'translate-x-7' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${emailNotifications ? 'translate-x-7' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -474,14 +462,12 @@ export function Settings({ onClose }: SettingsProps) {
             </div>
             <button
               onClick={() => setTranslationComplete(!translationComplete)}
-              className={`relative w-14 h-7 rounded-full transition-colors ${
-                translationComplete ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
+              className={`relative w-14 h-7 rounded-full transition-colors ${translationComplete ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
             >
               <div
-                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                  translationComplete ? 'translate-x-7' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${translationComplete ? 'translate-x-7' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -493,14 +479,12 @@ export function Settings({ onClose }: SettingsProps) {
             </div>
             <button
               onClick={() => setSystemUpdates(!systemUpdates)}
-              className={`relative w-14 h-7 rounded-full transition-colors ${
-                systemUpdates ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
+              className={`relative w-14 h-7 rounded-full transition-colors ${systemUpdates ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
             >
               <div
-                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                  systemUpdates ? 'translate-x-7' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${systemUpdates ? 'translate-x-7' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -519,7 +503,7 @@ export function Settings({ onClose }: SettingsProps) {
     <div className="space-y-6">
       <div className="space-y-4">
         <h3 className="text-gray-900">Tự động hóa</h3>
-        
+
         <div className="space-y-3">
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div>
@@ -528,14 +512,12 @@ export function Settings({ onClose }: SettingsProps) {
             </div>
             <button
               onClick={() => setAutoSave(!autoSave)}
-              className={`relative w-14 h-7 rounded-full transition-colors ${
-                autoSave ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
+              className={`relative w-14 h-7 rounded-full transition-colors ${autoSave ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
             >
               <div
-                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                  autoSave ? 'translate-x-7' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${autoSave ? 'translate-x-7' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -547,14 +529,12 @@ export function Settings({ onClose }: SettingsProps) {
             </div>
             <button
               onClick={() => setBackupEnabled(!backupEnabled)}
-              className={`relative w-14 h-7 rounded-full transition-colors ${
-                backupEnabled ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
+              className={`relative w-14 h-7 rounded-full transition-colors ${backupEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
             >
               <div
-                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                  backupEnabled ? 'translate-x-7' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${backupEnabled ? 'translate-x-7' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -563,7 +543,7 @@ export function Settings({ onClose }: SettingsProps) {
 
       <div className="space-y-4">
         <h3 className="text-gray-900">Thông tin hệ thống</h3>
-        
+
         <div className="p-4 bg-gray-50 rounded-lg space-y-3">
           <div className="flex justify-between">
             <span className="text-gray-600">Phiên bản</span>
@@ -589,7 +569,28 @@ export function Settings({ onClose }: SettingsProps) {
         <p className="text-gray-600">
           Xóa tất cả các file phụ đề, bản dịch và cài đặt. Hành động này không thể hoàn tác.
         </p>
-        <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+        <button
+          onClick={async () => {
+            if (window.confirm('Bạn có chắc chắn muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác.')) {
+              try {
+                // Delete all files first
+                const files = await db.getFiles();
+                await Promise.all(files.map(f => db.deleteFile(f.id)));
+
+                // Delete all projects
+                const projects = await db.getProjects();
+                await Promise.all(projects.map(p => db.deleteProject(p.id)));
+
+                alert('Đã xóa toàn bộ dữ liệu thành công.');
+                window.location.reload(); // Reload to refresh state
+              } catch (error) {
+                console.error(error);
+                alert('Có lỗi xảy ra khi xóa dữ liệu.');
+              }
+            }
+          }}
+          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+        >
           Xóa tất cả dữ liệu
         </button>
       </div>
@@ -605,11 +606,10 @@ export function Settings({ onClose }: SettingsProps) {
           <button
             key={section.id}
             onClick={() => setActiveSection(section.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === section.id
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === section.id
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
           >
             <section.icon className="w-5 h-5" />
             <span>{t(section.id === 'translation' ? 'translationSettings' : section.id === 'account' ? 'accountSettings' : section.id === 'appearance' ? 'appearanceSettings' : section.id === 'notifications' ? 'notificationSettings' : 'systemSettings')}</span>
