@@ -16,7 +16,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   ];
 
   return (
-    <div className="w-64 bg-gray-900 min-h-screen flex flex-col">
+    <div className="w-64 bg-deep-dark border-r border-gray-800 min-h-screen flex flex-col" style={{ backgroundColor: '#020617' }}>
       {/* User Profile */}
       <div className="p-6 border-b border-gray-800">
         <div className="flex items-center gap-3">
@@ -36,11 +36,10 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           <button
             key={item.id}
             onClick={() => onTabChange(item.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeTab === item.id
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.id
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-300 hover:bg-gray-800'
+              }`}
           >
             <item.icon className="w-5 h-5" />
             <span>{item.label}</span>

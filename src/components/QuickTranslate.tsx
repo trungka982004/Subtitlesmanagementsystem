@@ -89,11 +89,11 @@ export function QuickTranslate() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-gray-900 dark:text-white flex items-center gap-2">
+        <h2 className="text-gray-900 dark:text-slate-200 flex items-center gap-2">
           <Languages className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           {t('quickTranslateTitle')}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-gray-600 dark:text-slate-400 mt-1">
           {t('quickTranslateDesc')}
         </p>
       </div>
@@ -101,11 +101,11 @@ export function QuickTranslate() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input Section */}
         <div className="space-y-6">
-          <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="p-6 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800">
             <div className="space-y-4">
               {/* Source Text */}
               <div>
-                <Label htmlFor="sourceText" className="text-gray-900 dark:text-white">
+                <Label htmlFor="sourceText" className="text-gray-900 dark:text-slate-200">
                   {t('sourceText')}
                 </Label>
                 <Textarea
@@ -113,28 +113,28 @@ export function QuickTranslate() {
                   placeholder={t('sourceTextPlaceholder')}
                   value={sourceText}
                   onChange={(e) => setSourceText(e.target.value)}
-                  className="mt-2 min-h-32 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  className="mt-2 min-h-32 bg-white dark:bg-slate-850 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200"
                 />
               </div>
 
               {/* Content Type */}
               <div>
-                <Label htmlFor="contentType" className="text-gray-900 dark:text-white">
+                <Label htmlFor="contentType" className="text-gray-900 dark:text-slate-200">
                   {t('contentType')} <span className="text-red-500">*</span>
                 </Label>
                 <Select value={contentType} onValueChange={setContentType}>
                   <SelectTrigger
                     id="contentType"
-                    className="mt-2 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    className="mt-2 bg-white dark:bg-slate-850 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200"
                   >
                     <SelectValue placeholder={t('selectContentType')} />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
                     {contentTypes.map((type) => (
                       <SelectItem
                         key={type.value}
                         value={type.value}
-                        className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="text-gray-900 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700"
                       >
                         {type.label}
                       </SelectItem>
@@ -145,22 +145,22 @@ export function QuickTranslate() {
 
               {/* Character Relationship */}
               <div>
-                <Label htmlFor="relationship" className="text-gray-900 dark:text-white">
+                <Label htmlFor="relationship" className="text-gray-900 dark:text-slate-200">
                   {t('characterRelationship')} <span className="text-red-500">*</span>
                 </Label>
                 <Select value={relationship} onValueChange={setRelationship}>
                   <SelectTrigger
                     id="relationship"
-                    className="mt-2 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    className="mt-2 bg-white dark:bg-slate-850 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200"
                   >
                     <SelectValue placeholder={t('selectRelationship')} />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
                     {relationships.map((rel) => (
                       <SelectItem
                         key={rel.value}
                         value={rel.value}
-                        className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="text-gray-900 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700"
                       >
                         {rel.label}
                       </SelectItem>
@@ -171,15 +171,15 @@ export function QuickTranslate() {
 
               {/* Additional Context */}
               <div>
-                <Label htmlFor="additionalContext" className="text-gray-900 dark:text-white">
-                  {t('additionalContext')} <span className="text-gray-400">({t('optional')})</span>
+                <Label htmlFor="additionalContext" className="text-gray-900 dark:text-slate-200">
+                  {t('additionalContext')} <span className="text-gray-400 dark:text-slate-500">({t('optional')})</span>
                 </Label>
                 <Textarea
                   id="additionalContext"
                   placeholder={t('additionalContextPlaceholder')}
                   value={additionalContext}
                   onChange={(e) => setAdditionalContext(e.target.value)}
-                  className="mt-2 min-h-24 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  className="mt-2 min-h-24 bg-white dark:bg-slate-850 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200"
                 />
               </div>
 
@@ -196,7 +196,7 @@ export function QuickTranslate() {
                 <Button
                   onClick={handleClear}
                   variant="outline"
-                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   {t('clearAll')}
@@ -209,14 +209,14 @@ export function QuickTranslate() {
         {/* Results Section */}
         <div className="space-y-6">
           <div>
-            <h3 className="text-gray-900 dark:text-white mb-4">
+            <h3 className="text-gray-900 dark:text-slate-200 mb-4">
               {t('translationResults')}
             </h3>
 
             {/* Google Translate Result */}
-            <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-4">
+            <Card className="p-6 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 mb-4">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-gray-900 dark:text-white">
+                <h4 className="text-gray-900 dark:text-slate-200">
                   {t('googleTranslate')}
                 </h4>
                 {googleResult && (
@@ -224,7 +224,7 @@ export function QuickTranslate() {
                     onClick={() => handleCopy(googleResult, 'google')}
                     variant="ghost"
                     size="sm"
-                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200"
                   >
                     {copiedGoogle ? (
                       <>
@@ -240,13 +240,13 @@ export function QuickTranslate() {
                   </Button>
                 )}
               </div>
-              <div className="min-h-32 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="min-h-32 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                 {googleResult ? (
-                  <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+                  <p className="text-gray-900 dark:text-slate-200 whitespace-pre-wrap">
                     {googleResult}
                   </p>
                 ) : (
-                  <p className="text-gray-400 dark:text-gray-500 italic">
+                  <p className="text-gray-400 dark:text-slate-500 italic">
                     Translation result will appear here...
                   </p>
                 )}
@@ -254,9 +254,9 @@ export function QuickTranslate() {
             </Card>
 
             {/* Custom NLP Model Result */}
-            <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="p-6 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-gray-900 dark:text-white">
+                <h4 className="text-gray-900 dark:text-slate-200">
                   {t('customNLPModel')}
                 </h4>
                 {nlpResult && (
@@ -264,7 +264,7 @@ export function QuickTranslate() {
                     onClick={() => handleCopy(nlpResult, 'nlp')}
                     variant="ghost"
                     size="sm"
-                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200"
                   >
                     {copiedNlp ? (
                       <>
@@ -280,13 +280,13 @@ export function QuickTranslate() {
                   </Button>
                 )}
               </div>
-              <div className="min-h-32 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="min-h-32 p-4 bg-blue-50 dark:bg-blue-900-20 rounded-lg border border-blue-200 dark:border-blue-900/30">
                 {nlpResult ? (
-                  <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+                  <p className="text-gray-900 dark:text-slate-200 whitespace-pre-wrap">
                     {nlpResult}
                   </p>
                 ) : (
-                  <p className="text-gray-400 dark:text-gray-500 italic">
+                  <p className="text-gray-400 dark:text-slate-500 italic">
                     Translation result will appear here...
                   </p>
                 )}
@@ -298,21 +298,21 @@ export function QuickTranslate() {
 
       {/* Info Box */}
       {(contentType || relationship) && (
-        <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <Card className="p-4 bg-blue-50 dark:bg-blue-900-20 border-blue-200 dark:border-blue-900/30">
           <div className="flex gap-2">
             <div className="text-blue-600 dark:text-blue-400">ℹ️</div>
             <div>
-              <p className="text-gray-900 dark:text-white">
+              <p className="text-gray-900 dark:text-slate-200">
                 <span className="font-medium">Context Selected:</span>
               </p>
-              <p className="text-gray-700 dark:text-gray-300 mt-1">
+              <p className="text-gray-700 dark:text-slate-300 mt-1">
                 {contentType && (
-                  <span className="inline-block bg-white dark:bg-gray-800 px-3 py-1 rounded-full mr-2 mb-2">
+                  <span className="inline-block bg-white dark:bg-slate-800 px-3 py-1 rounded-full mr-2 mb-2">
                     {contentTypes.find(ct => ct.value === contentType)?.label}
                   </span>
                 )}
                 {relationship && (
-                  <span className="inline-block bg-white dark:bg-gray-800 px-3 py-1 rounded-full mr-2 mb-2">
+                  <span className="inline-block bg-white dark:bg-slate-800 px-3 py-1 rounded-full mr-2 mb-2">
                     {relationships.find(r => r.value === relationship)?.label}
                   </span>
                 )}

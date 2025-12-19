@@ -33,6 +33,7 @@ export interface SubtitleFile {
   id: string;
   projectId?: string;
   name: string;
+  language?: string;
   entries: SubtitleEntry[];
   uploadedAt: Date;
   status: 'not-started' | 'in-progress' | 'done';
@@ -156,21 +157,25 @@ export default function App() {
 
   return (
     <SettingsProvider>
-      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+      <div className="flex min-h-screen bg-blue-50-custom dark:bg-slate-950 transition-colors">
         {/* Sidebar */}
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Main Content */}
         <div className="flex-1">
-          <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
-            <div className="px-8 py-6">
-              <h1 className="text-gray-900 dark:text-white">Subtitle Translation Analysis & Management</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">Chinese to Vietnamese subtitle translation system</p>
+          <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-200 dark:border-blue-900/30 transition-colors">
+            <div className="px-8 py-6 text-center">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-cyan-600 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent inline-block">
+                Subtitle Translation Analysis & Management
+              </h1>
+              <p className="text-gray-600 dark:text-blue-200/70 mt-1 font-medium text-sm">
+                Chinese to Vietnamese subtitle translation system
+              </p>
             </div>
           </header>
 
           <div className={activeTab === 'manage' ? "" : "p-8"}>
-            <div className={activeTab === 'manage' ? "" : "bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors"}>
+            <div className={activeTab === 'manage' ? "" : "bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6 transition-colors"}>
               {activeTab === 'upload' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <SubtitleUploader
@@ -196,9 +201,9 @@ export default function App() {
               {activeTab === 'manage' && (
                 <div className="flex h-[calc(100vh-theme(spacing.24))]">
                   {/* File Sidebar */}
-                  <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 overflow-y-auto flex-shrink-0">
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                      <h3 className="font-semibold text-gray-700 dark:text-gray-200">Files</h3>
+                  <div className="w-64 border-r border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 overflow-y-auto flex-shrink-0">
+                    <div className="p-4 border-b border-gray-200 dark:border-slate-800">
+                      <h3 className="font-semibold text-gray-700 dark:text-slate-200">Files</h3>
                     </div>
                     <div className="p-2 space-y-1">
                       {subtitleFiles.length === 0 ? (
@@ -209,8 +214,8 @@ export default function App() {
                             key={file.id}
                             onClick={() => handleFileSelect(file)}
                             className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${selectedFile?.id === file.id
-                              ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 font-medium'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-200 dark:ring-slate-700 font-medium'
+                              : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                               }`}
                           >
                             <div className="truncate">{file.name}</div>
@@ -225,14 +230,14 @@ export default function App() {
                   </div>
 
                   {/* Main Editor Area */}
-                  <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 relative">
+                  <div className="flex-1 overflow-hidden bg-white dark:bg-slate-900 relative">
                     {selectedFile ? (
                       <SubtitleEditor
                         file={selectedFile}
                         onUpdate={handleUpdateFile}
                       />
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                      <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500">
                         <p>Select a file to begin translating</p>
                       </div>
                     )}

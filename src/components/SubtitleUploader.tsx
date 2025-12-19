@@ -131,8 +131,8 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
   return (
     <div className="space-y-6">
       {/* Project Creation Only - No Selection */}
-      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+      <div className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
           <FolderPlus className="w-4 h-4" />
           Create New Project
         </h3>
@@ -140,7 +140,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
         {!isCreatingProject ? (
           <button
             onClick={() => setIsCreatingProject(true)}
-            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2"
+            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-md text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
           >
             <FolderPlus className="w-4 h-4" />
             Create Project
@@ -153,7 +153,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
               onChange={(e) => setNewProjectName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleManualCreateProject()}
               placeholder="Enter project name..."
-              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="flex-1 rounded-md border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-850 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               autoFocus
             />
             <button
@@ -177,15 +177,15 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-300 hover:border-gray-400'
+          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+          : 'border-gray-300 dark:border-slate-700 hover:border-gray-400 dark:hover:border-slate-600'
           }`}
       >
-        <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-        <p className="text-gray-700 mb-2">
+        <Upload className="w-12 h-12 mx-auto text-gray-400 dark:text-slate-600 mb-4" />
+        <p className="text-gray-700 dark:text-slate-300 mb-2">
           Drag and drop your SRT file here
         </p>
-        <p className="text-gray-500 mb-4">
+        <p className="text-gray-500 dark:text-slate-500 mb-4">
           or
         </p>
         <input
@@ -208,17 +208,17 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
       </div>
 
       <div className="flex items-center justify-center gap-4">
-        <div className="flex-1 h-px bg-gray-300" />
-        <span className="text-gray-500">or</span>
-        <div className="flex-1 h-px bg-gray-300" />
+        <div className="flex-1 h-px bg-gray-300 dark:bg-slate-700" />
+        <span className="text-gray-500 dark:text-gray-500">or</span>
+        <div className="flex-1 h-px bg-gray-300 dark:bg-slate-700" />
       </div>
 
       <button
         onClick={handleLoadSample}
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 dark:border-slate-700 rounded-lg hover:border-gray-400 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
       >
-        <FileText className="w-5 h-5 text-gray-600" />
-        <span className="text-gray-700">Load Sample Subtitle File</span>
+        <FileText className="w-5 h-5 text-gray-600 dark:text-slate-400" />
+        <span className="text-gray-700 dark:text-slate-300">Load Sample Subtitle File</span>
       </button>
     </div>
   );
