@@ -15,23 +15,32 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const parseSRT = (content: string): SubtitleEntry[] => {
+    const normalizeContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const entries: SubtitleEntry[] = [];
-    const blocks = content.trim().split('\n\n');
+    const blocks = normalizeContent.trim().split(/\n\s*\n/);
 
     blocks.forEach(block => {
-      const lines = block.split('\n');
+      const lines = block.split('\n').map(l => l.trim());
       if (lines.length >= 3) {
-        const id = parseInt(lines[0]);
-        const timeMatch = lines[1].match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
+        // Try to identify logical parts
+        const idStr = lines[0];
+        const id = parseInt(idStr);
 
-        if (timeMatch) {
-          const text = lines.slice(2).join('\n');
-          entries.push({
-            id,
-            startTime: timeMatch[1],
-            endTime: timeMatch[2],
-            text,
-          });
+        // Time usually on line 2 (index 1), but let's look for the arrow
+        const timeLineIndex = lines.findIndex(l => l.includes('-->'));
+
+        if (timeLineIndex !== -1) {
+          const timeMatch = lines[timeLineIndex].match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
+
+          if (timeMatch) {
+            const text = lines.slice(timeLineIndex + 1).join('\n');
+            entries.push({
+              id: !isNaN(id) ? id : entries.length + 1, // Fallback ID if missing
+              startTime: timeMatch[1],
+              endTime: timeMatch[2],
+              text,
+            });
+          }
         }
       }
     });

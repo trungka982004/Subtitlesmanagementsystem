@@ -25,9 +25,12 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     );
     setEditedEntries(updated);
 
-    // Calculate progress
+    // Calculate progress (Split 50/50 between models)
     const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
-    const progress = Math.round((translatedCount / updated.length) * 100);
+    const googleCount = updated.filter(e => e.googleTranslation).length;
+    const nlpCount = updated.filter(e => e.nlpTranslation).length;
+    const progress = updated.length > 0 ? Math.round(((googleCount / updated.length) * 50) + ((nlpCount / updated.length) * 50)) : 0;
+
     const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
 
     // Propagate up
@@ -56,7 +59,10 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
 
         // Update stats
         const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
-        const progress = Math.round((translatedCount / updated.length) * 100);
+        const googleCount = updated.filter(e => e.googleTranslation).length;
+        const nlpCount = updated.filter(e => e.nlpTranslation).length;
+        const progress = updated.length > 0 ? Math.round(((googleCount / updated.length) * 50) + ((nlpCount / updated.length) * 50)) : 0;
+
         const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
 
         setEditedEntries(updated);
@@ -73,8 +79,17 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
           if (entry.nlpTranslation) return entry;
           return { ...entry, nlpTranslation: `[NLP] ${entry.text}` };
         });
+
+        // Update stats (NLP also contributes to progress now)
+        const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
+        const googleCount = updated.filter(e => e.googleTranslation).length;
+        const nlpCount = updated.filter(e => e.nlpTranslation).length;
+        const progress = updated.length > 0 ? Math.round(((googleCount / updated.length) * 50) + ((nlpCount / updated.length) * 50)) : 0;
+
+        const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
+
         setEditedEntries(updated);
-        onUpdate({ ...file, entries: updated });
+        onUpdate({ ...file, entries: updated, progress, status }); // Include progress update for NLP
         setIsTranslating(false);
       }, 1000);
     }
@@ -111,9 +126,13 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
   };
 
-  // Stats
+  // Stats (Main Render)
   const translatedCount = editedEntries.filter(e => e.translation && e.translation.trim().length > 0).length;
-  const progressPercentage = Math.round((translatedCount / editedEntries.length) * 100);
+  const googleCount = editedEntries.filter(e => e.googleTranslation).length;
+  const nlpCount = editedEntries.filter(e => e.nlpTranslation).length;
+  // Progress split 50/50
+  const progressPercentage = editedEntries.length > 0 ? Math.round(((googleCount / editedEntries.length) * 50) + ((nlpCount / editedEntries.length) * 50)) : 0;
+
 
   // Helper for Duration Bar
   const maxDuration = 10; // Assume 10s is a "long" line for visual scaling cap
@@ -232,8 +251,8 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 )}
 
                 <p className={`leading-relaxed whitespace-pre-wrap flex-1 mt-1 ${isGoogleSelected
-                    ? 'text-green-900 dark:text-green-100 font-medium'
-                    : 'text-gray-700 dark:text-gray-300'
+                  ? 'text-green-900 dark:text-green-100 font-medium'
+                  : 'text-gray-700 dark:text-gray-300'
                   }`}>
                   {entry.googleTranslation || <span className="text-gray-400 italic">No translation available</span>}
                 </p>
@@ -259,8 +278,8 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 )}
 
                 <p className={`leading-relaxed whitespace-pre-wrap flex-1 mt-1 ${isNlpSelected
-                    ? 'text-blue-900 dark:text-blue-100 font-medium'
-                    : 'text-gray-700 dark:text-gray-300'
+                  ? 'text-blue-900 dark:text-blue-100 font-medium'
+                  : 'text-gray-700 dark:text-gray-300'
                   }`}>
                   {entry.nlpTranslation || <span className="text-gray-400 italic">No translation available</span>}
                 </p>

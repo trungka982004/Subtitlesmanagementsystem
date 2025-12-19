@@ -1,5 +1,5 @@
-
 import { Project, SubtitleFile } from '../App';
+import { parseContent } from '../utils/srt';
 
 const API_URL = 'http://localhost:3001/api';
 
@@ -43,7 +43,7 @@ export const db = {
         const data = await res.json();
         return data.map((f: any) => ({
             ...f,
-            entries: [], // Parsing would happen on the frontend if needed, or backend could store JSON
+            entries: parseContent(f.content), // Parse content (JSON or SRT)
             uploadedAt: new Date(f.createdAt),
         }));
     },
@@ -63,11 +63,11 @@ export const db = {
         return {
             ...data,
             uploadedAt: new Date(data.createdAt),
-            entries: [],
+            entries: parseContent(data.content),
         };
     },
 
-    async updateFile(id: string, updates: Partial<SubtitleFile> & { projectId?: string | null }): Promise<SubtitleFile> {
+    async updateFile(id: string, updates: Partial<SubtitleFile> & { projectId?: string | null, content?: string }): Promise<SubtitleFile> {
         const res = await fetch(`${API_URL}/files/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -78,7 +78,7 @@ export const db = {
         return {
             ...data,
             uploadedAt: new Date(data.createdAt),
-            entries: [], // Re-parsing or maintaining existing entries would be handled by state management
+            entries: parseContent(data.content),
         };
     },
 

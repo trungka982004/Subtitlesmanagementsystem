@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from './services/db';
 import { SubtitleUploader } from './components/SubtitleUploader';
+import { serializeEntriesToJSON } from './utils/srt';
 
 import { SubtitleEditor } from './components/SubtitleEditor';
 import { SubtitleAnalysis } from './components/SubtitleAnalysis';
@@ -132,7 +133,7 @@ export default function App() {
     // Save to DB (debouncing might be good here, but for now direct save)
     try {
       await db.updateFile(updatedFile.id, {
-        // content: ... (serialize entries),
+        content: serializeEntriesToJSON(updatedFile.entries),
         status: updatedFile.status,
         progress: updatedFile.progress
       });
@@ -208,8 +209,8 @@ export default function App() {
                             key={file.id}
                             onClick={() => handleFileSelect(file)}
                             className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${selectedFile?.id === file.id
-                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 font-medium'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                              ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                               }`}
                           >
                             <div className="truncate">{file.name}</div>
