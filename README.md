@@ -29,3 +29,12 @@
   4. **Start the Frontend:**
      Open another new terminal tab/window and run `npm run dev`
   5. Open your browser and navigate to the URL shown in the frontend terminal (usually `http://localhost:5173`).
+
+  ## Mock account
+  User 1:
+  - Email: john@example.com
+  - Password: password123
+
+  User 2:
+  - Email: trung@example.com
+  - Password: 123456

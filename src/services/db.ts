@@ -3,10 +3,20 @@ import { parseContent } from '../utils/srt';
 
 const API_URL = 'http://localhost:3001/api';
 
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('auth_token');
+    return {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+};
+
 export const db = {
     // Projects
     async getProjects(): Promise<Project[]> {
-        const res = await fetch(`${API_URL}/projects`);
+        const res = await fetch(`${API_URL}/projects`, {
+            headers: getAuthHeaders()
+        });
         if (!res.ok) throw new Error('Failed to fetch projects');
         const data = await res.json();
         // Convert date strings to Date objects
@@ -17,16 +27,11 @@ export const db = {
         }));
     },
 
-    async createProject(name: string, description?: string, userId?: string): Promise<Project> {
+    async createProject(name: string, description?: string): Promise<Project> {
         const res = await fetch(`${API_URL}/projects`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            // Mock userId for now since we don't have auth on frontend yet
-            body: JSON.stringify({
-                name,
-                description,
-                userId: userId || 'b7ffdd36-3769-4bac-a946-01c896496f5c'
-            }),
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ name, description }),
         });
         if (!res.ok) throw new Error('Failed to create project');
         const p = await res.json();
@@ -38,7 +43,9 @@ export const db = {
 
     // Files
     async getFiles(): Promise<SubtitleFile[]> {
-        const res = await fetch(`${API_URL}/files`);
+        const res = await fetch(`${API_URL}/files`, {
+            headers: getAuthHeaders()
+        });
         if (!res.ok) throw new Error('Failed to fetch files');
         const data = await res.json();
         return data.map((f: any) => ({
@@ -51,11 +58,11 @@ export const db = {
     async createFile(file: { name: string, content: string, projectId?: string | null }): Promise<SubtitleFile> {
         const res = await fetch(`${API_URL}/files`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify({
                 name: file.name,
                 content: file.content,
-                projectId: file.projectId || null, // Convert undefined/empty to null for backend
+                projectId: file.projectId || null,
             }),
         });
         if (!res.ok) throw new Error('Failed to create file');
@@ -70,7 +77,7 @@ export const db = {
     async updateFile(id: string, updates: Partial<SubtitleFile> & { projectId?: string | null, content?: string }): Promise<SubtitleFile> {
         const res = await fetch(`${API_URL}/files/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(updates),
         });
         if (!res.ok) throw new Error('Failed to update file');
@@ -85,6 +92,7 @@ export const db = {
     async deleteFile(id: string): Promise<void> {
         const res = await fetch(`${API_URL}/files/${id}`, {
             method: 'DELETE',
+            headers: getAuthHeaders()
         });
         if (!res.ok) throw new Error('Failed to delete file');
     },
@@ -92,6 +100,7 @@ export const db = {
     async deleteProject(id: string): Promise<void> {
         const res = await fetch(`${API_URL}/projects/${id}`, {
             method: 'DELETE',
+            headers: getAuthHeaders()
         });
         if (!res.ok) throw new Error('Failed to delete project');
     }

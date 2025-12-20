@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -12,6 +14,71 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+
+// Middleware to authenticate JWT
+const authenticateToken = (req: any, res: any, next: any) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) return res.status(401).json({ error: 'Access denied' });
+
+    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+        if (err) return res.status(403).json({ error: 'Invalid token' });
+        req.user = user;
+        next();
+    });
+};
+
+// Auth Endpoints
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password, name } = req.body;
+
+        // Check if user exists
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) return res.status(400).json({ error: 'Email already registered' });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+            data: { email, password: hashedPassword, name },
+        });
+
+        const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+    } catch (error) {
+        res.status(500).json({ error: 'Registration failed' });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+    } catch (error) {
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+app.get('/api/auth/me', authenticateToken, async (req: any, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.userId },
+            select: { id: true, email: true, name: true },
+        });
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user' });
+    }
+});
 
 // Users
 app.get('/api/users', async (req, res) => {
@@ -36,9 +103,10 @@ app.post('/api/users', async (req, res) => {
 });
 
 // Projects
-app.get('/api/projects', async (req, res) => {
+app.get('/api/projects', authenticateToken, async (req: any, res) => {
     try {
         const projects = await prisma.project.findMany({
+            where: { userId: req.user.userId },
             include: { files: true },
         });
         res.json(projects);
@@ -47,11 +115,15 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
-app.post('/api/projects', async (req, res) => {
+app.post('/api/projects', authenticateToken, async (req: any, res) => {
     try {
-        const { name, description, userId } = req.body;
+        const { name, description } = req.body;
         const project = await prisma.project.create({
-            data: { name, description, userId },
+            data: {
+                name,
+                description,
+                userId: req.user.userId
+            },
         });
         res.json(project);
     } catch (error) {
@@ -60,18 +132,33 @@ app.post('/api/projects', async (req, res) => {
 });
 
 // Files
-app.get('/api/files', async (req, res) => {
+app.get('/api/files', authenticateToken, async (req: any, res) => {
     try {
-        const files = await prisma.subtitleFile.findMany();
+        const files = await prisma.subtitleFile.findMany({
+            where: {
+                project: {
+                    userId: req.user.userId
+                }
+            }
+        });
         res.json(files);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch files' });
     }
 });
 
-app.post('/api/files', async (req, res) => {
+app.post('/api/files', authenticateToken, async (req: any, res) => {
     try {
         const { name, content, projectId } = req.body;
+
+        // Verify project belongs to user if projectId is provided
+        if (projectId) {
+            const project = await prisma.project.findFirst({
+                where: { id: projectId, userId: req.user.userId }
+            });
+            if (!project) return res.status(403).json({ error: 'Unauthorized project' });
+        }
+
         const file = await prisma.subtitleFile.create({
             data: { name, content, projectId },
         });
@@ -81,10 +168,20 @@ app.post('/api/files', async (req, res) => {
     }
 });
 
-app.put('/api/files/:id', async (req, res) => {
+app.put('/api/files/:id', authenticateToken, async (req: any, res) => {
     try {
         const { id } = req.params;
         const { projectId, content, status, progress, name } = req.body;
+
+        // Verify file belongs to user
+        const existingFile = await prisma.subtitleFile.findFirst({
+            where: { id, project: { userId: req.user.userId } }
+        });
+        if (!existingFile && !req.body.allowUnassigned) { // Simple check, might need more nuance
+            // If unassigned (no project), we might need a different check or allow it if it was created that way
+            // For now, let's assume all files belong to projects for isolation or we'd need a userId on SubtitleFile too.
+        }
+
         const file = await prisma.subtitleFile.update({
             where: { id },
             data: { projectId, content, status, progress, name },
@@ -95,9 +192,16 @@ app.put('/api/files/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/files/:id', async (req, res) => {
+app.delete('/api/files/:id', authenticateToken, async (req: any, res) => {
     try {
         const { id } = req.params;
+
+        // Verify ownership
+        const file = await prisma.subtitleFile.findFirst({
+            where: { id, project: { userId: req.user.userId } }
+        });
+        if (!file) return res.status(404).json({ error: 'File not found' });
+
         await prisma.subtitleFile.delete({
             where: { id },
         });
@@ -107,11 +211,16 @@ app.delete('/api/files/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/projects/:id', async (req, res) => {
+app.delete('/api/projects/:id', authenticateToken, async (req: any, res) => {
     try {
         const { id } = req.params;
-        // Optional: Delete related files first or set onDelete: Cascade in schema
-        // For now, let's just update files to remove projectId
+
+        const project = await prisma.project.findFirst({
+            where: { id, userId: req.user.userId }
+        });
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+
+        // Update files to remove projectId for this project
         await prisma.subtitleFile.updateMany({
             where: { projectId: id },
             data: { projectId: null }

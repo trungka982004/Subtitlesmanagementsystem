@@ -5,12 +5,14 @@ import { serializeEntriesToJSON } from './utils/srt';
 
 import { SubtitleEditor } from './components/SubtitleEditor';
 import { SubtitleAnalysis } from './components/SubtitleAnalysis';
-import { SubtitleComparison } from './components/SubtitleComparison';
+
 import { QuickTranslate } from './components/QuickTranslate';
 import { Sidebar } from './components/Sidebar';
 import { ProjectDashboard } from './components/ProjectDashboard';
 import { Settings } from './components/Settings';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { Auth } from './components/Auth';
 
 export interface SubtitleEntry {
   id: number;
@@ -43,25 +45,13 @@ export interface SubtitleFile {
 export default function App() {
   const [subtitleFiles, setSubtitleFiles] = useState<SubtitleFile[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings'>('upload');
   const [selectedFile, setSelectedFile] = useState<SubtitleFile | null>(null);
 
-  // Load initial data
+  // Data loading is now handled inside AppContent to react to user changes
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [loadedProjects, loadedFiles] = await Promise.all([
-          db.getProjects(),
-          db.getFiles()
-        ]);
-        setProjects(loadedProjects);
-        setSubtitleFiles(loadedFiles);
-      } catch (err) {
-        console.error('Failed to load data:', err);
-      }
-    };
-    loadData();
-  }, []);
+    if (!selectedFile) return;
+  }, [selectedFile]);
 
   const handleFileUpload = async (file: SubtitleFile) => {
     console.log('Uploading file:', file.name, 'Project ID:', file.projectId);
@@ -156,6 +146,82 @@ export default function App() {
   };
 
   return (
+    <AuthProvider>
+      <AppContent
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        subtitleFiles={subtitleFiles}
+        projects={projects}
+        handleFileUpload={handleFileUpload}
+        handleCreateProject={handleCreateProject}
+        handleDeleteProject={handleDeleteProject}
+        handleMoveFileToProject={handleMoveFileToProject}
+        handleFileSelect={handleFileSelect}
+        selectedFile={selectedFile}
+        handleUpdateFile={handleUpdateFile}
+        setSubtitleFiles={setSubtitleFiles}
+        setProjects={setProjects}
+      />
+    </AuthProvider>
+  );
+}
+
+function AppContent({
+  activeTab,
+  setActiveTab,
+  subtitleFiles,
+  projects,
+  handleFileUpload,
+  handleCreateProject,
+  handleDeleteProject,
+  handleMoveFileToProject,
+  handleFileSelect,
+  selectedFile,
+  handleUpdateFile,
+  setSubtitleFiles,
+  setProjects
+}: any) {
+  const { user, isLoading } = useAuth();
+
+  // Load user-specific data whenever the user changes
+  useEffect(() => {
+    if (user) {
+      const loadUserData = async () => {
+        try {
+          const [loadedProjects, loadedFiles] = await Promise.all([
+            db.getProjects(),
+            db.getFiles()
+          ]);
+          // Update state
+          setProjects(loadedProjects);
+          setSubtitleFiles(loadedFiles);
+        } catch (err) {
+          console.error('Failed to load user data:', err);
+          setProjects([]);
+          setSubtitleFiles([]);
+        }
+      };
+      loadUserData();
+    } else {
+      // Clear data if no user
+      setProjects([]);
+      setSubtitleFiles([]);
+    }
+  }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
+  return (
     <SettingsProvider>
       <div className="flex min-h-screen bg-blue-50-custom dark:bg-slate-950 transition-colors">
         {/* Sidebar */}
@@ -190,7 +256,7 @@ export default function App() {
                     onDeleteProject={handleDeleteProject}
                     onMoveFile={handleMoveFileToProject}
                     onFileUpload={handleFileUpload}
-                    onFileSelect={(file) => {
+                    onFileSelect={(file: any) => {
                       handleFileSelect(file);
                       setActiveTab('manage');
                     }}
@@ -209,7 +275,7 @@ export default function App() {
                       {subtitleFiles.length === 0 ? (
                         <div className="text-sm text-gray-400 p-4 text-center">No files uploaded</div>
                       ) : (
-                        subtitleFiles.map(file => (
+                        subtitleFiles.map((file: any) => (
                           <button
                             key={file.id}
                             onClick={() => handleFileSelect(file)}
@@ -253,16 +319,12 @@ export default function App() {
                 />
               )}
 
-              {activeTab === 'compare' && (
-                <SubtitleComparison files={subtitleFiles} />
-              )}
-
               {activeTab === 'quick-translate' && (
                 <QuickTranslate />
               )}
 
               {activeTab === 'settings' && (
-                <Settings />
+                <Settings projectsCount={projects.length} />
               )}
             </div>
           </div>

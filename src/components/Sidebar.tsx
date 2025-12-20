@@ -1,17 +1,19 @@
-import { Upload, FileText, BarChart3, GitCompare, Settings, LogOut, User, Languages } from 'lucide-react';
+import { Upload, FileText, BarChart3, Settings, LogOut, User, Languages } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
-  activeTab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings';
-  onTabChange: (tab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'compare' | 'settings') => void;
+  activeTab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings';
+  onTabChange: (tab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings') => void;
 }
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+  const { user, logout } = useAuth();
   const menuItems = [
     { id: 'upload' as const, label: 'Upload', icon: Upload },
     { id: 'manage' as const, label: 'Manage & Translate', icon: FileText },
     { id: 'quick-translate' as const, label: 'Quick Translate', icon: Languages },
     { id: 'analysis' as const, label: 'Analysis', icon: BarChart3 },
-    { id: 'compare' as const, label: 'Compare', icon: GitCompare },
+
     { id: 'settings' as const, label: 'Settings', icon: Settings },
   ];
 
@@ -24,8 +26,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             <User className="w-6 h-6 text-white" />
           </div>
           <div>
-            <p className="text-white">Admin User</p>
-            <p className="text-gray-400">admin@example.com</p>
+            <p className="text-white font-medium truncate w-32">{user?.name || 'Admin User'}</p>
+            <p className="text-xs text-gray-400 truncate w-32">{user?.email || 'admin@example.com'}</p>
           </div>
         </div>
       </div>
@@ -49,8 +51,11 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
       {/* Logout */}
       <div className="p-4 border-t border-gray-800">
-        <button className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800 rounded-lg transition-colors">
-          <LogOut className="w-5 h-5" />
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800/50 rounded-lg transition-colors group"
+        >
+          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
           <span>Logout</span>
         </button>
       </div>

@@ -6,7 +6,6 @@ export const translations = {
     manageTranslate: 'Quản lý & Dịch',
     quickTranslate: 'Dịch nhanh',
     analysis: 'Phân tích',
-    comparison: 'So sánh',
     settings: 'Cài đặt',
     logout: 'Đăng xuất',
 
@@ -53,16 +52,7 @@ export const translations = {
     readingSpeedAnalysis: 'Phân tích tốc độ đọc',
     characterCountDistribution: 'Phân bố số ký tự',
 
-    // Comparison
-    subtitleComparison: 'So sánh phụ đề',
-    selectFilesToCompare: 'Chọn file để so sánh',
-    file1: 'File 1',
-    file2: 'File 2',
-    compare: 'So sánh',
-    comparisonResults: 'Kết quả so sánh',
-    metrics: 'Chỉ số',
-    differences: 'Khác biệt',
-    timingDifference: 'Chênh lệch thời gian',
+
 
     // Quick Translate
     quickTranslateTitle: 'Dịch nhanh theo ngữ cảnh',
@@ -193,7 +183,6 @@ export const translations = {
     manageTranslate: 'Manage & Translate',
     quickTranslate: 'Quick Translate',
     analysis: 'Analysis',
-    comparison: 'Comparison',
     settings: 'Settings',
     logout: 'Logout',
 
@@ -240,16 +229,7 @@ export const translations = {
     readingSpeedAnalysis: 'Reading Speed Analysis',
     characterCountDistribution: 'Character Count Distribution',
 
-    // Comparison
-    subtitleComparison: 'Subtitle Comparison',
-    selectFilesToCompare: 'Select files to compare',
-    file1: 'File 1',
-    file2: 'File 2',
-    compare: 'Compare',
-    comparisonResults: 'Comparison Results',
-    metrics: 'Metrics',
-    differences: 'Differences',
-    timingDifference: 'Timing Difference',
+
 
     // Quick Translate
     quickTranslateTitle: 'Quick Contextual Translation',
@@ -380,7 +360,6 @@ export const translations = {
     manageTranslate: '管理与翻译',
     quickTranslate: '快速翻译',
     analysis: '分析',
-    comparison: '比较',
     settings: '设置',
     logout: '登出',
 
@@ -427,16 +406,7 @@ export const translations = {
     readingSpeedAnalysis: '阅读速度分析',
     characterCountDistribution: '字符数分布',
 
-    // Comparison
-    subtitleComparison: '字幕比较',
-    selectFilesToCompare: '选择要比较的文件',
-    file1: '文件 1',
-    file2: '文件 2',
-    compare: '比较',
-    comparisonResults: '比较结果',
-    metrics: '指标',
-    differences: '差异',
-    timingDifference: '时间差异',
+
 
     // Quick Translate
     quickTranslateTitle: '快速上下文翻译',

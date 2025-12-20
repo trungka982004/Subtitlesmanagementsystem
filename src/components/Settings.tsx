@@ -1,25 +1,47 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Clock, User, Moon, Bell, Globe as GlobeIcon, Database, Sun, Monitor, Eye, EyeOff, Camera, ChevronDown, Check, History as HistoryIcon } from 'lucide-react';
+import { db } from '../services/db';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  User,
+  Moon,
+  Database,
+  History as HistoryIcon,
+  ChevronDown,
+  Check,
+  Eye,
+  EyeOff,
+  Trash2,
+  Lock,
+  Mail,
+  X,
+  Clock,
+  Bell,
+  Globe as GlobeIcon,
+  Sun,
+  Monitor,
+  Camera
+} from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTranslation } from '../hooks/useTranslation';
-import { db } from '../services/db';
 
 interface SettingsProps {
   onClose?: () => void;
+  projectsCount?: number;
 }
 
-export function Settings({ onClose }: SettingsProps) {
+export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const { theme, setTheme, language, setLanguage } = useSettings();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<'account' | 'appearance' | 'system'>('account');
 
   // Translation settings
 
 
   // Account settings
-  const [userName, setUserName] = useState<string>('Admin User');
-  const [userEmail, setUserEmail] = useState<string>('admin@example.com');
-  const [currentPassword, setCurrentPassword] = useState<string>('');
+  const [userName, setUserName] = useState<string>(user?.name || 'Admin User');
+  const [userEmail, setUserEmail] = useState<string>(user?.email || 'admin@example.com');
+  const [currentPassword, setCurrentPassword] = useState<string>(user?.lastKnownPassword || '');
   const [newPassword, setNewPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
 
@@ -89,6 +111,17 @@ export function Settings({ onClose }: SettingsProps) {
   const [backupEnabled, setBackupEnabled] = useState<boolean>(true);
   const [appVersion, setAppVersion] = useState<string>('1.0.0');
   const [showVersions, setShowVersions] = useState<boolean>(false);
+
+  // Synchronize state when user context changes
+  useEffect(() => {
+    if (user) {
+      setUserName(user.name || '');
+      setUserEmail(user.email);
+      if (user.lastKnownPassword) {
+        setCurrentPassword(user.lastKnownPassword);
+      }
+    }
+  }, [user]);
 
   const availableVersions = [
     { id: '1.0.0', date: '2025-01-20', note: 'Stable Release', current: true },
@@ -274,6 +307,13 @@ export function Settings({ onClose }: SettingsProps) {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Debug Info */}
+      <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800">
+        <p className="text-[10px] text-gray-400 font-mono">
+          DEBUG: UserID={user?.id} | Projects={projectsCount}
+        </p>
       </div>
 
       {/* Delete Account Section */}
