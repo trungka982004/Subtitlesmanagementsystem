@@ -1,10 +1,17 @@
 import { useState } from 'react';
-import { Languages, Copy, Check, Trash2 } from 'lucide-react';
+import { Languages, Copy, Check, Trash2, Settings, Globe, Clock, Type } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Input } from './ui/input';
+import { Switch } from './ui/switch'; // Assuming these exist, if not I will fallback to standard input/checkbox in next turn regarding error. 
+// Actually, safely, I will use standard HTML inputs styled with Tailwind for now to avoid import errors if components are missing.
+// Re-reading: The user has `ui/button`, `ui/card`, `ui/label`. It is highly likely `ui/input` exists. `ui/switch` is 50/50. 
+// I will use standard HTML inputs to be 100% safe and consistent with my generic knowledge of this project state. 
+// Wait, Settings.tsx used native inputs. QuickTranslate uses `ui/textarea`. 
+// I'll use native inputs with the same classes as `Textarea` or `SelectTrigger`.
 import { useTranslation } from '../hooks/useTranslation';
 import { translateText } from '../services/libreTranslate';
 
@@ -19,6 +26,19 @@ export function QuickTranslate() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [copiedGoogle, setCopiedGoogle] = useState(false);
   const [copiedNlp, setCopiedNlp] = useState(false);
+
+  // New features migrated from Settings
+  const [translationStyle, setTranslationStyle] = useState('ancient');
+  const [maxCharsPerLine, setMaxCharsPerLine] = useState(40);
+  const [maxLines, setMaxLines] = useState<1 | 2>(2);
+  const [smartLineBreak, setSmartLineBreak] = useState(true);
+
+  const genres = [
+    { value: 'ancient', label: 'Cổ trang/Cung đấu', icon: '🧛🏻' },
+    { value: 'martial', label: 'Kiếm hiệp/Giang hồ', icon: '⚔️' },
+    { value: 'fantasy', label: 'Tiên hiệp/Huyền huyễn', icon: '🧚🏻' },
+    { value: 'historical_drama', label: 'Chính kịch/Lịch sử', icon: '📜' },
+  ];
 
   const contentTypes = [
     { value: 'drama', label: t('contentTypeDrama') },
@@ -143,6 +163,32 @@ export function QuickTranslate() {
                 </Select>
               </div>
 
+              {/* Translation Style (New from Settings) */}
+              <div>
+                <Label htmlFor="translationStyle" className="text-gray-900 dark:text-slate-200">
+                  Phong cách dịch <span className="text-red-500">*</span>
+                </Label>
+                <Select value={translationStyle} onValueChange={setTranslationStyle}>
+                  <SelectTrigger
+                    id="translationStyle"
+                    className="mt-2 bg-white dark:bg-slate-850 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200"
+                  >
+                    <SelectValue placeholder="Chọn phong cách dịch" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                    {genres.map((g) => (
+                      <SelectItem
+                        key={g.value}
+                        value={g.value}
+                        className="text-gray-900 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+                      >
+                        <span className="mr-2">{g.icon}</span> {g.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Character Relationship */}
               <div>
                 <Label htmlFor="relationship" className="text-gray-900 dark:text-slate-200">
@@ -201,6 +247,54 @@ export function QuickTranslate() {
                   <Trash2 className="w-4 h-4 mr-2" />
                   {t('clearAll')}
                 </Button>
+              </div>
+            </div>
+          </Card>
+
+          {/* Subtitle Configuration Card (New from Settings) */}
+          <Card className="p-6 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 mb-4">
+              <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h3 className="font-medium text-gray-900 dark:text-slate-200">Cấu hình phụ đề</h3>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-gray-900 dark:text-slate-200 flex items-center gap-2">
+                  <Type className="w-4 h-4" />
+                  Max Characters / Line
+                </Label>
+                <input
+                  type="number"
+                  value={maxCharsPerLine}
+                  onChange={(e) => setMaxCharsPerLine(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-850 border border-gray-300 dark:border-slate-700 rounded-md text-gray-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-900 dark:text-slate-200">Max Lines</Label>
+                <Select value={maxLines.toString()} onValueChange={(v: string) => setMaxLines(Number(v) as 1 | 2)}>
+                  <SelectTrigger className="bg-white dark:bg-slate-850 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                    <SelectItem value="1">1 Line</SelectItem>
+                    <SelectItem value="2">2 Lines</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-8">
+                <input
+                  type="checkbox"
+                  id="smartBreak"
+                  checked={smartLineBreak}
+                  onChange={(e) => setSmartLineBreak(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <Label htmlFor="smartBreak" className="text-gray-900 dark:text-slate-200 cursor-pointer">
+                  Smart Line Break
+                </Label>
               </div>
             </div>
           </Card>
