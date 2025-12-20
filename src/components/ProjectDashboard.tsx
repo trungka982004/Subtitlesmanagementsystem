@@ -118,32 +118,41 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
   return (
     <div className="space-y-8">
-      {/* Summary Cards */}
+      {/* Summary Cards - Match Analysis Page Colored Style */}
       <div>
-        <h3 className="text-gray-900 font-medium mb-4">Overview</h3>
+        <h3 className="text-slate-200 font-medium mb-4">Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-green-50 dark:bg-green-900-20 rounded-lg border border-green-200 dark:border-green-900/30">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-300" />
-              <span className="text-green-900 dark:text-green-300 font-medium">Done</span>
+          {/* Done Card */}
+          <div className="p-6 bg-green-900/20 rounded-lg shadow-sm border border-green-900/30 flex items-center justify-between">
+            <div>
+              <p className="text-green-300 text-sm font-medium mb-1 uppercase tracking-wide">Done</p>
+              <p className="text-3xl font-bold text-green-100">{doneCount}</p>
             </div>
-            <p className="text-green-900 dark:text-green-200">{doneCount} files</p>
+            <div className="w-12 h-12 bg-green-900/30 rounded-full flex items-center justify-center border border-green-500/20">
+              <CheckCircle2 className="w-6 h-6 text-green-400" />
+            </div>
           </div>
 
-          <div className="p-4 bg-blue-50 dark:bg-blue-900-20 rounded-lg border border-blue-200 dark:border-blue-900/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <span className="text-blue-900 dark:text-blue-400 font-medium">In Progress</span>
+          {/* In Progress Card */}
+          <div className="p-6 bg-blue-900/20 rounded-lg shadow-sm border border-blue-900/30 flex items-center justify-between">
+            <div>
+              <p className="text-blue-300 text-sm font-medium mb-1 uppercase tracking-wide">In Progress</p>
+              <p className="text-3xl font-bold text-blue-100">{inProgressCount}</p>
             </div>
-            <p className="text-blue-900 dark:text-blue-300">{inProgressCount} files</p>
+            <div className="w-12 h-12 bg-blue-900/30 rounded-full flex items-center justify-center border border-blue-500/20">
+              <Clock className="w-6 h-6 text-blue-400" />
+            </div>
           </div>
 
-          <div className="p-4 bg-orange-50 dark:bg-orange-900-20 rounded-lg border border-orange-200 dark:border-orange-900/30">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-300" />
-              <span className="text-orange-900 dark:text-orange-300 font-medium">Not Started</span>
+          {/* Not Started Card */}
+          <div className="p-6 bg-orange-900/20 rounded-lg shadow-sm border border-orange-900/30 flex items-center justify-between">
+            <div>
+              <p className="text-orange-300 text-sm font-medium mb-1 uppercase tracking-wide">Not Started</p>
+              <p className="text-3xl font-bold text-orange-100">{notStartedCount}</p>
             </div>
-            <p className="text-orange-900 dark:text-orange-200">{notStartedCount} files</p>
+            <div className="w-12 h-12 bg-orange-900/30 rounded-full flex items-center justify-center border border-orange-500/20">
+              <AlertCircle className="w-6 h-6 text-orange-400" />
+            </div>
           </div>
         </div>
       </div>
@@ -151,7 +160,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
       {/* Projects Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-gray-900 font-medium">Projects</h3>
+          <h3 className="text-slate-200 font-medium">Projects</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -163,10 +172,9 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
             return (
               <div
                 key={project.id}
-                className={`p-4 bg-white dark:bg-slate-900 rounded-lg border shadow-sm transition-all duration-200
-                  ${isDragActive
-                    ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-900 bg-blue-50 dark:bg-slate-800 scale-[1.02]'
-                    : 'border-gray-200 dark:border-slate-800 hover:shadow-md dark:shadow-slate-900/50'
+                className={`p-6 bg-[#1e293b] rounded-lg border transition-all duration-200 shadow-md ${isDragActive
+                  ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-900/20'
+                  : 'border-slate-700 hover:border-blue-500/50 hover:shadow-lg hover:bg-[#1e293b]/80'
                   }`}
                 onDrop={(e) => handleDrop(e, project.id)}
                 onDragOver={(e) => handleDragOver(e, project.id)}
@@ -174,28 +182,28 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Folder className={`w-5 h-5 ${isDragActive ? 'text-blue-600' : 'text-blue-500'}`} />
+                    <Folder className={`w-5 h-5 ${isDragActive ? 'text-blue-400' : 'text-blue-500'}`} />
                     <div>
-                      <h4 className="font-medium text-gray-900 dark:text-slate-100">{project.name}</h4>
-                      <p className="text-xs text-gray-500 dark:text-slate-400">{pFiles.length} files • Created {new Date(project.createdAt).toLocaleDateString()}</p>
+                      <h4 className="font-medium text-slate-100">{project.name}</h4>
+                      <p className="text-xs text-slate-400">{pFiles.length} files • Created {new Date(project.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => onDeleteProject(project.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
+                    className="p-1 text-slate-500 hover:text-red-400 rounded transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-xs text-slate-400">
                     <span>Progress</span>
                     <span>{progress}%</span>
                   </div>
-                  <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-[#1e293b] rounded-full h-1.5 overflow-hidden border border-slate-700/50">
                     <div
-                      className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                      className="h-full bg-blue-500 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -203,40 +211,40 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
                 {/* File list preview */}
                 {pFiles.length > 0 ? (
-                  <div className="mt-4 space-y-2 border-t dark:border-slate-800 pt-3">
+                  <div className="mt-4 space-y-2 border-t border-slate-700/50 pt-3">
                     {pFiles.slice(0, 3).map(file => (
                       <div
                         key={file.id}
-                        className="flex items-center justify-between text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 p-1 -mx-1 rounded"
+                        className="flex items-center justify-between text-sm cursor-pointer hover:bg-slate-800 p-1 -mx-1 rounded"
                         onClick={() => onFileSelect(file)}
                       >
-                        <span className="text-gray-600 dark:text-slate-100 truncate max-w-[150px]">{file.name}</span>
+                        <span className="text-slate-300 truncate max-w-[150px]">{file.name}</span>
                         <div className="flex items-center gap-2">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${file.status === 'done' ? 'bg-green-100 dark:bg-green-900 dark:border dark:border-green-500 text-green-700 dark:text-green-300' :
-                            file.status === 'in-progress' ? 'bg-blue-100 dark:bg-blue-900 dark:border dark:border-blue-500 text-blue-700 dark:text-blue-400' :
-                              'bg-orange-100 dark:bg-orange-900 dark:border dark:border-orange-500 text-orange-700 dark:text-orange-300'
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${file.status === 'done' ? 'bg-green-900/20 border-green-500/30 text-green-400' :
+                            file.status === 'in-progress' ? 'bg-blue-900/20 border-blue-500/30 text-blue-400' :
+                              'bg-orange-900/20 border-orange-500/30 text-orange-400'
                             }`}>
                             {file.status === 'done' ? 'Done' : 'Pending'}
                           </span>
                           {/* Move Button */}
                           <select
-                            className="text-xs border-none bg-transparent text-gray-400 hover:text-gray-600 cursor-pointer focus:ring-0 p-0"
+                            className="text-xs border-none bg-transparent text-slate-500 hover:text-slate-300 cursor-pointer focus:ring-0 p-0"
                             value={project.id}
                             onChange={(e) => onMoveFile(file.id, e.target.value)}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <option value={project.id}>Move...</option>
-                            <option value="">Unassign</option>
+                            <option value={project.id} className="bg-slate-800">Move...</option>
+                            <option value="" className="bg-slate-800">Unassign</option>
                           </select>
                         </div>
                       </div>
                     ))}
                     {pFiles.length > 3 && (
-                      <p className="text-xs text-gray-400 text-center">+ {pFiles.length - 3} more files</p>
+                      <p className="text-xs text-slate-500 text-center">+ {pFiles.length - 3} more files</p>
                     )}
                   </div>
                 ) : (
-                  <div className={`mt-4 border-t dark:border-slate-800 pt-3 text-center transition-colors ${isDragActive ? 'text-blue-600' : 'text-gray-400 dark:text-slate-500'}`}>
+                  <div className={`mt-4 border-t border-slate-700/50 pt-3 text-center transition-colors ${isDragActive ? 'text-blue-400' : 'text-slate-500'}`}>
                     <p className="text-xs italic">
                       {isDragActive ? 'Drop file to add' : 'Start by dragging files here'}
                     </p>
@@ -247,8 +255,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
           })}
 
           {projects.length === 0 && (
-            <div className="col-span-1 md:col-span-2 p-8 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-lg text-center text-gray-400 dark:text-slate-500">
-              <FolderOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+            <div className="col-span-1 md:col-span-2 p-8 border-2 border-dashed border-slate-700 rounded-lg text-center text-slate-500">
+              <FolderOpen className="w-8 h-8 mx-auto mb-2 text-slate-600" />
               <p>No projects yet. Create one to organize your files.</p>
             </div>
           )}
@@ -258,31 +266,31 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
       {/* Unassigned Files */}
       {getUnassignedFiles().length > 0 && (
         <div>
-          <h3 className="text-gray-900 dark:text-slate-200 font-medium mb-4">Unassigned Files</h3>
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 divide-y dark:divide-slate-800">
+          <h3 className="text-slate-200 font-medium mb-4">Unassigned Files</h3>
+          <div className="bg-[#1e293b] rounded-lg border border-slate-700 shadow-sm divide-y divide-slate-700/50">
             {getUnassignedFiles().map(file => (
               <div
                 key={file.id}
-                className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
+                className="p-4 flex items-center justify-between hover:bg-slate-700/50 cursor-pointer"
                 onClick={() => onFileSelect(file)}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${file.status === 'done' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-100 dark:bg-slate-800'
+                  <div className={`p-2 rounded-lg ${file.status === 'done' ? 'bg-green-900/20' : 'bg-[#1e293b]'
                     }`}>
-                    <FolderOpen className={`w-4 h-4 ${file.status === 'done' ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-slate-400'
+                    <FolderOpen className={`w-4 h-4 ${file.status === 'done' ? 'text-green-400' : 'text-slate-500'
                       }`} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-slate-200">{file.name}</h4>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">{file.entries.length} entries • {file.progress}% complete</p>
+                    <h4 className="text-sm font-medium text-slate-200">{file.name}</h4>
+                    <p className="text-xs text-slate-400">{file.entries.length} entries • {file.progress}% complete</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500 dark:text-slate-400">Move to:</span>
+                    <span className="text-sm text-slate-500">Move to:</span>
                     <select
-                      className="text-sm border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-850 dark:text-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="text-sm border-slate-700 bg-[#0f172a] text-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-[#0f172a]"
                       value=""
                       onChange={(e) => {
                         if (e.target.value) onMoveFile(file.id, e.target.value);

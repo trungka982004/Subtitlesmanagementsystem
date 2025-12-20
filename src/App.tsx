@@ -13,6 +13,8 @@ import { Settings } from './components/Settings';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Auth } from './components/Auth';
+import './App.css';
+import { FileText, Settings as SettingsIcon, LogOut, Menu, X } from 'lucide-react';
 
 export interface SubtitleEntry {
   id: number;
@@ -46,6 +48,9 @@ export default function App() {
   const [subtitleFiles, setSubtitleFiles] = useState<SubtitleFile[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings'>('upload');
+
+  // Mobile Menu State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<SubtitleFile | null>(null);
 
   // Data loading is now handled inside AppContent to react to user changes
@@ -161,6 +166,8 @@ export default function App() {
         handleUpdateFile={handleUpdateFile}
         setSubtitleFiles={setSubtitleFiles}
         setProjects={setProjects}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
     </AuthProvider>
   );
@@ -179,7 +186,9 @@ function AppContent({
   selectedFile,
   handleUpdateFile,
   setSubtitleFiles,
-  setProjects
+  setProjects,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen
 }: any) {
   const { user, isLoading } = useAuth();
 
@@ -223,71 +232,103 @@ function AppContent({
 
   return (
     <SettingsProvider>
-      <div className="flex min-h-screen bg-blue-50-custom dark:bg-slate-950 transition-colors">
-        {/* Sidebar */}
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="flex min-h-screen w-full bg-[#0b1121] font-sans text-slate-200">
 
-        {/* Main Content */}
-        <div className="flex-1">
-          <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-200 dark:border-blue-900/30 transition-colors">
-            <div className="px-8 py-6 text-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-cyan-600 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent inline-block">
-                Subtitle Translation Analysis & Management
+        {/* Mobile Sidebar Overlay */}
+        {isMobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Sidebar - Responsive Structure */}
+        <div className={`
+          fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out
+          lg:sticky lg:top-0 lg:h-screen lg:translate-x-0
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}>
+          <Sidebar activeTab={activeTab} onTabChange={(tab) => {
+            setActiveTab(tab);
+            setIsMobileMenuOpen(false); // Close on selection
+          }} />
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 bg-[#0b1121]">
+
+          {/* Header */}
+          <header className="sticky top-0 px-6 py-4 bg-[#0b1121]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-center shrink-0 z-20 shadow-sm">
+            {/* Centered Title */}
+            <div className="text-center">
+              <h1 className="text-xl font-bold text-white tracking-tight">
+                Subtitle Management
               </h1>
-              <p className="text-gray-600 dark:text-blue-200/70 mt-1 font-medium text-sm">
-                Chinese to Vietnamese subtitle translation system
+              <p className="text-slate-400 text-xs font-medium mt-0.5">
+                Chinese to Vietnamese System
               </p>
             </div>
           </header>
 
-          <div className={activeTab === 'manage' ? "" : "p-8"}>
-            <div className={activeTab === 'manage' ? "" : "bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6 transition-colors"}>
+          {/* Scrollable Main Content */}
+          <main className="flex-1 p-4 lg:p-8 scroll-smooth">
+            <div className="max-w-7xl mx-auto space-y-6">
               {activeTab === 'upload' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <SubtitleUploader
                     onFileUpload={handleFileUpload}
                     projects={projects}
                     onCreateProject={handleCreateProject}
                   />
-                  <ProjectDashboard
-                    files={subtitleFiles}
-                    projects={projects}
-                    onCreateProject={handleCreateProject}
-                    onDeleteProject={handleDeleteProject}
-                    onMoveFile={handleMoveFileToProject}
-                    onFileUpload={handleFileUpload}
-                    onFileSelect={(file: any) => {
-                      handleFileSelect(file);
-                      setActiveTab('manage');
-                    }}
-                  />
+                  <div className="mt-8">
+                    <ProjectDashboard
+                      projects={projects}
+                      files={subtitleFiles}
+                      onDeleteProject={handleDeleteProject}
+                      onCreateProject={handleCreateProject}
+                      onMoveFile={handleMoveFileToProject}
+                      onFileUpload={handleFileUpload}
+                      onFileSelect={(file: any) => {
+                        handleFileSelect(file);
+                        setActiveTab('manage');
+                      }}
+                    />
+                  </div>
                 </div>
               )}
 
               {activeTab === 'manage' && (
-                <div className="flex h-[calc(100vh-theme(spacing.24))]">
-                  {/* File Sidebar */}
-                  <div className="w-64 border-r border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 overflow-y-auto flex-shrink-0">
-                    <div className="p-4 border-b border-gray-200 dark:border-slate-800">
-                      <h3 className="font-semibold text-gray-700 dark:text-slate-200">Files</h3>
+                <div className="flex flex-col lg:flex-row h-[calc(100vh-140px)] gap-6 animate-in fade-in zoom-in-95 duration-300">
+                  {/* File List Sidebar */}
+                  <div className="w-full lg:w-72 bg-white rounded-lg border border-gray-200 flex flex-col shrink-0 shadow-sm overflow-hidden">
+                    <div className="p-4 border-b border-gray-100 bg-slate-50">
+                      <h3 className="font-bold text-slate-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-slate-400" />
+                        Project Files
+                      </h3>
                     </div>
-                    <div className="p-2 space-y-1">
+                    <div className="p-2 space-y-1 overflow-y-auto flex-1 bg-slate-50/50">
                       {subtitleFiles.length === 0 ? (
-                        <div className="text-sm text-gray-400 p-4 text-center">No files uploaded</div>
+                        <div className="p-8 text-center text-slate-400 text-sm italic">
+                          No files found
+                        </div>
                       ) : (
                         subtitleFiles.map((file: any) => (
                           <button
                             key={file.id}
                             onClick={() => handleFileSelect(file)}
-                            className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${selectedFile?.id === file.id
-                              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-200 dark:ring-slate-700 font-medium'
-                              : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                            className={`w-full text-left px-4 py-3 rounded-md text-sm transition-all duration-200 border group ${selectedFile?.id === file.id
+                              ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
+                              : 'bg-white border-transparent text-slate-600 hover:bg-white hover:border-gray-200 hover:shadow-sm'
                               }`}
                           >
-                            <div className="truncate">{file.name}</div>
-                            <div className="flex justify-between items-center mt-1">
-                              <span className="text-[10px] text-gray-400">{file.entries.length} lines</span>
+                            <div className="font-semibold truncate mb-0.5">{file.name}</div>
+                            <div className="flex justify-between items-center text-xs">
+                              <span className={`font-medium ${selectedFile?.id === file.id ? 'text-blue-500' : 'text-slate-400'}`}>
+                                {file.entries?.length || 0} lines
+                              </span>
                               {file.status === 'done' && <span className="w-2 h-2 rounded-full bg-green-500"></span>}
+                              {file.status === 'in-progress' && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
                             </div>
                           </button>
                         ))
@@ -295,39 +336,51 @@ function AppContent({
                     </div>
                   </div>
 
-                  {/* Main Editor Area */}
-                  <div className="flex-1 overflow-hidden bg-white dark:bg-slate-900 relative">
+                  {/* Editor Area */}
+                  <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col relative">
                     {selectedFile ? (
-                      <SubtitleEditor
-                        file={selectedFile}
-                        onUpdate={handleUpdateFile}
-                      />
+                      <div className="flex-1 overflow-hidden flex flex-col">
+                        <SubtitleEditor
+                          file={selectedFile}
+                          onUpdate={handleUpdateFile}
+                        />
+                      </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500">
-                        <p>Select a file to begin translating</p>
+                      <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                          <FileText className="w-8 h-8 text-slate-300" />
+                        </div>
+                        <h3 className="font-bold text-lg text-slate-700">Select a File</h3>
+                        <p className="text-slate-400 text-sm mt-1">Choose a file from the list to start editing</p>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {activeTab === 'analysis' && (
-                <SubtitleAnalysis
-                  files={subtitleFiles}
-                  selectedFile={selectedFile}
-                  onSelectFile={handleFileSelect}
-                />
+              {activeTab === 'quick-translate' && (
+                <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-right-8 duration-500">
+                  <QuickTranslate />
+                </div>
               )}
 
-              {activeTab === 'quick-translate' && (
-                <QuickTranslate />
+              {activeTab === 'analysis' && (
+                <div className="max-w-7xl mx-auto animate-in fade-in zoom-in-95 duration-500">
+                  <SubtitleAnalysis
+                    files={subtitleFiles}
+                    selectedFile={selectedFile}
+                    onSelectFile={handleFileSelect}
+                  />
+                </div>
               )}
 
               {activeTab === 'settings' && (
-                <Settings projectsCount={projects.length} />
+                <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <Settings projectsCount={projects.length} />
+                </div>
               )}
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </SettingsProvider>

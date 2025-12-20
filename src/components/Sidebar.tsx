@@ -18,47 +18,51 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   ];
 
   return (
-    <div className="w-64 bg-deep-dark border-r border-gray-800 min-h-screen flex flex-col" style={{ backgroundColor: '#020617' }}>
+    <div
+      className="w-64 h-full bg-[#001529] text-white flex flex-col shrink-0 transition-all duration-300 relative z-20 shadow-xl"
+      style={{ backgroundColor: '#001529', minWidth: '250px' }}
+    >
       {/* User Profile */}
-      <div className="p-6 border-b border-gray-800">
+      {/* User Profile */}
+      <div className="p-6 bg-[#002140] flex flex-col gap-4 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <User className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
+            <User className="w-5 h-5" />
           </div>
-          <div>
-            <p className="text-white font-medium truncate w-32">{user?.name || 'Admin User'}</p>
-            <p className="text-xs text-gray-400 truncate w-32">{user?.email || 'admin@example.com'}</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm text-white truncate">{user?.name || 'Admin'}</p>
+            <p className="text-xs text-slate-400 truncate" title={user?.email}>{user?.email || 'admin@example.com'}</p>
           </div>
         </div>
+
+        <button
+          onClick={logout}
+          className="flex items-center gap-2 text-xs font-semibold text-red-300 hover:text-red-200 hover:bg-white/5 py-2 px-3 rounded transition-all w-full"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          Sign Out
+        </button>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map(item => (
           <button
             key={item.id}
             onClick={() => onTabChange(item.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.id
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-300 hover:bg-gray-800'
+            className={`w-full flex items-center gap-3 px-6 py-3 text-sm font-medium transition-all duration-200 rounded-md ${activeTab === item.id
+              ? 'bg-[#1890ff] text-white shadow-sm'
+              : 'text-slate-400 hover:text-white hover:bg-white/10 hover:translate-x-1'
               }`}
           >
-            <item.icon className="w-5 h-5" />
+            <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-slate-400'}`} />
             <span>{item.label}</span>
           </button>
         ))}
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t border-gray-800">
-        <button
-          onClick={logout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800/50 rounded-lg transition-colors group"
-        >
-          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span>Logout</span>
-        </button>
-      </div>
+
     </div>
   );
 }
