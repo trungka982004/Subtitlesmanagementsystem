@@ -258,14 +258,16 @@ function AppContent({
         <div className="flex-1 flex flex-col min-w-0 bg-[#0b1121]">
 
           {/* Header */}
-          <header className="sticky top-0 px-6 py-4 bg-[#0b1121]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-center shrink-0 z-20 shadow-sm">
+          <header className="sticky top-0 px-6 py-4 bg-[#0b1121]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-center shrink-0 z-20 shadow-lg shadow-black/20">
             {/* Centered Title */}
             <div className="text-center">
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                Subtitle Management
+              <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 tracking-tighter drop-shadow-sm">
+                Sino-Viet Subtitle Studio
               </h1>
-              <p className="text-slate-400 text-xs font-medium mt-0.5">
-                Chinese to Vietnamese System
+              <p className="text-blue-200/50 text-xs font-bold tracking-[0.2em] uppercase mt-1.5 flex items-center justify-center gap-2">
+                <span className="w-8 h-px bg-blue-500/30"></span>
+                Professional Translation Workflow
+                <span className="w-8 h-px bg-blue-500/30"></span>
               </p>
             </div>
           </header>
@@ -280,7 +282,7 @@ function AppContent({
                     projects={projects}
                     onCreateProject={handleCreateProject}
                   />
-                  <div className="mt-8">
+                  <div className="mt-24">
                     <ProjectDashboard
                       projects={projects}
                       files={subtitleFiles}

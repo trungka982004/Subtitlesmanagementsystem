@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Upload, FileText, FolderPlus, Folder } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Upload, FileText, FolderPlus, X, CloudUpload, CheckCircle2 } from 'lucide-react';
 import { SubtitleFile, SubtitleEntry, Project } from '../App';
 
 interface SubtitleUploaderProps {
@@ -8,11 +8,29 @@ interface SubtitleUploaderProps {
   onCreateProject: (name: string) => Promise<string> | string;
 }
 
+interface StagedFile {
+  id: string;
+  fileObj: File;
+  content: string;
+  progress: number;
+  status: 'uploading' | 'completed' | 'error';
+}
+
 export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: SubtitleUploaderProps) {
   const [dragActive, setDragActive] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Format bytes to human readable
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   const parseSRT = (content: string): SubtitleEntry[] => {
     const normalizeContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -22,11 +40,8 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
     blocks.forEach(block => {
       const lines = block.split('\n').map(l => l.trim());
       if (lines.length >= 3) {
-        // Try to identify logical parts
         const idStr = lines[0];
         const id = parseInt(idStr);
-
-        // Time usually on line 2 (index 1), but let's look for the arrow
         const timeLineIndex = lines.findIndex(l => l.includes('-->'));
 
         if (timeLineIndex !== -1) {
@@ -35,7 +50,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
           if (timeMatch) {
             const text = lines.slice(timeLineIndex + 1).join('\n');
             entries.push({
-              id: !isNaN(id) ? id : entries.length + 1, // Fallback ID if missing
+              id: !isNaN(id) ? id : entries.length + 1,
               startTime: timeMatch[1],
               endTime: timeMatch[2],
               text,
@@ -48,39 +63,74 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
     return entries;
   };
 
-  const handleFileRead = (content: string, fileName: string) => {
-    const entries = parseSRT(content);
+  // Simulate upload progress
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStagedFiles(prev => prev.map(f => {
+        if (f.status === 'uploading') {
+          const newProgress = Math.min(f.progress + Math.random() * 20, 100);
+          return {
+            ...f,
+            progress: newProgress,
+            status: newProgress >= 100 ? 'completed' : 'uploading'
+          };
+        }
+        return f;
+      }));
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
 
-    if (entries.length > 0) {
-      const newFile: SubtitleFile = {
-        id: `${Date.now()}-${Math.random()}`,
-        name: fileName,
-        entries,
-        uploadedAt: new Date(),
-        status: 'not-started',
-        progress: 0,
-        projectId: undefined,
-      };
-      onFileUpload(newFile);
-    }
-  };
-
-  const handleFileSelect = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      handleFileRead(content, file.name);
-    };
-    reader.readAsText(file);
+  const handleFileSelect = (files: FileList) => {
+    Array.from(files).forEach(file => {
+      if (file.name.endsWith('.srt')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result as string;
+          setStagedFiles(prev => [...prev, {
+            id: Math.random().toString(36).substr(2, 9),
+            fileObj: file,
+            content,
+            progress: 0,
+            status: 'uploading'
+          }]);
+        };
+        reader.readAsText(file);
+      }
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelect(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files);
     }
+  };
+
+  const handleRemoveStaged = (id: string) => {
+    setStagedFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  const handleAttachFiles = () => {
+    stagedFiles.forEach(f => {
+      if (f.status === 'completed') {
+        const entries = parseSRT(f.content);
+        if (entries.length > 0) {
+          const newFile: SubtitleFile = {
+            id: `${Date.now()}-${Math.random()}`,
+            name: f.fileObj.name,
+            entries,
+            uploadedAt: new Date(),
+            status: 'not-started',
+            progress: 0,
+            projectId: undefined,
+          };
+          onFileUpload(newFile);
+        }
+      }
+    });
+    setStagedFiles([]);
   };
 
   const handleManualCreateProject = () => {
@@ -91,48 +141,11 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(false);
-  };
-
-  const handleLoadSample = () => {
-    const sampleSRT = `1
-00:00:01,000 --> 00:00:04,000
-欢迎使用字幕翻译
-分析与管理系统
-
-2
-00:00:04,500 --> 00:00:07,500
-此工具可帮助您管理
-和翻译字幕文件
-
-3
-00:00:08,000 --> 00:00:11,000
-上传您的SRT文件即可开始
-
-4
-00:00:11,500 --> 00:00:14,500
-您可以分析时间、字符数
-和翻译质量
-
-5
-00:00:15,000 --> 00:00:18,000
-并排比较多个版本`;
-
-    handleFileRead(sampleSRT, 'sample_chinese.srt');
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Project Creation - Match Analysis Page Theme */}
-      <div className="p-6 bg-[#0f172a] rounded-lg shadow-lg border border-slate-800">
-        <h3 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2 uppercase tracking-wide">
+    <div className="space-y-24">
+      {/* Project Creation */}
+      <div className="p-5 bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300">
+        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2 uppercase tracking-wide border-l-4 border-blue-500 pl-3">
           <FolderPlus className="w-4 h-4 text-blue-500" />
           Create New Project
         </h3>
@@ -140,9 +153,9 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
         {!isCreatingProject ? (
           <button
             onClick={() => setIsCreatingProject(true)}
-            className="w-full px-4 py-3 bg-[#020617] border border-dashed border-slate-700 rounded text-slate-400 hover:border-blue-500 hover:bg-[#0f172a] hover:text-blue-400 flex items-center justify-center gap-2 transition-all font-medium"
+            className="w-full px-4 py-3 bg-slate-50 dark:bg-[#020617] border border-dashed border-slate-300 dark:border-slate-700 rounded-lg text-slate-500 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-[#0f172a] hover:text-blue-500 flex items-center justify-center gap-2 transition-all font-medium active:scale-[0.99]"
           >
-            <FolderPlus className="w-5 h-5" />
+            <FolderPlus className="w-5 h-5 transition-transform group-hover:scale-110" />
             Create Project
           </button>
         ) : (
@@ -153,18 +166,18 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
               onChange={(e) => setNewProjectName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleManualCreateProject()}
               placeholder="Enter project name..."
-              className="flex-1 px-4 py-2 bg-[#020617] border border-slate-700 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-white placeholder:text-slate-500"
+              className="flex-1 px-4 py-2 bg-slate-50 dark:bg-[#020617] border border-slate-300 dark:border-slate-700 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
               autoFocus
             />
             <button
               onClick={handleManualCreateProject}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium text-sm shadow-sm transition-all"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-sm shadow-sm transition-all"
             >
               Create
             </button>
             <button
               onClick={() => setIsCreatingProject(false)}
-              className="px-4 py-2 text-slate-400 hover:text-slate-200 font-medium"
+              className="px-3 py-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
             >
               Cancel
             </button>
@@ -172,58 +185,100 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
         )}
       </div>
 
-      {/* Drag & Drop - Match Analysis Page Theme */}
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className={`bg-[#1e293b] border-2 border-dashed rounded-lg p-12 text-center transition-all duration-300 ${dragActive
-          ? 'border-blue-500 bg-blue-900/20 ring-1 ring-blue-500'
-          : 'border-slate-700 hover:border-blue-500 hover:bg-[#1e293b]/80'
-          }`}
-      >
-        <div className="w-16 h-16 mx-auto bg-blue-900/20 rounded-full flex items-center justify-center mb-6">
-          <Upload className="w-8 h-8 text-blue-400" />
+      {/* Upload and Attach Files - Redesigned Card */}
+      <div className="bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 group/card">
+        {/* Header */}
+        <div className="px-6 py-6 border-b border-slate-100 dark:border-slate-700/50 flex flex-col items-center justify-center text-center bg-slate-50/30 dark:bg-slate-800/30">
+          <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 tracking-tight font-sans">
+            Import Subtitles
+          </h3>
+          <p className="text-xs font-medium text-slate-500 mt-1.5 uppercase tracking-wider">
+            Supported formats: .srt
+          </p>
         </div>
 
-        <h3 className="text-white font-bold text-xl mb-2">
-          Drag and drop your SRT file here
-        </h3>
-        <p className="text-slate-500 mb-6 font-medium text-sm uppercase tracking-wide">
-          - or -
-        </p>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".srt"
-          onChange={(e) => {
-            if (e.target.files && e.target.files[0]) {
-              handleFileSelect(e.target.files[0]);
-            }
-          }}
-          className="hidden"
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="px-8 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium shadow-sm transition-all"
-        >
-          Choose File
-        </button>
-      </div>
+        <div className="p-6 space-y-6">
+          {/* Dropzone */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group ${dragActive
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
+              : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+              }`}
+          >
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+              <CloudUpload className="w-6 h-6" />
+            </div>
+            <p className="text-slate-700 dark:text-slate-300 font-medium text-sm">
+              <span className="text-blue-600 hover:underline">Click to upload</span> or drag and drop
+            </p>
+            <p className="text-slate-400 text-xs mt-1">Maximum file size 50 MB</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".srt"
+              multiple
+              onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+              className="hidden"
+            />
+          </div>
 
-      <div className="flex items-center justify-center gap-4">
-        <div className="flex-1 h-px bg-slate-800" />
-        <span className="text-slate-600">or</span>
-        <div className="flex-1 h-px bg-slate-800" />
-      </div>
+          {/* Staged Files List */}
+          {stagedFiles.length > 0 && (
+            <div className="space-y-3">
+              {stagedFiles.map((file) => (
+                <div key={file.id} className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-700/50 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="w-8 h-8 rounded bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 shrink-0 border border-green-200 dark:border-green-800">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{file.fileObj.name}</p>
+                        <p className="text-xs text-slate-400">{formatFileSize(file.fileObj.size)}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => handleRemoveStaged(file.id)} className="text-slate-400 hover:text-red-500 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {/* Progress Bar */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${file.progress === 100 ? 'bg-green-500' : 'bg-blue-500'}`}
+                        style={{ width: `${file.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-slate-500 w-8 text-right">{Math.round(file.progress)}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      <button
-        onClick={handleLoadSample}
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#1e293b] border border-slate-700 rounded hover:border-blue-500 hover:text-blue-400 transition-all group font-medium text-slate-400 shadow-sm"
-      >
-        <FileText className="w-5 h-5 text-slate-500 group-hover:text-blue-400 transition-colors" />
-        <span>Load Sample Subtitle File</span>
-      </button>
+        {/* Footer */}
+        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700/50 flex justify-end gap-3">
+          <button
+            onClick={() => setStagedFiles([])}
+            className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm active:scale-95 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleAttachFiles}
+            disabled={stagedFiles.length === 0 || stagedFiles.some(f => f.status === 'uploading')}
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 hover:shadow-md hover:shadow-blue-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 shadow-sm transition-all flex items-center gap-2"
+          >
+            {stagedFiles.every(f => f.status === 'completed') && stagedFiles.length > 0 && <CheckCircle2 className="w-4 h-4" />}
+            Attach files
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

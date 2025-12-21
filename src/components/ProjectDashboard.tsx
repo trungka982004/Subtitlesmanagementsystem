@@ -117,50 +117,59 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-24">
       {/* Summary Cards - Match Analysis Page Colored Style */}
-      <div>
-        <h3 className="text-slate-200 font-medium mb-4">Overview</h3>
+      <div className="mb-12">
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 pl-3 border-l-4 border-blue-500">Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Done Card */}
-          <div className="p-6 bg-green-900/20 rounded-lg shadow-sm border border-green-900/30 flex items-center justify-between">
-            <div>
-              <p className="text-green-300 text-sm font-medium mb-1 uppercase tracking-wide">Done</p>
-              <p className="text-3xl font-bold text-green-100">{doneCount}</p>
+          <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-green-200 dark:border-green-900/50 flex items-center justify-between group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden">
+            <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 border border-green-200 dark:border-green-800 mb-2 tracking-wide uppercase transition-transform group-hover:scale-105 origin-left">
+                Done
+              </span>
+              <p className="text-3xl font-bold text-green-700 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 transition-colors">{doneCount}</p>
             </div>
-            <div className="w-12 h-12 bg-green-900/30 rounded-full flex items-center justify-center border border-green-500/20">
-              <CheckCircle2 className="w-6 h-6 text-green-400" />
+            <div className="relative z-10 w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center border border-green-200 dark:border-green-800 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300 shadow-sm">
+              <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
 
           {/* In Progress Card */}
-          <div className="p-6 bg-blue-900/20 rounded-lg shadow-sm border border-blue-900/30 flex items-center justify-between">
-            <div>
-              <p className="text-blue-300 text-sm font-medium mb-1 uppercase tracking-wide">In Progress</p>
-              <p className="text-3xl font-bold text-blue-100">{inProgressCount}</p>
+          <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-blue-200 dark:border-blue-900/50 flex items-center justify-between group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden">
+            <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-800 mb-2 tracking-wide uppercase transition-transform group-hover:scale-105 origin-left">
+                In Progress
+              </span>
+              <p className="text-3xl font-bold text-blue-700 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">{inProgressCount}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-900/30 rounded-full flex items-center justify-center border border-blue-500/20">
-              <Clock className="w-6 h-6 text-blue-400" />
+            <div className="relative z-10 w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center border border-blue-200 dark:border-blue-800 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-300 shadow-sm">
+              <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
 
           {/* Not Started Card */}
-          <div className="p-6 bg-orange-900/20 rounded-lg shadow-sm border border-orange-900/30 flex items-center justify-between">
-            <div>
-              <p className="text-orange-300 text-sm font-medium mb-1 uppercase tracking-wide">Not Started</p>
-              <p className="text-3xl font-bold text-orange-100">{notStartedCount}</p>
+          <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-orange-200 dark:border-orange-900/50 flex items-center justify-between group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden">
+            <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 border border-orange-200 dark:border-orange-800 mb-2 tracking-wide uppercase transition-transform group-hover:scale-105 origin-left">
+                Not Started
+              </span>
+              <p className="text-3xl font-bold text-orange-700 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">{notStartedCount}</p>
             </div>
-            <div className="w-12 h-12 bg-orange-900/30 rounded-full flex items-center justify-center border border-orange-500/20">
-              <AlertCircle className="w-6 h-6 text-orange-400" />
+            <div className="relative z-10 w-12 h-12 bg-orange-100 dark:bg-orange-900/50 rounded-full flex items-center justify-center border border-orange-200 dark:border-orange-800 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-sm">
+              <AlertCircle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Projects Section */}
-      <div>
+      <div className="mb-12">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-slate-200 font-medium">Projects</h3>
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500">Projects</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -172,10 +181,10 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
             return (
               <div
                 key={project.id}
-                className={`p-6 bg-[#1e293b] rounded-lg border transition-all duration-200 shadow-md ${isDragActive
-                  ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-900/20'
-                  : 'border-slate-700 hover:border-blue-500/50 hover:shadow-lg hover:bg-[#1e293b]/80'
-                  }`}
+                className={`p-6 bg-[#1e293b] rounded-lg border transition-all duration-300 shadow-md ${isDragActive
+                  ? 'border-blue-500 ring-4 ring-blue-500/20 bg-blue-900/20 scale-[1.02]'
+                  : 'border-slate-700 hover:border-blue-500/50 hover:shadow-xl hover:-translate-y-1 hover:bg-[#1e293b]'
+                  } group`}
                 onDrop={(e) => handleDrop(e, project.id)}
                 onDragOver={(e) => handleDragOver(e, project.id)}
                 onDragLeave={handleDragLeave}
@@ -220,11 +229,13 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                       >
                         <span className="text-slate-300 truncate max-w-[150px]">{file.name}</span>
                         <div className="flex items-center gap-2">
-                          <span className={`text-xs px-2 py-0.5 rounded-full border ${file.status === 'done' ? 'bg-green-900/20 border-green-500/30 text-green-400' :
-                            file.status === 'in-progress' ? 'bg-blue-900/20 border-blue-500/30 text-blue-400' :
-                              'bg-orange-900/20 border-orange-500/30 text-orange-400'
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${file.status === 'done'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 border-green-200 dark:border-green-800'
+                            : file.status === 'in-progress'
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                              : 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 border-orange-200 dark:border-orange-800'
                             }`}>
-                            {file.status === 'done' ? 'Done' : 'Pending'}
+                            {file.status === 'done' ? 'Done' : file.status === 'in-progress' ? 'In Progress' : 'Not Started'}
                           </span>
                           {/* Move Button */}
                           <select
@@ -233,8 +244,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                             onChange={(e) => onMoveFile(file.id, e.target.value)}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <option value={project.id} className="bg-slate-800">Move...</option>
-                            <option value="" className="bg-slate-800">Unassign</option>
+                            <option value={project.id}>Move...</option>
+                            <option value="">Unassign</option>
                           </select>
                         </div>
                       </div>
@@ -266,12 +277,12 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
       {/* Unassigned Files */}
       {getUnassignedFiles().length > 0 && (
         <div>
-          <h3 className="text-slate-200 font-medium mb-4">Unassigned Files</h3>
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 pl-3 border-l-4 border-blue-500">Unassigned Files</h3>
           <div className="bg-[#1e293b] rounded-lg border border-slate-700 shadow-sm divide-y divide-slate-700/50">
             {getUnassignedFiles().map(file => (
               <div
                 key={file.id}
-                className="p-4 flex items-center justify-between hover:bg-slate-700/50 cursor-pointer"
+                className="p-4 flex items-center justify-between hover:bg-slate-700/50 cursor-pointer transition-colors duration-200 group active:scale-[0.99]"
                 onClick={() => onFileSelect(file)}
               >
                 <div className="flex items-center gap-3">
