@@ -300,16 +300,16 @@ function AppContent({
               )}
 
               {activeTab === 'manage' && (
-                <div className="flex flex-col lg:flex-row h-[calc(100vh-140px)] gap-6 animate-in fade-in zoom-in-95 duration-300">
+                <div className="flex flex-col lg:flex-row h-full gap-6 animate-in fade-in zoom-in-95 duration-300">
                   {/* File List Sidebar */}
-                  <div className="w-full lg:w-72 bg-white rounded-lg border border-gray-200 flex flex-col shrink-0 shadow-sm overflow-hidden">
+                  <div className="w-full lg:w-72 bg-white rounded-lg border border-gray-200 flex flex-col shrink-0 shadow-sm overflow-hidden h-full">
                     <div className="p-4 border-b border-gray-100 bg-slate-50">
                       <h3 className="font-bold text-slate-700 text-sm uppercase tracking-wide flex items-center gap-2">
                         <FileText className="w-4 h-4 text-slate-400" />
                         Project Files
                       </h3>
                     </div>
-                    <div className="p-2 space-y-1 overflow-y-auto flex-1 bg-slate-50/50">
+                    <div className="p-2 space-y-1 bg-slate-50/50 overflow-y-auto flex-1">
                       {subtitleFiles.length === 0 ? (
                         <div className="p-8 text-center text-slate-400 text-sm italic">
                           No files found
@@ -339,9 +339,9 @@ function AppContent({
                   </div>
 
                   {/* Editor Area */}
-                  <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col relative">
+                  <div className="w-full lg:flex-1 bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col relative h-full overflow-hidden">
                     {selectedFile ? (
-                      <div className="flex-1 overflow-hidden flex flex-col">
+                      <div className="w-full flex flex-col h-full overflow-hidden">
                         <SubtitleEditor
                           file={selectedFile}
                           onUpdate={handleUpdateFile}

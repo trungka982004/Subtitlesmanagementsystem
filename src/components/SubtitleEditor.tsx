@@ -138,10 +138,10 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   const maxDuration = 10; // Assume 10s is a "long" line for visual scaling cap
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#1e293b] font-sans">
+    <div className="flex flex-col w-full bg-[#1e293b] font-sans rounded-b-lg">
 
       {/* 1. Slim Header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700 bg-[#1e293b] z-10 sticky top-0 w-full shadow-lg">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700 bg-[#1e293b] z-20 sticky top-0 w-full shadow-lg">
         <div className="flex items-center gap-4">
           <h2 className="font-semibold text-slate-100">{file.name}</h2>
           <div className="flex items-center gap-2 text-xs">
@@ -197,13 +197,13 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
 
       {/* 2. Distinct Column Headers */}
       <div className="flex gap-4 px-4 py-2 border-b border-slate-700 text-xs font-bold uppercase tracking-wider sticky top-[61px] z-10 bg-[#1e293b] shadow-md w-full">
-        <div style={{ flex: 2 }} className="px-4 py-3 bg-slate-800 text-slate-400 rounded-lg border border-slate-700">
+        <div style={{ flex: 2 }} className="px-4 py-3 bg-white text-slate-900 rounded-lg border border-slate-200 font-extrabold tracking-tight">
           Source Text
         </div>
-        <div style={{ flex: 5 }} className="px-4 py-3 bg-green-900/20 text-green-400 rounded-lg border border-green-500/10">
+        <div style={{ flex: 5 }} className="px-4 py-3 bg-green-600 text-white rounded-lg border border-green-500 shadow-sm font-bold">
           LibreTranslate (Machine)
         </div>
-        <div style={{ flex: 5 }} className="px-4 py-3 bg-blue-900/20 text-blue-400 rounded-lg border border-blue-500/10">
+        <div style={{ flex: 5 }} className="px-4 py-3 bg-purple-600 text-white rounded-lg border border-purple-500 shadow-sm font-bold">
           NLP Model (Advanced)
         </div>
       </div>
@@ -211,7 +211,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
       {/* 3. Main List Content */}
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto bg-[#1e293b] w-full"
+        className="w-full bg-[#1e293b]"
       >
         {editedEntries.map((entry) => {
           const isGoogleSelected = entry.translation === entry.googleTranslation && !!entry.googleTranslation;
@@ -220,13 +220,13 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
           return (
             <div key={entry.id} className="flex gap-4 px-4 py-4 border-b border-slate-800 min-h-[100px] hover:bg-slate-800/30 transition-colors w-full">
 
-              {/* Col 1: Source (Gray) */}
-              <div style={{ flex: 2 }} className="p-4 text-sm bg-slate-800/50 text-slate-300 flex flex-col gap-2 rounded-lg border border-slate-700/50">
+              {/* Col 1: Source (White) */}
+              <div style={{ flex: 2 }} className="p-4 text-sm bg-slate-50 text-slate-900 flex flex-col gap-2 rounded-lg border border-slate-200">
                 <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mb-1">
                   <span className="font-bold">#{entry.id}</span>
                   <span>{entry.startTime}</span>
                 </div>
-                <p className="leading-relaxed whitespace-pre-wrap">
+                <p className="leading-relaxed whitespace-pre-wrap font-medium">
                   {entry.text}
                 </p>
               </div>
@@ -258,27 +258,27 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 </p>
               </div>
 
-              {/* Col 3: NLP Model (Blue) */}
+              {/* Col 3: NLP Model (Purple) */}
               <div
                 style={{ flex: 5 }}
                 onClick={() => entry.nlpTranslation && handleTranslationChange(entry.id, entry.nlpTranslation)}
                 className={`p-4 text-sm transition-all relative flex flex-col rounded-lg border
                     ${isNlpSelected
-                    ? 'bg-blue-900/20 border-blue-500 ring-1 ring-blue-500 shadow-sm cursor-pointer'
+                    ? 'bg-purple-900/20 border-purple-500 ring-1 ring-purple-500 shadow-sm cursor-pointer'
                     : entry.nlpTranslation
-                      ? 'bg-blue-900/10 border-blue-500/20 hover:bg-blue-900/30 cursor-pointer'
+                      ? 'bg-purple-900/10 border-purple-500/20 hover:bg-purple-900/30 cursor-pointer'
                       : 'bg-slate-800/20 border-slate-700/50 cursor-default'
                   }
                 `}
               >
                 {isNlpSelected && (
-                  <div className="absolute top-2 right-2 text-blue-400">
-                    <CheckCircle2 className="w-5 h-5 fill-blue-900/50" />
+                  <div className="absolute top-2 right-2 text-purple-400">
+                    <CheckCircle2 className="w-5 h-5 fill-purple-900/50" />
                   </div>
                 )}
 
                 <p className={`leading-relaxed whitespace-pre-wrap flex-1 mt-1 ${isNlpSelected
-                  ? 'text-blue-300 font-medium'
+                  ? 'text-purple-300 font-medium'
                   : 'text-slate-300'
                   }`}>
                   {entry.nlpTranslation || <span className="text-slate-600 italic">No translation available</span>}
