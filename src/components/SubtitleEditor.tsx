@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { SubtitleFile, SubtitleEntry } from '../App';
+import { SubtitleFile, SubtitleEntry } from '../types';
 import { Download, Sparkles, Globe, Clock, Save, CheckCircle2 } from 'lucide-react';
 import { translateText } from '../services/libreTranslate';
 
@@ -138,10 +138,10 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   const maxDuration = 10; // Assume 10s is a "long" line for visual scaling cap
 
   return (
-    <div className="flex flex-col w-full bg-[#1e293b] font-sans rounded-b-lg">
+    <div className="flex flex-col w-full h-full bg-[#1e293b] font-sans rounded-b-lg overflow-hidden">
 
       {/* 1. Slim Header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700 bg-[#1e293b] z-20 sticky top-0 w-full shadow-lg">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700 bg-[#1e293b] z-20 w-full shadow-lg shrink-0">
         <div className="flex items-center gap-4">
           <h2 className="font-semibold text-slate-100">{file.name}</h2>
           <div className="flex items-center gap-2 text-xs">
@@ -196,7 +196,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
       </div>
 
       {/* 2. Distinct Column Headers */}
-      <div className="flex gap-4 px-4 py-2 border-b border-slate-700 text-xs font-bold uppercase tracking-wider sticky top-[61px] z-10 bg-[#1e293b] shadow-md w-full">
+      <div className="flex gap-4 px-4 py-2 border-b border-slate-700 text-xs font-bold uppercase tracking-wider bg-[#1e293b] shadow-md w-full shrink-0">
         <div style={{ flex: 2 }} className="px-4 py-3 bg-white text-slate-900 rounded-lg border border-slate-200 font-extrabold tracking-tight">
           Source Text
         </div>
@@ -211,7 +211,8 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
       {/* 3. Main List Content */}
       <div
         ref={scrollContainerRef}
-        className="w-full bg-[#1e293b]"
+        className="w-full bg-[#1e293b] custom-scrollbar overflow-y-auto"
+        style={{ flex: 1 }}
       >
         {editedEntries.map((entry) => {
           const isGoogleSelected = entry.translation === entry.googleTranslation && !!entry.googleTranslation;

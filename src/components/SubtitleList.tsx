@@ -1,4 +1,4 @@
-import { SubtitleFile, Project } from '../App';
+import { SubtitleFile, Project } from '../types';
 import { FileText, Trash2, Clock, Folder } from 'lucide-react';
 
 interface SubtitleListProps {

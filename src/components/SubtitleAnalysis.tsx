@@ -1,4 +1,4 @@
-import { SubtitleFile } from '../App';
+import { SubtitleFile } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { TrendingUp, Clock, Type, AlertCircle } from 'lucide-react';
 

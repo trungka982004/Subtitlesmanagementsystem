@@ -1,4 +1,4 @@
-import { Project, SubtitleFile } from '../App';
+import { Project, SubtitleFile } from '../types';
 import { parseContent } from '../utils/srt';
 
 const API_URL = 'http://localhost:3001/api';

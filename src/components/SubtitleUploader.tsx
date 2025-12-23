@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Upload, FileText, FolderPlus, X, CloudUpload, CheckCircle2 } from 'lucide-react';
-import { SubtitleFile, SubtitleEntry, Project } from '../App';
+import { SubtitleFile, SubtitleEntry, Project } from '../types';
 
 interface SubtitleUploaderProps {
   onFileUpload: (file: SubtitleFile) => void;
@@ -145,7 +145,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
     <div className="flex flex-col" style={{ gap: '3rem' }}>
       {/* Project Creation */}
       <div className="p-5 bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wide border-l-4 border-blue-500 pl-3" style={{ marginBottom: '24px' }}>
+        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wide border-l-4 border-blue-500 pl-3" style={{ marginBottom: '24px', marginTop: '1.5rem' }}>
           <FolderPlus className="w-4 h-4 text-blue-500" />
           Create New Project
         </h3>

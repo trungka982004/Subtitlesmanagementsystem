@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SubtitleFile, Project, SubtitleEntry } from '../App';
+import { SubtitleFile, Project, SubtitleEntry } from '../types';
 import { CheckCircle2, Clock, AlertCircle, Folder, Trash2, FolderOpen } from 'lucide-react';
 
 interface ProjectDashboardProps {

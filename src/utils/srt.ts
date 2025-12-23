@@ -1,4 +1,4 @@
-import { SubtitleEntry } from '../App';
+import { SubtitleEntry } from '../types';
 
 export const parseSRT = (content: string): SubtitleEntry[] => {
     if (!content) return [];
