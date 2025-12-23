@@ -117,10 +117,10 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
   };
 
   return (
-    <div className="space-y-24">
+    <div className="flex flex-col" style={{ gap: '2rem' }}>
       {/* Summary Cards - Match Analysis Page Colored Style */}
-      <div className="mb-12">
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 pl-3 border-l-4 border-blue-500">Overview</h3>
+      <div>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500" style={{ marginBottom: '24px' }}>Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Done Card */}
           <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-green-200 dark:border-green-900/50 flex items-center justify-between group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden">
@@ -167,8 +167,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
       </div>
 
       {/* Projects Section */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-4">
+      <div>
+        <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500">Projects</h3>
         </div>
 
@@ -276,8 +276,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
       {/* Unassigned Files */}
       {getUnassignedFiles().length > 0 && (
-        <div>
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 pl-3 border-l-4 border-blue-500">Unassigned Files</h3>
+        <div style={{ marginBottom: '3rem' }}>
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500" style={{ marginBottom: '24px' }}>Unassigned Files</h3>
           <div className="bg-[#1e293b] rounded-lg border border-slate-700 shadow-sm divide-y divide-slate-700/50">
             {getUnassignedFiles().map(file => (
               <div

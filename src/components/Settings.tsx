@@ -161,7 +161,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
 
   const renderAccountSettings = () => (
-    <div className="space-y-6">
+    <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       {/* Profile Section */}
       <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Thông tin cá nhân</h3>
@@ -200,7 +200,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
           {/* Inputs Column */}
           <div className="flex-1 space-y-4 w-full">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Tên người dùng</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Tên người dùng</label>
               <input
                 type="text"
                 value={userName}
@@ -210,7 +210,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Email</label>
               <input
                 type="email"
                 value={userEmail}
@@ -223,12 +223,12 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
       </div>
 
       {/* Password Section */}
-      <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
+      <div className="p-8 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Đổi mật khẩu</h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Mật khẩu hiện tại</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Mật khẩu hiện tại</label>
             <div className="relative w-full">
               <input
                 type={showCurrentPassword ? "text" : "password"}
@@ -253,7 +253,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Mật khẩu mới</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Mật khẩu mới</label>
               <div className="relative w-full">
                 <input
                   type={showNewPassword ? "text" : "password"}
@@ -277,7 +277,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Xác nhận mật khẩu mới</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Xác nhận mật khẩu mới</label>
               <div className="relative w-full">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
@@ -312,7 +312,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
 
       {/* Delete Account Section */}
-      <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl shadow-sm">
+      <div className="p-8 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">Xóa tài khoản</h3>
         <p className="text-gray-600 dark:text-slate-400 mb-4 text-sm">
           Khi bạn xóa tài khoản, tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục. Hãy cân nhắc kỹ trước khi thực hiện.
@@ -325,7 +325,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   );
 
   const renderAppearanceSettings = () => (
-    <div className="space-y-6">
+    <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       <div className="space-y-4">
         <h3 className="text-gray-900 dark:text-slate-200">Chủ đề giao diện</h3>
 
@@ -430,7 +430,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
 
   const renderSystemSettings = () => (
-    <div className="space-y-6">
+    <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       {/* Automation Section */}
       <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Tự động hóa</h3>

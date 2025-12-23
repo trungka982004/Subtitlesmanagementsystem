@@ -301,7 +301,7 @@ function AppContent({
                     projects={projects}
                     onCreateProject={handleCreateProject}
                   />
-                  <div className="mt-24">
+                  <div style={{ marginTop: '2rem' }}>
                     <ProjectDashboard
                       projects={projects}
                       files={subtitleFiles}
