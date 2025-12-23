@@ -19,7 +19,9 @@ import {
   Globe as GlobeIcon,
   Sun,
   Monitor,
-  Camera
+  Camera,
+  Cpu,
+  HardDrive
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTranslation } from '../hooks/useTranslation';
@@ -126,8 +128,6 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const availableVersions = [
     { id: '1.0.0', date: '2025-01-20', note: 'Stable Release', current: true },
     { id: '0.9.8', date: '2025-01-10', note: 'Beta Release', current: false },
-    { id: '0.9.5', date: '2024-12-25', note: 'Alpha Feature Test', current: false },
-    { id: '0.9.0', date: '2024-12-01', note: 'Initial Prototype', current: false },
   ];
 
   const sections = [
@@ -200,7 +200,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
           {/* Inputs Column */}
           <div className="flex-1 space-y-4 w-full">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Tên người dùng</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Tên người dùng</label>
               <input
                 type="text"
                 value={userName}
@@ -210,7 +210,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Email</label>
               <input
                 type="email"
                 value={userEmail}
@@ -228,7 +228,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Mật khẩu hiện tại</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Mật khẩu hiện tại</label>
             <div className="relative w-full">
               <input
                 type={showCurrentPassword ? "text" : "password"}
@@ -253,7 +253,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Mật khẩu mới</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Mật khẩu mới</label>
               <div className="relative w-full">
                 <input
                   type={showNewPassword ? "text" : "password"}
@@ -277,7 +277,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Xác nhận mật khẩu mới</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Xác nhận mật khẩu mới</label>
               <div className="relative w-full">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
@@ -309,12 +309,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
         </div>
       </div>
 
-      {/* Debug Info */}
-      <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800">
-        <p className="text-[10px] text-gray-400 font-mono">
-          DEBUG: UserID={user?.id} | Projects={projectsCount}
-        </p>
-      </div>
+
 
       {/* Delete Account Section */}
       <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl shadow-sm">
@@ -537,21 +532,33 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             )}
           </div>
 
-          <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800">
-            <span className="block text-sm text-gray-500 dark:text-slate-400 mb-1">Model dịch thuật</span>
-            <span className="block text-lg font-medium text-gray-900 dark:text-slate-200">VietSub-Custom (Latest)</span>
-          </div>
-          <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800">
-            <span className="block text-sm text-gray-500 dark:text-slate-400 mb-1">Dung lượng đã dùng</span>
-            <span className="block text-lg font-medium text-gray-900 dark:text-slate-200">256 MB / 10 GB</span>
-          </div>
-          <div className="col-span-1 md:col-span-2 p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center justify-between">
-            <div>
-              <span className="block text-sm text-gray-500 dark:text-slate-400 mb-1">Tổng số dự án</span>
-              <span className="block text-lg font-medium text-gray-900 dark:text-slate-200">12 Projects</span>
+          <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+              <Cpu className="w-5 h-5" />
             </div>
-            <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <div>
+              <span className="block text-xs text-gray-500 dark:text-slate-400">Model dịch thuật</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-slate-200">VietSub-Custom (Latest)</span>
+            </div>
+          </div>
+
+          <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+              <HardDrive className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="block text-xs text-gray-500 dark:text-slate-400">Dung lượng đã dùng</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-slate-200">256 MB / 10 GB</span>
+            </div>
+          </div>
+
+          <div className="col-span-1 md:col-span-2 p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center gap-3 hover:bg-white dark:hover:bg-slate-900 transition-all cursor-default">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
               <Database className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="block text-xs text-gray-500 dark:text-slate-400">Tổng số dự án</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-slate-200">{projectsCount} Projects</span>
             </div>
           </div>
         </div>
