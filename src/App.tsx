@@ -192,7 +192,18 @@ function AppContent({
 }: any) {
   const { user, isLoading } = useAuth();
 
-  // Load user-specific data whenever the user changes
+  // Sync document title with active tab
+  useEffect(() => {
+    const labels: Record<string, string> = {
+      upload: 'Upload',
+      manage: 'Manage & Translate',
+      'quick-translate': 'Quick Translate',
+      analysis: 'Analysis',
+      settings: 'Settings'
+    };
+    document.title = `Sino-Viet Subtitle Studio | ${labels[activeTab] || 'Dashboard'}`;
+  }, [activeTab]);
+
   useEffect(() => {
     if (user) {
       const loadUserData = async () => {
@@ -262,7 +273,15 @@ function AppContent({
             {/* Centered Title */}
             <div className="text-center">
               <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 tracking-tighter drop-shadow-sm">
-                Sino-Viet Subtitle Studio
+                Sino-Viet Subtitle Studio | {
+                  {
+                    upload: 'Upload',
+                    manage: 'Manage & Translate',
+                    'quick-translate': 'Quick Translate',
+                    analysis: 'Analysis',
+                    settings: 'Settings'
+                  }[activeTab as 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings'] || 'Dashboard'
+                }
               </h1>
               <p className="text-blue-200/50 text-xs font-bold tracking-[0.2em] uppercase mt-1.5 flex items-center justify-center gap-2">
                 <span className="w-8 h-px bg-blue-500/30"></span>

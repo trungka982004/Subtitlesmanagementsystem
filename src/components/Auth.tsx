@@ -13,6 +13,10 @@ export function Auth() {
     const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
 
+    React.useEffect(() => {
+        document.title = `Sino-Viet Subtitle Studio | ${isLogin ? 'Login' : 'Sign Up'}`;
+    }, [isLogin]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
