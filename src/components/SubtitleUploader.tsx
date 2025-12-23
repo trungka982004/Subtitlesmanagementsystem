@@ -144,7 +144,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
   return (
     <div className="flex flex-col" style={{ gap: '3rem' }}>
       {/* Project Creation */}
-      <div className="p-5 bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300">
+      <div className="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 hover:shadow-lg hover:border-slate-300 dark:hover:border-blue-500/30 transition-all duration-300">
         <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wide border-l-4 border-blue-500 pl-3" style={{ marginBottom: '24px', marginTop: '1.5rem' }}>
           <FolderPlus className="w-4 h-4 text-blue-500" />
           Create New Project
@@ -153,7 +153,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
         {!isCreatingProject ? (
           <button
             onClick={() => setIsCreatingProject(true)}
-            className="w-full px-4 py-3 bg-slate-50 dark:bg-[#020617] border border-dashed border-slate-300 dark:border-slate-700 rounded-lg text-slate-500 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-[#0f172a] hover:text-blue-500 flex items-center justify-center gap-2 transition-all font-medium active:scale-[0.99]"
+            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/50 border border-dashed border-slate-300 dark:border-white/10 rounded-lg text-slate-500 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-500 flex items-center justify-center gap-2 transition-all font-medium active:scale-[0.99]"
           >
             <FolderPlus className="w-5 h-5 transition-transform group-hover:scale-110" />
             Create Project
@@ -166,7 +166,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
               onChange={(e) => setNewProjectName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleManualCreateProject()}
               placeholder="Enter project name..."
-              className="flex-1 px-4 py-2 bg-slate-50 dark:bg-[#020617] border border-slate-300 dark:border-slate-700 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
+              className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-950/50 border border-slate-300 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
               autoFocus
             />
             <button
@@ -186,9 +186,9 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
       </div>
 
       {/* Upload and Attach Files - Redesigned Card */}
-      <div className="bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 group/card">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 group/card">
         {/* Header */}
-        <div className="px-6 py-6 border-b border-slate-100 dark:border-slate-700/50 flex flex-col items-center justify-center text-center bg-slate-50/30 dark:bg-slate-800/30">
+        <div className="px-6 py-6 border-b border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center bg-slate-50/30 dark:bg-slate-950/30">
           <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 tracking-tight font-sans">
             Import Subtitles
           </h3>
@@ -206,7 +206,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
             onClick={() => fileInputRef.current?.click()}
             className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group ${dragActive
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
-              : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+              : 'border-slate-300 dark:border-white/10 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
               }`}
           >
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
@@ -279,6 +279,6 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject }: Su
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

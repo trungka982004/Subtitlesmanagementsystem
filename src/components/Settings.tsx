@@ -163,7 +163,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const renderAccountSettings = () => (
     <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       {/* Profile Section */}
-      <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
+      <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Thông tin cá nhân</h3>
 
         <div className="flex flex-col md:flex-row gap-8">
@@ -171,7 +171,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
           <div className="flex flex-col items-center space-y-3 shrink-0">
             <div className="relative group w-24 h-24">
               <div
-                className="w-full h-full rounded-full bg-gray-200 border-4 border-white dark:border-slate-800 shadow-md overflow-hidden flex items-center justify-center"
+                className="w-full h-full rounded-full bg-gray-200 dark:bg-slate-800 border-4 border-white dark:border-slate-900 shadow-md overflow-hidden flex items-center justify-center"
               >
                 {avatar ? (
                   <img src={avatar} alt="User Avatar" className="w-full h-full object-cover" />
@@ -183,7 +183,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
             <button
               onClick={triggerFileInput}
-              className="p-2 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 rounded-full hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 transition-colors cursor-pointer border border-gray-200 dark:border-slate-700 shadow-sm"
+              className="p-2 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 rounded-full hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 transition-colors cursor-pointer border border-gray-200 dark:border-white/10 shadow-sm"
               title="Thay đổi ảnh đại diện"
             >
               <Camera className="w-5 h-5" />
@@ -200,22 +200,22 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
           {/* Inputs Column */}
           <div className="flex-1 space-y-4 w-full">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Tên người dùng</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Tên người dùng</label>
               <input
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full pl-6 px-4 py-2.5 text-sm border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Email</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Email</label>
               <input
                 type="email"
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full pl-6 px-4 py-2.5 text-sm border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
               />
             </div>
           </div>
@@ -223,18 +223,18 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
       </div>
 
       {/* Password Section */}
-      <div className="p-8 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Đổi mật khẩu</h3>
+      <div className="p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200">Đổi mật khẩu</h3>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pt-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Mật khẩu hiện tại</label>
+            <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Mật khẩu hiện tại</label>
             <div className="relative w-full">
               <input
                 type={showCurrentPassword ? "text" : "password"}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full pl-4 pr-12 py-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full pl-6 pr-12 py-2.5 text-sm border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
                 placeholder="your password"
               />
               <button
@@ -253,13 +253,13 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Mật khẩu mới</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Mật khẩu mới</label>
               <div className="relative w-full">
                 <input
                   type={showNewPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full pl-6 pr-12 py-2.5 text-sm border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
                   placeholder="your password"
                 />
                 <button
@@ -277,13 +277,13 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300" style={{ marginBottom: '12px' }}>Xác nhận mật khẩu mới</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Xác nhận mật khẩu mới</label>
               <div className="relative w-full">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full pl-6 pr-12 py-2.5 text-sm border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
                   placeholder="your password"
                 />
                 <button
@@ -312,12 +312,12 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
 
       {/* Delete Account Section */}
-      <div className="p-8 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl shadow-sm">
+      <div className="p-8 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">Xóa tài khoản</h3>
         <p className="text-gray-600 dark:text-slate-400 mb-4 text-sm">
           Khi bạn xóa tài khoản, tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục. Hãy cân nhắc kỹ trước khi thực hiện.
         </p>
-        <button className="px-6 py-2.5 bg-white border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors focus:ring-4 focus:ring-red-500/10 dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20">
+        <button className="px-6 py-2.5 bg-white border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors focus:ring-4 focus:ring-red-500/10 dark:bg-slate-950 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20">
           Xóa tài khoản
         </button>
       </div>
@@ -327,51 +327,51 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const renderAppearanceSettings = () => (
     <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       <div className="space-y-4">
-        <h3 className="text-gray-900 dark:text-slate-200">Chủ đề giao diện</h3>
+        <h3 className="text-gray-900 dark:text-white font-medium text-lg">Chủ đề giao diện</h3>
 
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => setTheme('light')}
             className={`p-6 rounded-lg border-2 transition-all ${theme === 'light'
               ? 'border-blue-500 bg-blue-50 dark:bg-slate-800 dark:border-blue-500'
-              : 'border-gray-200 bg-white dark:bg-slate-900 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              : 'border-gray-200 bg-white dark:bg-slate-950 dark:border-white/10 hover:border-gray-300 dark:hover:border-slate-500'
               }`}
           >
             <Sun className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
-            <p className="text-gray-900 dark:text-white">Sáng</p>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Light Mode</p>
+            <p className="text-gray-900 dark:text-white font-medium">Sáng</p>
+            <p className="text-gray-500 dark:text-slate-300 mt-1">Light Mode</p>
           </button>
 
           <button
             onClick={() => setTheme('dark')}
             className={`p-6 rounded-lg border-2 transition-all ${theme === 'dark'
               ? 'border-blue-500 bg-blue-50 dark:bg-slate-800 dark:border-blue-500'
-              : 'border-gray-200 bg-white dark:bg-slate-900 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              : 'border-gray-200 bg-white dark:bg-slate-950 dark:border-white/10 hover:border-gray-300 dark:hover:border-slate-500'
               }`}
           >
             <Moon className="w-8 h-8 mx-auto mb-2 text-gray-700 dark:text-gray-200" />
-            <p className="text-gray-900 dark:text-white">Tối</p>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Dark Mode</p>
+            <p className="text-gray-900 dark:text-white font-medium">Tối</p>
+            <p className="text-gray-500 dark:text-slate-300 mt-1">Dark Mode</p>
           </button>
         </div>
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-gray-900 dark:text-white">Ngôn ngữ giao diện</h3>
+        <h3 className="text-gray-900 dark:text-white font-medium text-lg">Ngôn ngữ giao diện</h3>
 
         <div className="space-y-2">
           <button
             onClick={() => setLanguage('vi')}
             className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${language === 'vi'
               ? 'border-blue-500 bg-blue-50 dark:bg-slate-800 dark:border-blue-500'
-              : 'border-gray-200 bg-white dark:bg-slate-900 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              : 'border-gray-200 bg-white dark:bg-slate-950 dark:border-white/10 hover:border-gray-300 dark:hover:border-slate-500'
               }`}
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇻🇳</span>
               <div className="text-left">
-                <p className="text-gray-900 dark:text-white">Tiếng Việt</p>
-                <p className="text-gray-500 dark:text-gray-400">Vietnamese</p>
+                <p className="text-gray-900 dark:text-white font-medium">Tiếng Việt</p>
+                <p className="text-gray-500 dark:text-slate-300">Vietnamese</p>
               </div>
             </div>
             {language === 'vi' && (
@@ -385,14 +385,14 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             onClick={() => setLanguage('en')}
             className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${language === 'en'
               ? 'border-blue-500 bg-blue-50 dark:bg-slate-800 dark:border-blue-500'
-              : 'border-gray-200 bg-white dark:bg-slate-900 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              : 'border-gray-200 bg-white dark:bg-slate-950 dark:border-white/10 hover:border-gray-300 dark:hover:border-slate-500'
               }`}
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇬🇧</span>
               <div className="text-left">
-                <p className="text-gray-900 dark:text-white">English</p>
-                <p className="text-gray-500 dark:text-gray-400">English</p>
+                <p className="text-gray-900 dark:text-white font-medium">English</p>
+                <p className="text-gray-500 dark:text-slate-300">English</p>
               </div>
             </div>
             {language === 'en' && (
@@ -406,14 +406,14 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             onClick={() => setLanguage('zh')}
             className={`w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between ${language === 'zh'
               ? 'border-blue-500 bg-blue-50 dark:bg-slate-800 dark:border-blue-500'
-              : 'border-gray-200 bg-white dark:bg-slate-900 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              : 'border-gray-200 bg-white dark:bg-slate-950 dark:border-white/10 hover:border-gray-300 dark:hover:border-slate-500'
               }`}
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇨🇳</span>
               <div className="text-left">
-                <p className="text-gray-900 dark:text-white">中文</p>
-                <p className="text-gray-500 dark:text-gray-400">Chinese</p>
+                <p className="text-gray-900 dark:text-white font-medium">中文</p>
+                <p className="text-gray-500 dark:text-slate-300">Chinese</p>
               </div>
             </div>
             {language === 'zh' && (
@@ -432,14 +432,14 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const renderSystemSettings = () => (
     <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       {/* Automation Section */}
-      <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Tự động hóa</h3>
+      <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Tự động hóa</h3>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800">
+          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5">
             <div>
-              <p className="font-medium text-gray-900 dark:text-slate-200">Tự động lưu</p>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Tự động lưu thay đổi khi chỉnh sửa phụ đề</p>
+              <p className="font-medium text-gray-900 dark:text-white">Tự động lưu</p>
+              <p className="text-sm text-gray-500 dark:text-slate-300 mt-1">Tự động lưu thay đổi khi chỉnh sửa phụ đề</p>
             </div>
             <button
               onClick={() => setAutoSave(!autoSave)}
@@ -453,10 +453,10 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </button>
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800">
+          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5">
             <div>
-              <p className="font-medium text-gray-900 dark:text-slate-200">Sao lưu tự động</p>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Tự động sao lưu dữ liệu mỗi ngày</p>
+              <p className="font-medium text-gray-900 dark:text-white">Sao lưu tự động</p>
+              <p className="text-sm text-gray-500 dark:text-slate-300 mt-1">Tự động sao lưu dữ liệu mỗi ngày</p>
             </div>
             <button
               onClick={() => setBackupEnabled(!backupEnabled)}
@@ -473,12 +473,12 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
       </div>
 
       {/* System Info Section */}
-      <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Thông tin hệ thống</h3>
+      <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Thông tin hệ thống</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Version Manager - Full Width */}
-          <div className="col-span-1 md:col-span-2 p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 transition-all">
+          <div className="col-span-1 md:col-span-2 p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 transition-all">
             <div
               className="flex items-center justify-between cursor-pointer"
               onClick={() => setShowVersions(!showVersions)}
@@ -488,9 +488,9 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                   <HistoryIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-slate-400">Phiên bản hiện tại</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-300">Phiên bản hiện tại</p>
                   <div className="flex items-center gap-2">
-                    <p className="text-lg font-bold text-gray-900 dark:text-slate-200">v{appVersion}</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">v{appVersion}</p>
                     <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
                       Stable
                     </span>
@@ -502,7 +502,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
             {/* Expanded Version List */}
             {showVersions && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-800 animate-in fade-in slide-in-from-top-2">
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-top-2">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Lịch sử phiên bản</p>
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                   {availableVersions.map((ver) => (
@@ -532,40 +532,40 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             )}
           </div>
 
-          <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center gap-3">
+          <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 flex items-center gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
               <Cpu className="w-5 h-5" />
             </div>
             <div>
-              <span className="block text-xs text-gray-500 dark:text-slate-400">Model dịch thuật</span>
-              <span className="block text-base font-bold text-gray-900 dark:text-slate-200">VietSub-Custom (Latest)</span>
+              <span className="block text-xs text-gray-500 dark:text-slate-300">Model dịch thuật</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-white">VietSub-Custom (Latest)</span>
             </div>
           </div>
 
-          <div className="p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center gap-3">
+          <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 flex items-center gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
               <HardDrive className="w-5 h-5" />
             </div>
             <div>
-              <span className="block text-xs text-gray-500 dark:text-slate-400">Dung lượng đã dùng</span>
-              <span className="block text-base font-bold text-gray-900 dark:text-slate-200">256 MB / 10 GB</span>
+              <span className="block text-xs text-gray-500 dark:text-slate-300">Dung lượng đã dùng</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-white">256 MB / 10 GB</span>
             </div>
           </div>
 
-          <div className="col-span-1 md:col-span-2 p-4 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center gap-3 hover:bg-white dark:hover:bg-slate-900 transition-all cursor-default">
+          <div className="col-span-1 md:col-span-2 p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 flex items-center gap-3 hover:bg-white dark:hover:bg-slate-900 transition-all cursor-default">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <span className="block text-xs text-gray-500 dark:text-slate-400">Tổng số dự án</span>
-              <span className="block text-base font-bold text-gray-900 dark:text-slate-200">{projectsCount} Projects</span>
+              <span className="block text-xs text-gray-500 dark:text-slate-300">Tổng số dự án</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-white">{projectsCount} Projects</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Danger Zone Section */}
-      <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl shadow-sm">
+      <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">Xóa tất cả dữ liệu</h3>
         <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
           Xóa tất cả các file phụ đề, bản dịch và cài đặt. Hành động này không thể hoàn tác.
@@ -590,7 +590,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               }
             }
           }}
-          className="px-6 py-2.5 bg-white border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors focus:ring-4 focus:ring-red-500/10 dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+          className="px-6 py-2.5 bg-white border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors focus:ring-4 focus:ring-red-500/10 dark:bg-slate-950 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20"
         >
           Xóa tất cả dữ liệu
         </button>
@@ -602,14 +602,14 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
     <div className="flex gap-6 max-w-7xl mx-auto">
       {/* Left Sidebar - Section Navigation */}
       <div className="w-64 space-y-2">
-        <h3 className="text-gray-900 dark:text-white mb-4">{t('settingsTitle')}</h3>
+        <h3 className="text-gray-900 dark:text-white mb-4 font-bold text-xl uppercase tracking-wide">{t('settingsTitle')}</h3>
         {sections.map(section => (
           <button
             key={section.id}
             onClick={() => setActiveSection(section.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === section.id
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-gray-700 dark:text-slate-200 hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800/50 font-medium'
               }`}
           >
             <section.icon className="w-5 h-5" />
@@ -621,7 +621,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
       {/* Right Content Area */}
       <div className="flex-1">
         <div className="mb-6">
-          <h2 className="text-gray-900 dark:text-white">
+          <h2 className="text-gray-900 dark:text-white text-2xl font-bold tracking-tight">
             {t(activeSection === 'account' ? 'accountSettings' : activeSection === 'appearance' ? 'appearanceSettings' : 'systemSettings')}
           </h2>
         </div>
@@ -632,10 +632,10 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
         {activeSection === 'system' && renderSystemSettings()}
 
         {/* Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10 flex items-center justify-between">
           <button
             onClick={handleReset}
-            className="px-6 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            className="px-6 py-2 text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-gray-300 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
           >
             {t('reset')}
           </button>

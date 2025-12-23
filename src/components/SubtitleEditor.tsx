@@ -197,7 +197,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
 
       {/* 2. Distinct Column Headers */}
       <div className="flex gap-4 px-4 py-2 border-b border-slate-700 text-xs font-bold uppercase tracking-wider bg-[#1e293b] shadow-md w-full shrink-0">
-        <div style={{ flex: 2 }} className="px-4 py-3 bg-white text-slate-900 rounded-lg border border-slate-200 font-extrabold tracking-tight">
+        <div style={{ flex: 2 }} className="px-4 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg border border-slate-200 dark:border-slate-700 font-extrabold tracking-tight">
           Source Text
         </div>
         <div style={{ flex: 5 }} className="px-4 py-3 bg-green-600 text-white rounded-lg border border-green-500 shadow-sm font-bold">
@@ -221,8 +221,8 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
           return (
             <div key={entry.id} className="flex gap-4 px-4 py-4 border-b border-slate-800 min-h-[100px] hover:bg-slate-800/30 transition-colors w-full">
 
-              {/* Col 1: Source (White) */}
-              <div style={{ flex: 2 }} className="p-4 text-sm bg-slate-50 text-slate-900 flex flex-col gap-2 rounded-lg border border-slate-200">
+              {/* Col 1: Source (White -> Dark) */}
+              <div style={{ flex: 2 }} className="p-4 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 flex flex-col gap-2 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mb-1">
                   <span className="font-bold">#{entry.id}</span>
                   <span>{entry.startTime}</span>
