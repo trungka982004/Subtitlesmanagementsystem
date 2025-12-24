@@ -151,15 +151,13 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   ];
 
   const sections = [
-    { id: 'account' as const, label: 'Tài khoản', icon: User },
-    { id: 'appearance' as const, label: 'Giao diện', icon: Moon },
-    { id: 'system' as const, label: 'Hệ thống', icon: Database },
+    { id: 'account' as const, label: t('accountSettings'), icon: User },
+    { id: 'appearance' as const, label: t('appearanceSettings'), icon: Moon },
+    { id: 'system' as const, label: t('systemSettings'), icon: Database },
   ];
 
   const handleReset = () => {
     if (activeSection === 'appearance') {
-      setTheme('light');
-      setLanguage('vi');
       setTheme('light');
       setLanguage('vi');
     } else if (activeSection === 'system') {
@@ -184,7 +182,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
     <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       {/* Profile Section */}
       <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">Thông tin cá nhân</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200 mb-6">{t('personalInfo')}</h3>
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Avatar Column */}
@@ -204,7 +202,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             <button
               onClick={triggerFileInput}
               className="p-2 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 rounded-full hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 transition-colors cursor-pointer border border-gray-200 dark:border-white/10 shadow-sm"
-              title="Thay đổi ảnh đại diện"
+              title="Change Avatar"
             >
               <Camera className="w-5 h-5" />
             </button>
@@ -220,7 +218,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
           {/* Inputs Column */}
           <div className="flex-1 space-y-4 w-full">
             <div>
-              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Tên người dùng</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">{t('username')}</label>
               <input
                 type="text"
                 value={userName}
@@ -230,7 +228,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
 
             <div>
-              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Email</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">{t('email')}</label>
               <input
                 type="email"
                 value={userEmail}
@@ -244,11 +242,11 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
       {/* Password Section */}
       <div className="p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200">Đổi mật khẩu</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-slate-200">{t('changePassword')}</h3>
 
         <div className="space-y-4 pt-2">
           <div>
-            <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Mật khẩu hiện tại</label>
+            <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">{t('currentPassword')}</label>
             <div className="relative w-full">
               <input
                 type={showCurrentPassword ? "text" : "password"}
@@ -273,7 +271,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Mật khẩu mới</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">{t('newPassword')}</label>
               <div className="relative w-full">
                 <input
                   type={showNewPassword ? "text" : "password"}
@@ -297,7 +295,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
 
             <div>
-              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">Xác nhận mật khẩu mới</label>
+              <label className="block text-xl font-bold text-gray-700 dark:text-slate-300 mb-2">{t('confirmPassword')}</label>
               <div className="relative w-full">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
@@ -323,7 +321,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
           <div className="pt-2">
             <button className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:ring-4 focus:ring-blue-500/20">
-              Cập nhật mật khẩu
+              {t('updatePassword')}
             </button>
           </div>
         </div>
@@ -333,12 +331,12 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
       {/* Delete Account Section */}
       <div className="p-8 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">Xóa tài khoản</h3>
+        <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">{t('deleteAccount')}</h3>
         <p className="text-gray-600 dark:text-slate-400 mb-4 text-sm">
-          Khi bạn xóa tài khoản, tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn và không thể khôi phục. Hãy cân nhắc kỹ trước khi thực hiện.
+          {t('deleteAccountWarning')}
         </p>
         <button className="px-6 py-2.5 bg-white border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors focus:ring-4 focus:ring-red-500/10 dark:bg-slate-950 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20">
-          Xóa tài khoản
+          {t('deleteAccount')}
         </button>
       </div>
     </div>
@@ -347,7 +345,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const renderAppearanceSettings = () => (
     <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       <div className="space-y-4">
-        <h3 className="text-gray-900 dark:text-white font-medium text-lg">Chủ đề giao diện</h3>
+        <h3 className="text-gray-900 dark:text-white font-medium text-lg">{t('themeSettings')}</h3>
 
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -358,8 +356,8 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               }`}
           >
             <Sun className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
-            <p className="text-gray-900 dark:text-white font-medium">Sáng</p>
-            <p className="text-gray-500 dark:text-slate-300 mt-1">Light Mode</p>
+            <p className="text-gray-900 dark:text-white font-medium">{t('lightMode')}</p>
+            <p className="text-gray-500 dark:text-slate-300 mt-1">{t('lightModeDesc')}</p>
           </button>
 
           <button
@@ -370,14 +368,14 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               }`}
           >
             <Moon className="w-8 h-8 mx-auto mb-2 text-gray-700 dark:text-gray-200" />
-            <p className="text-gray-900 dark:text-white font-medium">Tối</p>
-            <p className="text-gray-500 dark:text-slate-300 mt-1">Dark Mode</p>
+            <p className="text-gray-900 dark:text-white font-medium">{t('darkMode')}</p>
+            <p className="text-gray-500 dark:text-slate-300 mt-1">{t('darkModeDesc')}</p>
           </button>
         </div>
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-gray-900 dark:text-white font-medium text-lg">Ngôn ngữ giao diện</h3>
+        <h3 className="text-gray-900 dark:text-white font-medium text-lg">{t('uiLanguage')}</h3>
 
         <div className="space-y-2">
           <button
@@ -390,7 +388,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇻🇳</span>
               <div className="text-left">
-                <p className="text-gray-900 dark:text-white font-medium">Tiếng Việt</p>
+                <p className="text-gray-900 dark:text-white font-medium">{t('vietnamese')}</p>
                 <p className="text-gray-500 dark:text-slate-300">Vietnamese</p>
               </div>
             </div>
@@ -411,7 +409,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇬🇧</span>
               <div className="text-left">
-                <p className="text-gray-900 dark:text-white font-medium">English</p>
+                <p className="text-gray-900 dark:text-white font-medium">{t('english')}</p>
                 <p className="text-gray-500 dark:text-slate-300">English</p>
               </div>
             </div>
@@ -432,7 +430,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             <div className="flex items-center gap-3">
               <span className="text-2xl">🇨🇳</span>
               <div className="text-left">
-                <p className="text-gray-900 dark:text-white font-medium">中文</p>
+                <p className="text-gray-900 dark:text-white font-medium">{t('chinese')}</p>
                 <p className="text-gray-500 dark:text-slate-300">Chinese</p>
               </div>
             </div>
@@ -453,13 +451,13 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
     <div className="flex flex-col" style={{ gap: '2.5rem' }}>
       {/* Automation Section */}
       <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Tự động hóa</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">{t('automation')}</h3>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">Tự động lưu</p>
-              <p className="text-sm text-gray-500 dark:text-slate-300 mt-1">Tự động lưu thay đổi khi chỉnh sửa phụ đề</p>
+              <p className="font-medium text-gray-900 dark:text-white">{t('autoSave')}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-300 mt-1">{t('autoSaveDesc')}</p>
             </div>
             <button
               onClick={() => setAutoSave(!autoSave)}
@@ -475,8 +473,8 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
           <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">Sao lưu tự động</p>
-              <p className="text-sm text-gray-500 dark:text-slate-300 mt-1">Tự động sao lưu dữ liệu mỗi ngày</p>
+              <p className="font-medium text-gray-900 dark:text-white">{t('autoBackup')}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-300 mt-1">{t('autoBackupDesc')}</p>
             </div>
             <button
               onClick={() => setBackupEnabled(!backupEnabled)}
@@ -494,7 +492,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
 
       {/* System Info Section */}
       <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Thông tin hệ thống</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">{t('systemInfo')}</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Version Manager - Full Width */}
@@ -508,7 +506,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                   <HistoryIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-slate-300">Phiên bản hiện tại</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-300">{t('version')}</p>
                   <div className="flex items-center gap-2">
                     <p className="text-lg font-bold text-gray-900 dark:text-white">v{appVersion}</p>
                     <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
@@ -523,7 +521,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             {/* Expanded Version List */}
             {showVersions && (
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-top-2">
-                <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Lịch sử phiên bản</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Version History</p>
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                   {availableVersions.map((ver) => (
                     <button
@@ -557,7 +555,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               <Cpu className="w-5 h-5" />
             </div>
             <div>
-              <span className="block text-xs text-gray-500 dark:text-slate-300">Model dịch thuật</span>
+              <span className="block text-xs text-gray-500 dark:text-slate-300">{t('translationModel')}</span>
               <span className="block text-base font-bold text-gray-900 dark:text-white">VietSub-Custom (Latest)</span>
             </div>
           </div>
@@ -609,7 +607,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               <HardDrive className="w-5 h-5" />
             </div>
             <div>
-              <span className="block text-xs text-gray-500 dark:text-slate-300">Dung lượng đã dùng</span>
+              <span className="block text-xs text-gray-500 dark:text-slate-300">{t('storageUsed')}</span>
               <span className="block text-base font-bold text-gray-900 dark:text-white">256 MB / 10 GB</span>
             </div>
           </div>
@@ -619,21 +617,21 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <span className="block text-xs text-gray-500 dark:text-slate-300">Tổng số dự án</span>
-              <span className="block text-base font-bold text-gray-900 dark:text-white">{projectsCount} Projects</span>
+              <span className="block text-xs text-gray-500 dark:text-slate-300">{t('projectCount')}</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-white">{projectsCount} {t('projects')}</span>
             </div>
           </div>
         </div>
       </div>
       {/* Danger Zone Section */}
       <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-xl shadow-sm">
-        <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">Xóa tất cả dữ liệu</h3>
+        <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">{t('clearAllData')}</h3>
         <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
-          Xóa tất cả các file phụ đề, bản dịch và cài đặt. Hành động này không thể hoàn tác.
+          {t('clearAllDataWarning')}
         </p>
         <button
           onClick={async () => {
-            if (window.confirm('Bạn có chắc chắn muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác.')) {
+            if (window.confirm(t('clearAllDataWarning'))) {
               try {
                 // Delete all files first
                 const files = await db.getFiles();
@@ -643,17 +641,17 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                 const projects = await db.getProjects();
                 await Promise.all(projects.map(p => db.deleteProject(p.id)));
 
-                alert('Đã xóa toàn bộ dữ liệu thành công.');
+                alert('All data has been deleted successfully.');
                 window.location.reload(); // Reload to refresh state
               } catch (error) {
                 console.error(error);
-                alert('Có lỗi xảy ra khi xóa dữ liệu.');
+                alert('An error occurred while deleting data.');
               }
             }
           }}
           className="px-6 py-2.5 bg-white border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors focus:ring-4 focus:ring-red-500/10 dark:bg-slate-950 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20"
         >
-          Xóa tất cả dữ liệu
+          {t('clearAllData')}
         </button>
       </div>
     </div>
@@ -674,7 +672,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               }`}
           >
             <section.icon className="w-5 h-5" />
-            <span>{t(section.id === 'account' ? 'accountSettings' : section.id === 'appearance' ? 'appearanceSettings' : 'systemSettings')}</span>
+            <span>{section.label}</span>
           </button>
         ))}
       </div>

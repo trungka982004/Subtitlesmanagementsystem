@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SubtitleFile, Project, SubtitleEntry } from '../types';
 import { CheckCircle2, Clock, AlertCircle, Folder, Trash2, FolderOpen } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ProjectDashboardProps {
   files: SubtitleFile[];
@@ -13,6 +14,7 @@ interface ProjectDashboardProps {
 }
 
 export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile, onFileUpload, onFileSelect }: ProjectDashboardProps) {
+  const { t } = useTranslation();
   const [dragActiveProject, setDragActiveProject] = useState<string | null>(null);
 
   const doneCount = files.filter(f => f.status === 'done').length;
@@ -120,14 +122,14 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
     <div className="flex flex-col" style={{ gap: '2rem' }}>
       {/* Summary Cards - Match Analysis Page Colored Style */}
       <div>
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500" style={{ marginBottom: '24px' }}>Overview</h3>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500" style={{ marginBottom: '24px' }}>{t('overview')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Done Card */}
           <div className="p-6 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-green-200 dark:border-white/10 flex items-center justify-between group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden">
             <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative z-10">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 border border-green-200 dark:border-green-800 mb-2 tracking-wide uppercase transition-transform group-hover:scale-105 origin-left">
-                Done
+                {t('completed')}
               </span>
               <p className="text-3xl font-bold text-green-700 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 transition-colors">{doneCount}</p>
             </div>
@@ -141,7 +143,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
             <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative z-10">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-800 mb-2 tracking-wide uppercase transition-transform group-hover:scale-105 origin-left">
-                In Progress
+                {t('inProgress')}
               </span>
               <p className="text-3xl font-bold text-blue-700 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">{inProgressCount}</p>
             </div>
@@ -155,7 +157,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
             <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative z-10">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 border border-orange-200 dark:border-orange-800 mb-2 tracking-wide uppercase transition-transform group-hover:scale-105 origin-left">
-                Not Started
+                {t('notStarted')}
               </span>
               <p className="text-3xl font-bold text-orange-700 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors">{notStartedCount}</p>
             </div>
@@ -169,7 +171,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
       {/* Projects Section */}
       <div>
         <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500">Projects</h3>
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500">{t('projectsTitle')}</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,7 +196,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                     <Folder className={`w-5 h-5 ${isDragActive ? 'text-blue-400' : 'text-blue-500'}`} />
                     <div>
                       <h4 className="font-medium text-slate-700 dark:text-slate-100">{project.name}</h4>
-                      <p className="text-xs text-slate-400">{pFiles.length} files • Created {new Date(project.createdAt).toLocaleDateString()}</p>
+                      <p className="text-xs text-slate-400">{pFiles.length} {t('files')} • {t('created')} {new Date(project.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                   <button
@@ -207,7 +209,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Progress</span>
+                    <span>{t('progress')}</span>
                     <span>{progress}%</span>
                   </div>
                   <div className="w-full bg-slate-100 dark:bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-200 dark:border-white/5">
@@ -235,7 +237,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-800'
                               : 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 border-orange-200 dark:border-orange-800'
                             }`}>
-                            {file.status === 'done' ? 'Done' : file.status === 'in-progress' ? 'In Progress' : 'Not Started'}
+                            {file.status === 'done' ? t('completed') : file.status === 'in-progress' ? t('inProgress') : t('notStarted')}
                           </span>
                           {/* Move Button */}
                           <select
@@ -244,20 +246,20 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                             onChange={(e) => onMoveFile(file.id, e.target.value)}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <option value={project.id}>Move...</option>
-                            <option value="">Unassign</option>
+                            <option value={project.id}>{t('move')}</option>
+                            <option value="">{t('unassign')}</option>
                           </select>
                         </div>
                       </div>
                     ))}
                     {pFiles.length > 3 && (
-                      <p className="text-xs text-slate-500 text-center">+ {pFiles.length - 3} more files</p>
+                      <p className="text-xs text-slate-500 text-center">+ {pFiles.length - 3} {t('moreFiles')}</p>
                     )}
                   </div>
                 ) : (
                   <div className={`mt-4 border-t border-slate-100 dark:border-white/5 pt-3 text-center transition-colors ${isDragActive ? 'text-blue-400' : 'text-slate-500'}`}>
                     <p className="text-xs italic">
-                      {isDragActive ? 'Drop file to add' : 'Start by dragging files here'}
+                      {isDragActive ? t('dropFileToAdd') : t('startDragging')}
                     </p>
                   </div>
                 )}
@@ -268,7 +270,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
           {projects.length === 0 && (
             <div className="col-span-1 md:col-span-2 p-8 border-2 border-dashed border-slate-300 dark:border-white/10 rounded-lg text-center text-slate-500">
               <FolderOpen className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-              <p>No projects yet. Create one to organize your files.</p>
+              <p>{t('noProjectsYet')}</p>
             </div>
           )}
         </div>
@@ -277,7 +279,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
       {/* Unassigned Files */}
       {getUnassignedFiles().length > 0 && (
         <div style={{ marginBottom: '3rem' }}>
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500" style={{ marginBottom: '24px' }}>Unassigned Files</h3>
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500" style={{ marginBottom: '24px' }}>{t('unassignedFiles')}</h3>
           <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm divide-y divide-slate-100 dark:divide-white/5">
             {getUnassignedFiles().map(file => (
               <div
@@ -299,7 +301,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500">Move to:</span>
+                    <span className="text-sm text-slate-500">{t('moveTo')}</span>
                     <select
                       className="text-sm border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900"
                       value=""
@@ -308,7 +310,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <option value="">Select Project...</option>
+                      <option value="">{t('selectProject')}</option>
                       {projects.map(p => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}

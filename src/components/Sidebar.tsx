@@ -1,5 +1,6 @@
 import { Upload, FileText, BarChart3, Settings, LogOut, User, Languages } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SidebarProps {
   activeTab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings';
@@ -8,13 +9,14 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const { user, logout } = useAuth();
-  const menuItems = [
-    { id: 'upload' as const, label: 'Upload', icon: Upload },
-    { id: 'manage' as const, label: 'Manage & Translate', icon: FileText },
-    { id: 'quick-translate' as const, label: 'Quick Translate', icon: Languages },
-    { id: 'analysis' as const, label: 'Analysis', icon: BarChart3 },
+  const { t } = useTranslation();
 
-    { id: 'settings' as const, label: 'Settings', icon: Settings },
+  const menuItems = [
+    { id: 'upload' as const, label: t('uploadSubtitle'), icon: Upload },
+    { id: 'manage' as const, label: t('manageTranslate'), icon: FileText },
+    { id: 'quick-translate' as const, label: t('quickTranslate'), icon: Languages },
+    { id: 'analysis' as const, label: t('analysis'), icon: BarChart3 },
+    { id: 'settings' as const, label: t('settings'), icon: Settings },
   ];
 
   return (
@@ -22,7 +24,6 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       className="w-64 h-full bg-slate-900 dark:bg-slate-950 text-white flex flex-col shrink-0 transition-all duration-300 relative z-20 shadow-xl border-r border-transparent dark:border-white/10"
       style={{ minWidth: '250px' }}
     >
-      {/* User Profile */}
       {/* User Profile */}
       <div className="p-6 bg-slate-950 dark:bg-slate-950/50 flex flex-col gap-4 border-b border-white/10 dark:border-white/5">
         <div className="flex items-center gap-3">
@@ -40,7 +41,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           className="flex items-center justify-center gap-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 py-2 px-4 rounded-lg transition-all w-fit shadow-md"
         >
           <LogOut className="w-4 h-4" />
-          Sign Out
+          {t('logout')}
         </button>
       </div>
 
@@ -60,8 +61,6 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           </button>
         ))}
       </nav>
-
-      {/* Logout */}
 
     </div>
   );

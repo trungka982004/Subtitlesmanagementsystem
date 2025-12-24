@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Mail, Lock, User, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 import './Auth.css';
 
 export function Auth() {
@@ -12,10 +13,11 @@ export function Auth() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
+    const { t } = useTranslation();
 
     React.useEffect(() => {
-        document.title = `Sino-Viet Subtitle Studio | ${isLogin ? 'Login' : 'Sign Up'}`;
-    }, [isLogin]);
+        document.title = `Sino-Viet Subtitle Studio | ${isLogin ? t('login') : t('signUp')}`;
+    }, [isLogin, t]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,10 +39,10 @@ export function Auth() {
             if (response.ok) {
                 login(data.token, data.user, password);
             } else {
-                setError(data.error || 'Something went wrong');
+                setError(data.error || t('somethingWentWrong'));
             }
         } catch (err) {
-            setError('Connection failed. Please try again.');
+            setError(t('connectionFailed'));
         } finally {
             setIsSubmitting(false);
         }
@@ -56,7 +58,7 @@ export function Auth() {
             <div className="auth-card animate-auth">
                 <div className="auth-header">
                     <h3 className="auth-title">
-                        {isLogin ? 'Login' : 'Sign Up'}
+                        {isLogin ? t('login') : t('signUp')}
                     </h3>
                 </div>
 
@@ -69,7 +71,7 @@ export function Auth() {
 
                     {!isLogin && (
                         <div className="form-group">
-                            <label className="form-label">Full Name</label>
+                            <label className="form-label">{t('fullName')}</label>
                             <div className="input-wrapper">
                                 <User className="input-icon" />
                                 <input
@@ -78,14 +80,14 @@ export function Auth() {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     className="auth-input"
-                                    placeholder="Type your name"
+                                    placeholder={t('typeYourName')}
                                 />
                             </div>
                         </div>
                     )}
 
                     <div className="form-group">
-                        <label className="form-label">Username</label>
+                        <label className="form-label">{t('usernameLabel')}</label>
                         <div className="input-wrapper">
                             <Mail className="input-icon" />
                             <input
@@ -94,13 +96,13 @@ export function Auth() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="auth-input"
-                                placeholder="Type your email"
+                                placeholder={t('typeYourEmail')}
                             />
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Password</label>
+                        <label className="form-label">{t('password')}</label>
                         <div className="input-wrapper">
                             <Lock className="input-icon" />
                             <input
@@ -109,7 +111,7 @@ export function Auth() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="auth-input"
-                                placeholder="Type your password"
+                                placeholder={t('typeYourPassword')}
                                 style={{ paddingRight: '40px' }}
                             />
                             <button
@@ -122,7 +124,7 @@ export function Auth() {
                             </button>
                         </div>
                         {isLogin && (
-                            <button type="button" className="forgot-password">Forgot password?</button>
+                            <button type="button" className="forgot-password">{t('forgotPassword')}</button>
                         )}
                     </div>
 
@@ -134,14 +136,14 @@ export function Auth() {
                         {isSubmitting ? (
                             <Loader2 style={{ width: '20px', height: '20px', animation: 'spin 1s linear infinite' }} />
                         ) : (
-                            <span>{isLogin ? 'Login' : 'Sign Up'}</span>
+                            <span>{isLogin ? t('login') : t('signUp')}</span>
                         )}
                     </button>
                 </form>
 
                 <div className="social-auth">
                     <p className="social-title">
-                        Or {isLogin ? 'Sign In' : 'Sign Up'} Using
+                        {isLogin ? t('orSignInUsing') : t('orSignUpUsing')}
                     </p>
 
                     <div className="social-icons">
@@ -150,13 +152,13 @@ export function Auth() {
 
                     <div className="toggle-auth">
                         <p className="toggle-label">
-                            {isLogin ? 'Or Sign Up Using' : 'Have an account?'}
+                            {isLogin ? t('orSignUpUsing') : t('haveAccount')}
                         </p>
                         <button
                             onClick={() => setIsLogin(!isLogin)}
                             className="toggle-btn"
                         >
-                            {isLogin ? 'Sign Up' : 'Login'}
+                            {isLogin ? t('signUp') : t('login')}
                         </button>
                     </div>
                 </div>

@@ -6,12 +6,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
-import { Switch } from './ui/switch'; // Assuming these exist, if not I will fallback to standard input/checkbox in next turn regarding error. 
-// Actually, safely, I will use standard HTML inputs styled with Tailwind for now to avoid import errors if components are missing.
-// Re-reading: The user has `ui/button`, `ui/card`, `ui/label`. It is highly likely `ui/input` exists. `ui/switch` is 50/50. 
-// I will use standard HTML inputs to be 100% safe and consistent with my generic knowledge of this project state. 
-// Wait, Settings.tsx used native inputs. QuickTranslate uses `ui/textarea`. 
-// I'll use native inputs with the same classes as `Textarea` or `SelectTrigger`.
+import { Switch } from './ui/switch';
 import { useTranslation } from '../hooks/useTranslation';
 import { translateText } from '../services/libreTranslate';
 import { translateWithCustomModel } from '../services/customNLP';
@@ -35,10 +30,10 @@ export function QuickTranslate() {
   const [smartLineBreak, setSmartLineBreak] = useState(true);
 
   const genres = [
-    { value: 'ancient', label: 'Cổ trang/Cung đấu', icon: '🧛🏻' },
-    { value: 'martial', label: 'Kiếm hiệp/Giang hồ', icon: '⚔️' },
-    { value: 'fantasy', label: 'Tiên hiệp/Huyền huyễn', icon: '🧚🏻' },
-    { value: 'historical_drama', label: 'Chính kịch/Lịch sử', icon: '📜' },
+    { value: 'ancient', label: t('genreAncient'), icon: '🧛🏻' },
+    { value: 'martial', label: t('genreMartial'), icon: '⚔️' },
+    { value: 'fantasy', label: t('genreFantasy'), icon: '🧚🏻' },
+    { value: 'historical_drama', label: t('genreHistoricalDrama'), icon: '📜' },
   ];
 
   const contentTypes = [
@@ -191,14 +186,14 @@ export function QuickTranslate() {
               {/* Translation Style (New from Settings) */}
               <div>
                 <Label htmlFor="translationStyle" className="text-slate-700 dark:text-slate-200 font-bold">
-                  Phong cách dịch <span className="text-blue-500">*</span>
+                  {t('genreStyle')} <span className="text-blue-500">*</span>
                 </Label>
                 <Select value={translationStyle} onValueChange={setTranslationStyle}>
                   <SelectTrigger
                     id="translationStyle"
                     className="mt-2 bg-white dark:bg-slate-950 border-slate-200 dark:border-white/10 text-black dark:text-slate-100 rounded-lg"
                   >
-                    <SelectValue placeholder="Chọn phong cách dịch" />
+                    <SelectValue placeholder={t('selectTranslationStyle')} />
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-black dark:text-slate-100 z-[100] shadow-2xl">
                     {genres.map((g) => (
@@ -280,14 +275,14 @@ export function QuickTranslate() {
           <Card className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-lg rounded-xl transition-all duration-300">
             <div className="flex items-center gap-2 mb-4">
               <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="font-bold text-slate-900 dark:text-slate-100">Cấu hình phụ đề</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100">{t('subtitleConfiguration')}</h3>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-slate-700 dark:text-slate-200 font-bold flex items-center gap-2">
                   <Type className="w-4 h-4" />
-                  Max Characters / Line
+                  {t('maxCharsPerLine')}
                 </Label>
                 <input
                   type="number"
@@ -297,14 +292,14 @@ export function QuickTranslate() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-200 font-bold">Max Lines</Label>
+                <Label className="text-slate-700 dark:text-slate-200 font-bold">{t('maxLines')}</Label>
                 <Select value={maxLines.toString()} onValueChange={(v: string) => setMaxLines(Number(v) as 1 | 2)}>
                   <SelectTrigger className="bg-white dark:bg-slate-950 border-slate-200 dark:border-white/10 text-black dark:text-slate-100 rounded-lg font-medium">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-black dark:text-slate-100 z-[100] shadow-2xl">
-                    <SelectItem value="1" className="text-black dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-slate-100 dark:focus:bg-slate-800 focus:text-black dark:focus:text-white cursor-pointer">1 Line</SelectItem>
-                    <SelectItem value="2" className="text-black dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-slate-100 dark:focus:bg-slate-800 focus:text-black dark:focus:text-white cursor-pointer">2 Lines</SelectItem>
+                    <SelectItem value="1" className="text-black dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-slate-100 dark:focus:bg-slate-800 focus:text-black dark:focus:text-white cursor-pointer">{t('oneLine')}</SelectItem>
+                    <SelectItem value="2" className="text-black dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-slate-100 dark:focus:bg-slate-800 focus:text-black dark:focus:text-white cursor-pointer">{t('twoLines')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -318,7 +313,7 @@ export function QuickTranslate() {
                   className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950/50 text-blue-600 focus:ring-blue-500"
                 />
                 <Label htmlFor="smartBreak" className="text-slate-700 dark:text-slate-200 font-bold cursor-pointer">
-                  Smart Line Break
+                  {t('smartLineBreak')}
                 </Label>
               </div>
             </div>
@@ -340,7 +335,7 @@ export function QuickTranslate() {
                     <Globe className="w-5 h-5" />
                   </span>
                   <h4 className="text-green-900 font-bold text-lg">
-                    LibreTranslate
+                    {t('googleTranslate')}
                   </h4>
                 </div>
                 {googleResult && (
@@ -358,7 +353,7 @@ export function QuickTranslate() {
                     ) : (
                       <>
                         <Copy className="w-4 h-4 mr-1" />
-                        Sao chép
+                        {t('copyToClipboard')}
                       </>
                     )}
                   </Button>
@@ -372,7 +367,7 @@ export function QuickTranslate() {
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center py-6 text-green-600/40 dark:text-green-400/30 italic gap-3 border-2 border-dashed border-green-100 dark:border-green-900/30 rounded-lg bg-green-50/20 dark:bg-green-900/10">
                     <Globe className="w-10 h-10 opacity-20 animate-pulse" />
-                    <p className="text-green-800/40 font-semibold tracking-wide">Bản dịch máy sẽ xuất hiện tại đây...</p>
+                    <p className="text-green-800/40 font-semibold tracking-wide">{t('machineTranslationPlaceholder')}</p>
                   </div>
                 )}
               </div>
@@ -404,7 +399,7 @@ export function QuickTranslate() {
                     ) : (
                       <>
                         <Copy className="w-4 h-4 mr-1" />
-                        Sao chép
+                        {t('copyToClipboard')}
                       </>
                     )}
                   </Button>
@@ -418,7 +413,7 @@ export function QuickTranslate() {
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center py-6 text-purple-600/40 dark:text-purple-400/30 italic gap-3 border-2 border-dashed border-purple-100 dark:border-purple-900/30 rounded-lg bg-purple-50/20 dark:bg-purple-900/10">
                     <Settings className="w-10 h-10 opacity-20 animate-pulse" />
-                    <p className="text-purple-800/40 font-semibold tracking-wide">Bản dịch NLP chuyên sâu sẽ xuất hiện tại đây...</p>
+                    <p className="text-purple-800/40 font-semibold tracking-wide">{t('nlpTranslationPlaceholder')}</p>
                   </div>
                 )}
               </div>
@@ -434,7 +429,7 @@ export function QuickTranslate() {
             <div className="text-blue-400">ℹ️</div>
             <div>
               <p className="text-slate-200">
-                <span className="font-medium">Context Selected:</span>
+                <span className="font-medium">{t('contextSelected')}</span>
               </p>
               <p className="text-slate-400 mt-1">
                 {contentType && (

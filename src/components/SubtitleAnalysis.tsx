@@ -1,6 +1,7 @@
 import { SubtitleFile } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { TrendingUp, Clock, Type, AlertCircle } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SubtitleAnalysisProps {
   files: SubtitleFile[];
@@ -9,11 +10,13 @@ interface SubtitleAnalysisProps {
 }
 
 export function SubtitleAnalysis({ files, selectedFile, onSelectFile }: SubtitleAnalysisProps) {
+  const { t } = useTranslation();
+
   if (files.length === 0) {
     return (
       <div className="text-center py-12 text-gray-400 dark:text-slate-500">
         <BarChart className="w-12 h-12 mx-auto mb-3" />
-        <p>Upload subtitle files to see analysis</p>
+        <p>{t('uploadSubtitleForAnalysis')}</p>
       </div>
     );
   }
@@ -125,7 +128,7 @@ export function SubtitleAnalysis({ files, selectedFile, onSelectFile }: Subtitle
     <div className="space-y-6">
       <div>
         <label className="block text-gray-700 dark:text-slate-300 mb-2">
-          Select File to Analyze
+          {t('selectFileToAnalyze')}
         </label>
         <select
           value={fileToAnalyze.id}
@@ -147,57 +150,57 @@ export function SubtitleAnalysis({ files, selectedFile, onSelectFile }: Subtitle
         <div className="p-4 bg-blue-50 dark:bg-blue-900-20 rounded-lg border border-blue-200 dark:border-blue-900/30">
           <div className="flex items-center gap-2 mb-2">
             <Type className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span className="text-blue-900 dark:text-blue-200">Total Characters</span>
+            <span className="text-blue-900 dark:text-blue-200">{t('totalEntries')}</span>
           </div>
-          <p className="text-blue-900 dark:text-blue-100">{stats.totalChars.toLocaleString()}</p>
+          <p className="text-blue-900 dark:text-blue-100">{stats.totalEntries.toLocaleString()}</p>
           <p className="text-blue-700 dark:text-blue-300 mt-1">
-            Avg: {stats.avgCharsPerEntry.toFixed(0)} per entry
+            {t('avgPerEntry').replace('{{val}}', stats.avgCharsPerEntry.toFixed(0))}
           </p>
         </div>
 
         <div className="p-4 bg-green-50 dark:bg-green-900-20 rounded-lg border border-green-200 dark:border-green-900/30">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-5 h-5 text-green-600 dark:text-green-400" />
-            <span className="text-green-900 dark:text-green-200">Duration</span>
+            <span className="text-green-900 dark:text-green-200">{t('totalDuration')}</span>
           </div>
           <p className="text-green-900 dark:text-green-100">
             {Math.floor(stats.totalDuration / 60)}m {(stats.totalDuration % 60).toFixed(0)}s
           </p>
           <p className="text-green-700 dark:text-green-300 mt-1">
-            Avg: {stats.avgDuration.toFixed(1)}s per entry
+            {t('avgReadingSpeed')}
           </p>
         </div>
 
         <div className="p-4 bg-purple-50 dark:bg-purple-900-20 rounded-lg border border-purple-200 dark:border-purple-900/30">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            <span className="text-purple-900 dark:text-purple-200">Reading Speed</span>
+            <span className="text-purple-900 dark:text-purple-200">{t('readingSpeedAnalysis')}</span>
           </div>
           <p className="text-purple-900 dark:text-purple-100">
-            {stats.avgCharsPerSecond.toFixed(1)} chars/sec
+            {stats.avgCharsPerSecond.toFixed(1)} {t('charactersPerSecond')}
           </p>
           <p className="text-purple-700 dark:text-purple-300 mt-1">
-            Optimal: 15-17 chars/sec
+            {t('optimalReadingSpeed')}
           </p>
         </div>
 
         <div className="p-4 bg-orange-50 dark:bg-orange-900-20 rounded-lg border border-orange-200 dark:border-orange-900/30">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-            <span className="text-orange-900 dark:text-orange-200">Issues</span>
+            <span className="text-orange-900 dark:text-orange-200">{t('issues')}</span>
           </div>
           <p className="text-orange-900 dark:text-orange-100">
-            {stats.tooFastCount} too fast
+            {stats.tooFastCount} {t('tooFast')}
           </p>
           <p className="text-orange-700 dark:text-orange-300 mt-1">
-            {stats.gaps} large gaps
+            {stats.gaps} {t('largeGaps')}
           </p>
         </div>
       </div>
 
       {stats.translationProgress > 0 && (
         <div className="p-4 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800">
-          <h3 className="text-gray-900 dark:text-slate-200 mb-3">Translation Progress</h3>
+          <h3 className="text-gray-900 dark:text-slate-200 mb-3">{t('translationProgress')}</h3>
           <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-6 overflow-hidden">
             <div
               className="bg-blue-600 h-full flex items-center justify-center text-white transition-all"
@@ -207,28 +210,28 @@ export function SubtitleAnalysis({ files, selectedFile, onSelectFile }: Subtitle
             </div>
           </div>
           <p className="text-gray-600 dark:text-slate-400 mt-2">
-            {fileToAnalyze.entries.filter(e => e.translation).length} of {fileToAnalyze.entries.length} entries translated
+            {t('entriesTranslated').replace('{{translated}}', fileToAnalyze.entries.filter(e => e.translation).length.toString()).replace('{{total}}', fileToAnalyze.entries.length.toString())}
           </p>
         </div>
       )}
 
       <div className="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-800">
-        <h3 className="text-gray-900 dark:text-slate-200 mb-4">Reading Speed Analysis</h3>
+        <h3 className="text-gray-900 dark:text-slate-200 mb-4">{t('readingSpeedAnalysis')}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={durationData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="index" label={{ value: 'Entry Number', position: 'insideBottom', offset: -5 }} />
-            <YAxis label={{ value: 'Characters per Second', angle: -90, position: 'insideLeft' }} />
+            <XAxis dataKey="index" label={{ value: t('entryNumber'), position: 'insideBottom', offset: -5 }} />
+            <YAxis label={{ value: t('charsPerSec'), angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="readingSpeed" stroke="#8b5cf6" name="Chars/Second" />
+            <Line type="monotone" dataKey="readingSpeed" stroke="#8b5cf6" name={t('charsPerSec')} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {files.length > 1 && (
         <div className="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-800">
-          <h3 className="text-gray-900 dark:text-slate-200 mb-4">File Comparison</h3>
+          <h3 className="text-gray-900 dark:text-slate-200 mb-4">{t('fileComparison')}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={comparisonData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -236,8 +239,8 @@ export function SubtitleAnalysis({ files, selectedFile, onSelectFile }: Subtitle
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="entries" fill="#3b82f6" name="Total Entries" />
-              <Bar dataKey="translation" fill="#10b981" name="Translation %" />
+              <Bar dataKey="entries" fill="#3b82f6" name={t('totalEntries')} />
+              <Bar dataKey="translation" fill="#10b981" name={t('translationPercentage')} />
             </BarChart>
           </ResponsiveContainer>
         </div>
