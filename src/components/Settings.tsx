@@ -21,10 +21,12 @@ import {
   Monitor,
   Camera,
   Cpu,
-  HardDrive
+  HardDrive,
+  Sparkles
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTranslation } from '../hooks/useTranslation';
+import { checkCustomModelHealth, CUSTOM_NLP_API_URL } from '../services/customNLP';
 
 interface SettingsProps {
   onClose?: () => void;
@@ -113,6 +115,24 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const [backupEnabled, setBackupEnabled] = useState<boolean>(true);
   const [appVersion, setAppVersion] = useState<string>('1.0.0');
   const [showVersions, setShowVersions] = useState<boolean>(false);
+
+  // NLP Status
+  const [nlpStatus, setNlpStatus] = useState<{ status: string; model_loaded: boolean; device?: string } | null>(null);
+  const [checkingNlp, setCheckingNlp] = useState(false);
+
+  const checkNlpConnection = async () => {
+    setCheckingNlp(true);
+    const result = await checkCustomModelHealth();
+    setNlpStatus(result);
+    setCheckingNlp(false);
+  };
+
+  useEffect(() => {
+    // Check on load if system tab active? Or just when requested.
+    if (activeSection === 'system') {
+      checkNlpConnection();
+    }
+  }, [activeSection]);
 
   // Synchronize state when user context changes
   useEffect(() => {
@@ -542,6 +562,48 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
           </div>
 
+          {/* Custom NLP Connection Status */}
+          <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${nlpStatus?.status === 'ok' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="block text-xs text-gray-500 dark:text-slate-300">Custom NLP Service</span>
+                  <span className="block text-sm font-bold text-gray-900 dark:text-white">
+                    {CUSTOM_NLP_API_URL}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={checkNlpConnection}
+                disabled={checkingNlp}
+                className="px-3 py-1 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                {checkingNlp ? 'Checking...' : 'Check Connection'}
+              </button>
+            </div>
+
+            {nlpStatus && (
+              <div className="mt-2 text-xs flex items-center gap-4">
+                <span className={`px-2 py-0.5 rounded-full ${nlpStatus.status === 'ok' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  Status: {nlpStatus.status}
+                </span>
+                {nlpStatus.status === 'ok' && (
+                  <>
+                    <span className={`px-2 py-0.5 rounded-full ${nlpStatus.model_loaded ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      Model Loaded: {nlpStatus.model_loaded ? 'Yes' : 'No'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-300">
+                      Device: {nlpStatus.device || 'N/A'}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 flex items-center gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
               <HardDrive className="w-5 h-5" />
@@ -563,7 +625,6 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
           </div>
         </div>
       </div>
-
       {/* Danger Zone Section */}
       <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">Xóa tất cả dữ liệu</h3>

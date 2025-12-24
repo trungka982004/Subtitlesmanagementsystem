@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { SubtitleFile, SubtitleEntry } from '../types';
 import { Download, Sparkles, Globe, Clock, Save, CheckCircle2 } from 'lucide-react';
 import { translateText } from '../services/libreTranslate';
+import { translateWithCustomModel } from '../services/customNLP';
 
 interface SubtitleEditorProps {
   file: SubtitleFile;
@@ -73,12 +74,22 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
         setIsTranslating(false);
       }
     } else {
-      // Mock NLP
-      setTimeout(() => {
-        const updated = editedEntries.map(entry => {
-          if (entry.nlpTranslation) return entry;
-          return { ...entry, nlpTranslation: `[NLP] ${entry.text}` };
+      // Real NLP Translation using Python Service
+      try {
+        const translationPromises = editedEntries.map(async (entry) => {
+          // If already has NLP trans, ensure it's selected
+          if (entry.nlpTranslation) return { ...entry, translation: entry.nlpTranslation };
+
+          try {
+            const translated = await translateWithCustomModel(entry.text);
+            return { ...entry, nlpTranslation: translated, translation: translated };
+          } catch (e) {
+            console.error(`Failed to translate entry ${entry.id}`, e);
+            return entry;
+          }
         });
+
+        const updated = await Promise.all(translationPromises);
 
         // Update stats (NLP also contributes to progress now)
         const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
@@ -89,9 +100,12 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
         const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
 
         setEditedEntries(updated);
-        onUpdate({ ...file, entries: updated, progress, status }); // Include progress update for NLP
+        onUpdate({ ...file, entries: updated, progress, status });
         setIsTranslating(false);
-      }, 1000);
+      } catch (error) {
+        console.error("NLP Translation failed", error);
+        setIsTranslating(false);
+      }
     }
   };
 

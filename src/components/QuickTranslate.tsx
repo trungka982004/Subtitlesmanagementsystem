@@ -14,6 +14,7 @@ import { Switch } from './ui/switch'; // Assuming these exist, if not I will fal
 // I'll use native inputs with the same classes as `Textarea` or `SelectTrigger`.
 import { useTranslation } from '../hooks/useTranslation';
 import { translateText } from '../services/libreTranslate';
+import { translateWithCustomModel } from '../services/customNLP';
 
 export function QuickTranslate() {
   const { t } = useTranslation();
@@ -67,20 +68,30 @@ export function QuickTranslate() {
     if (!sourceText.trim() || !contentType || !relationship || !translationStyle) return;
 
     setIsTranslating(true);
+    setGoogleResult(''); // Clear previous results
+    setNlpResult('');
 
     try {
-      // Call LibreTranslate API
-      const translatedText = await translateText(sourceText, 'vi', 'auto'); // Defaulting to Vietnamese as per context
-      setGoogleResult(translatedText);
+      // 1. Call LibreTranslate API (Parallel)
+      const googlePromise = translateText(sourceText, 'vi', 'auto')
+        .then(res => setGoogleResult(res))
+        .catch(err => {
+          console.error("LibreTranslate failed", err);
+          setGoogleResult("Translation failed. Please check if LibreTranslate is running.");
+        });
 
-      // Mock Custom NLP Model result (placeholder)
-      // When integrating real API: Pass sourceText, contentType, relationship, and additionalContext to your custom NLP model
-      const selectedStyle = genres.find(g => g.value === translationStyle)?.label || 'Chưa chọn';
-      const contextInfo = `Loại: ${contentTypes.find(ct => ct.value === contentType)?.label}, Phong cách: ${selectedStyle}, Mối quan hệ: ${relationships.find(r => r.value === relationship)?.label}`;
-      setNlpResult(`Kết quả từ Custom NLP Model sẽ xuất hiện tại đây khi tích hợp API.\n\nNgữ cảnh đã chọn: ${contextInfo}\n${additionalContext ? `\nThông tin bổ sung: ${additionalContext}` : ''}\n\nBản dịch này sẽ được tối ưu hóa dựa trên ngữ cảnh và mối quan hệ giữa các nhân vật.`);
+      // 2. Call Custom NLP Model (Parallel)
+      const nlpPromise = translateWithCustomModel(sourceText)
+        .then(res => setNlpResult(res))
+        .catch(err => {
+          console.error("Custom NLP failed", err);
+          setNlpResult("Translation failed. Please check Custom NLP Service status in Settings.");
+        });
+
+      await Promise.all([googlePromise, nlpPromise]);
+
     } catch (error) {
-      console.error("Translation failed", error);
-      setGoogleResult("Translation failed. Please check if LibreTranslate is running at http://localhost:5000");
+      console.error("Translation process error", error);
     } finally {
       setIsTranslating(false);
     }
