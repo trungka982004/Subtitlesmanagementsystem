@@ -38,7 +38,32 @@ export async function translateWithCustomModel(
     }
 }
 
-export async function checkCustomModelHealth(): Promise<{ status: string; model_loaded: boolean; device?: string }> {
+export async function getModelVersions(): Promise<{ available_versions: string[]; current_version: string | null }> {
+    try {
+        const response = await fetch(`${CUSTOM_NLP_API_URL}/versions`);
+        if (response.ok) {
+            return await response.json();
+        }
+        return { available_versions: [], current_version: null };
+    } catch (e) {
+        console.error("Error fetching model versions:", e);
+        return { available_versions: [], current_version: null };
+    }
+}
+
+export async function setModelVersion(version: string): Promise<{ status: string; current_version: string }> {
+    const response = await fetch(`${CUSTOM_NLP_API_URL}/set_version`, {
+        method: "POST",
+        body: JSON.stringify({ version }),
+        headers: { "Content-Type": "application/json" }
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to set version: ${response.statusText}`);
+    }
+    return await response.json();
+}
+
+export async function checkCustomModelHealth(): Promise<{ status: string; model_loaded: boolean; device?: string; current_version?: string }> {
     try {
         const response = await fetch(`${CUSTOM_NLP_API_URL}/health`);
         if (response.ok) {

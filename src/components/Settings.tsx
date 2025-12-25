@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTranslation } from '../hooks/useTranslation';
-import { checkCustomModelHealth, CUSTOM_NLP_API_URL } from '../services/customNLP';
+import { checkCustomModelHealth, CUSTOM_NLP_API_URL, getModelVersions, setModelVersion } from '../services/customNLP';
 
 interface SettingsProps {
   onClose?: () => void;
@@ -120,17 +120,40 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const [nlpStatus, setNlpStatus] = useState<{ status: string; model_loaded: boolean; device?: string } | null>(null);
   const [checkingNlp, setCheckingNlp] = useState(false);
 
-  const checkNlpConnection = async () => {
+  // Model versions state
+  const [modelVersionsList, setModelVersionsList] = useState<{ id: string; date: string; note: string; current: boolean }[]>([]);
+
+  const fetchModelInfo = async () => {
     setCheckingNlp(true);
-    const result = await checkCustomModelHealth();
-    setNlpStatus(result);
+
+    // 1. Check health and current version
+    const statusResult = await checkCustomModelHealth();
+    setNlpStatus(statusResult);
+
+    // 2. Fetch available versions
+    const versionsData = await getModelVersions();
+
+    if (versionsData) {
+      // Current loaded version
+      const currentVer = statusResult.current_version || versionsData.current_version || 'Unknown';
+      setAppVersion(currentVer); // Repurposing appVersion to track current model version
+
+      // Map to UI format
+      const mappedVersions = versionsData.available_versions.map(v => ({
+        id: v,
+        date: new Date().toISOString().split('T')[0], // Use current date for now
+        note: v === 'v1.0' ? 'Stable Release' : v === 'v2.0' ? 'New Improved Model' : 'Custom Model',
+        current: v === currentVer
+      }));
+      setModelVersionsList(mappedVersions);
+    }
+
     setCheckingNlp(false);
   };
 
   useEffect(() => {
-    // Check on load if system tab active? Or just when requested.
     if (activeSection === 'system') {
-      checkNlpConnection();
+      fetchModelInfo();
     }
   }, [activeSection]);
 
@@ -508,7 +531,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                 <div>
                   <p className="text-sm text-gray-500 dark:text-slate-300">{t('version')}</p>
                   <div className="flex items-center gap-2">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">v{appVersion}</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">v{appVersion.replace(/^v/, '')}</p>
                     <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
                       Stable
                     </span>
@@ -523,12 +546,20 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-top-2">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Version History</p>
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
-                  {availableVersions.map((ver) => (
+                  {modelVersionsList.map((ver) => (
                     <button
                       key={ver.id}
-                      onClick={() => {
-                        setAppVersion(ver.id);
-                        setShowVersions(false);
+                      onClick={async () => {
+                        try {
+                          setCheckingNlp(true);
+                          await setModelVersion(ver.id);
+                          // Refresh info to confirm switch
+                          await fetchModelInfo();
+                          setShowVersions(false);
+                        } catch (err) {
+                          alert("Failed to switch version");
+                          setCheckingNlp(false);
+                        }
                       }}
                       className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all ${appVersion === ver.id
                         ? 'bg-white dark:bg-slate-900 border-blue-500 ring-1 ring-blue-500 shadow-sm'
@@ -537,7 +568,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                     >
                       <div className="text-left">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium ${appVersion === ver.id ? 'text-blue-600 dark:text-blue-400' : ''}`}>v{ver.id}</span>
+                          <span className={`font-medium ${appVersion === ver.id ? 'text-blue-600 dark:text-blue-400' : ''}`}>v{ver.id.replace(/^v/, '')}</span>
                           {ver.current && <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-500 rounded border border-gray-200 dark:border-slate-700">Latest</span>}
                         </div>
                         <p className="text-xs text-gray-400 mt-0.5">{ver.date} • {ver.note}</p>
@@ -556,7 +587,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
             <div>
               <span className="block text-xs text-gray-500 dark:text-slate-300">{t('translationModel')}</span>
-              <span className="block text-base font-bold text-gray-900 dark:text-white">VietSub-Custom (Latest)</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-white">VietSub-Custom ({appVersion})</span>
             </div>
           </div>
 
@@ -575,7 +606,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                 </div>
               </div>
               <button
-                onClick={checkNlpConnection}
+                onClick={fetchModelInfo}
                 disabled={checkingNlp}
                 className="px-3 py-1 text-xs bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
