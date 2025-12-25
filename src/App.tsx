@@ -327,13 +327,14 @@ function AppContent({
               )}
 
               {activeTab !== 'manage' && (
-                <div className="max-w-7xl mx-auto space-y-6">
+                <div className="max-w-[1600px] mx-auto space-y-6">
                   {activeTab === 'upload' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <SubtitleUploader
                         onFileUpload={handleFileUpload}
                         projects={projects}
                         onCreateProject={handleCreateProject}
+                        files={subtitleFiles}
                       />
                       <div style={{ marginTop: '2rem' }}>
                         <ProjectDashboard

@@ -44,6 +44,7 @@ export const translations = {
     dragAndDrop: 'hoặc kéo thả',
     maxFileSize: 'Kích thước file tối đa 50 MB',
     attachFiles: 'Đính kèm file',
+    createProjectDesc: 'Tạo dự án mới để tổ chức các file phụ đề của bạn cùng nhau.',
 
     // Project Dashboard
     overview: 'Tổng quan',
@@ -298,6 +299,7 @@ export const translations = {
     dragAndDrop: 'or drag and drop',
     maxFileSize: 'Maximum file size 50 MB',
     attachFiles: 'Attach files',
+    createProjectDesc: 'Create a new project to organize your subtitle files together.',
 
     // Project Dashboard
     overview: 'Overview',
@@ -552,6 +554,7 @@ export const translations = {
     dragAndDrop: '或拖放',
     maxFileSize: '最大文件大小 50 MB',
     attachFiles: '附加文件',
+    createProjectDesc: '创建一个新项目以整理您的字幕文件。',
 
     // Project Dashboard
     overview: '概览',
