@@ -2,153 +2,278 @@
 ## Subtitles Management System
 
 ### 1. System Overview
-The **Subtitles Management System** is a full-stack web application designed to help users manage, edit, and translate subtitle files. Key features include project organization, user authentication, and a specialized integration with a custom local NLP model for automated translation (specifically optimized for Chinese-Vietnamese translation).
+The **Subtitles Management System** is a full-stack web application designed to facilitate the translation, editing, and management of subtitle files. It addresses the need for a specialized tool that combines project management with advanced, domain-specific machine learning capabilities.
 
-### 2. Architecture Overview
-The system follows a microservices-inspired architecture with a decoupled frontend and two distinct backend services:
+**Key Capabilities:**
+*   **Project Management**: Organize subtitle files into distinct projects.
+*   **User Management**: Secure authentication and user-specific data isolation.
+*   **Automated Translation**: Integration with a local Python/FastAPI service running custom NLP models (Chinese-Vietnamese).
+*   **Hot-Swappable AI Models**: Unique capability to switch underlying translation models at runtime without downtime.
 
-1.  **Frontend**: A Single Page Application (SPA) built with React.
-2.  **Core Backend**: A Node.js/Express REST API handling business logic, data persistence, and authentication.
-3.  **NLP Service**: A Python/FastAPI service dedicated to running heavy machine learning inference tasks.
+### 2. Architecture Design
+The system employs a **Microservices-Lite** architecture. It consists of three decoupled components communicating over HTTP.
 
-#### High-Level Architecture
+#### 2.1 Communication Flow
+1.  **Client (React)**: Initiates all user interactions.
+2.  **API Gateway / Core Backend (Node.js)**: Acts as the primary entry point for business logic, data persistence, and authentication.
+3.  **Inference Engine (Python)**: A dedicated stateless service processing heavy computational tasks (NLP).
+
+#### 2.2 System Diagram
 ```mermaid
 graph TD
-    Client[React Frontend] -->|REST API / 3001| Node[Node.js Backend]
-    Client -->|REST API / 8000| Python[Python NLP Service]
+    subgraph Frontend
+        SPA[React SPA]
+    end
+
+    subgraph Backend Services
+        NodeAPI[Node.js Express API]
+        PythonAPI[Python FastAPI Inference]
+    end
+
+    subgraph Persistence layer
+        PG[(PostgreSQL Database)]
+        LocalStorage[Local File System]
+    end
+
+    SPA -->|HTTP / JSON| NodeAPI
+    SPA -->|HTTP / JSON| PythonAPI
     
-    Node -->|ORM| DB[(PostgreSQL Database)]
-    Python -->|Load| Models[Local ML Models]
+    NodeAPI -->|Prisma Client| PG
+    PythonAPI -->|transformers| LocalStorage
 ```
 
-### 3. Technology Stack
+### 3. Core System Models
+To better understand the system's behavior and user interactions, the following diagrams detail the core logical flows.
 
-#### Frontend
-*   **Framework**: React 18 (via Vite)
-*   **Language**: TypeScript
-*   **Styling**: Tailwind CSS, PostCSS
-*   **UI Components**: Radix UI (Headless), Shadcn UI (Component logic), Lucide React (Icons)
-*   **State Management**: React Context API, React Hook Form
-*   **Utilities**: `clsx`, `tailwind-merge`
+#### 3.1 Use Case Diagram
+This diagram outlines the primary actors and their interactions with the major system components.
 
-#### Core Backend (API)
-*   **Runtime**: Node.js
-*   **Framework**: Express.js
-*   **Language**: TypeScript (`tsx` for execution)
-*   **Database**: PostgreSQL
-*   **ORM**: Prisma
-*   **Authentication**: JSON Web Tokens (JWT), bcryptjs
-*   **Security**: CORS
-
-#### NLP Backend (AI Service)
-*   **Framework**: FastAPI
-*   **Language**: Python 3.x
-*   **ML Libraries**: PyTorch, Hugging Face Transformers (`AutoModelForSeq2SeqLM`)
-*   **Server**: Uvicorn
-*   **Features**: Dynamic model loading, GPU acceleration support (CUDA)
-
-### 4. Database Schema
-The database is managed via Prisma. The Data Model consists of three main entities:
-
-**User**
-*   `id`: UUID
-*   `email`: Unique identifier
-*   `password`: Hashed
-*   `projects`: Relation to Projects
-
-**Project**
-*   `id`: UUID
-*   `name`, `description`
-*   `userId`: Foreign Key to User
-*   `files`: Relation to SubtitleFiles
-
-**SubtitleFile**
-*   `id`: UUID
-*   `name`: Filename
-*   `content`: Text content (Subtitles)
-*   `status`: 'not-started', 'in-progress', 'done'
-*   `progress`: Integer (0-100)
-*   `projectId`: Foreign Key to Project
-
-### 5. Services & API Reference
-
-#### Core Backend (`server/index.ts`)
-*   **Auth**: `/api/auth/register`, `/api/auth/login`, `/api/auth/me`
-*   **Users**: `/api/users` (CRUD)
-*   **Projects**: `/api/projects` (Manage user projects)
-*   **Files**: `/api/files` (Upload and manage subtitle content)
-
-#### NLP Service (`server/python_service/main.py`)
-*   **Translation**: `POST /translate` - Accepts text, returns translated string using loaded model.
-*   **Versioning**: 
-    *   `GET /versions`: List available local model versions.
-    *   `POST /set_version`: Hot-swap the active model.
-*   **Health**: `GET /health` - Checks model status and device (CPU/CUDA).
-
-### 6. Codebase Structure
-
-```
-/
-├── prisma/                  # Database schema and migrations
-├── scripts/                 # Utility scripts
-├── server/
-│   ├── index.ts             # Node.js Express entry point
-│   └── python_service/      # Python FastAPI application
-│       ├── main.py          # FastAPI entry point
-│       ├── model/           # Legacy model path
-│       └── versions/        # Versioned model storage
-├── src/
-│   ├── components/          # React UI components
-│   ├── contexts/            # Global state (AuthContext, etc.)
-│   ├── hooks/               # Custom React hooks
-│   ├── services/            # API clients (customNLP.ts, etc.)
-│   └── i18n/                # Internationalization logic
-├── .env                     # Environment variables
-├── package.json             # NPM dependencies
-└── vite.config.ts           # Vite configuration
+```mermaid
+usecaseDiagram
+    actor U as "User"
+    package "Subtitles Management System" {
+        usecase "Register / Login" as UC1
+        usecase "Create & Manage Projects" as UC2
+        usecase "Upload Subtitle File (.srt)" as UC3
+        usecase "Edit Subtitle Content" as UC4
+        usecase "Translate Text (AI)" as UC5
+        usecase "Switch AI Model Version" as UC6
+        usecase "Export / Download" as UC7
+    }
+    U --> UC1
+    U --> UC2
+    U --> UC3
+    U --> UC4
+    U --> UC5
+    U --> UC6
+    U --> UC7
 ```
 
-### 7. Key Features Implementation
+#### 3.2 Activity Diagram: Translation Workflow
+The detailed flow of how a user interacts with the system to translate a specific line of text.
 
-#### Model Versioning
-The system implements a dynamic model versioning system. 
-1.  **Storage**: Models are stored in `server/python_service/versions/`.
-2.  **Discovery**: The Python service scans this directory using `os` and `glob`.
-3.  **Selection**: The frontend fetches available versions via `src/services/customNLP.ts` and allows the user to switch versions in real-time via the Settings page.
+```mermaid
+flowchart TD
+    Start([Start]) --> Login[User Logs In]
+    Login --> SelectProj[Open Project]
+    SelectProj --> SelectFile[Select Subtitle File]
+    SelectFile --> EditView[Enter Editor Mode]
+    EditView --> SelectLine[Select Subtitle Line]
+    
+    SelectLine --> ReqTrans{Request Translation?}
+    ReqTrans -- Yes --> CheckHealth[Check AI Service Health]
+    
+    CheckHealth -- Online --> CallAI[POST /translate to Python Service]
+    CheckHealth -- Offline --> Err[Show Error Toast]
+    
+    CallAI --> Inf[Model Inference (GPU/CPU)]
+    Inf --> Ret[Return Translated Text]
+    Ret --> UpdateUI[Populate suggestion in UI]
+    UpdateUI --> UserReview[User Reviews & Edits]
+    
+    UserReview --> Save{Save Changes?}
+    Save -- Yes --> CallNode[PUT /api/files to Node Backend]
+    CallNode --> DB[(Update Database)]
+    DB --> Notify[Show "Saved" Notification]
+    Notify --> EditView
+    
+    Save -- No --> EditView
+    ReqTrans -- No --> EditView
+```
 
-#### Authentication Flow
-1.  User logs in via Frontend.
-2.  Backend issues a JWT (expires in 7 days).
-3.  Frontend stores JWT in localStorage (or memory via Context).
-4.  Subsequent requests to Node Backend include `Authorization: Bearer <token>`.
-5.  Middleware in `server/index.ts` validates the token before granting access to protected routes (Projects, Files).
+#### 3.3 Sequence Diagram: Real-time Translation
+This diagram illustrates the sequence of network calls between the Client, Core Backend, and the AI Inference Service during a translation task. Note that the Client communicates **directly** with the Python Service for inference to reduce latency on the Core Backend.
 
-### 8. Running the System
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Client as React Client
+    participant Node as Node.js API
+    participant DB as PostgreSQL
+    participant Python as Python NLP Service
 
-**Prerequisites**: Node.js, Python 3.8+, PostgreSQL.
+    note over User, Client: Translation Phase
+    User->>Client: Clicks "Translate" button
+    Client->>Python: POST /translate { text: "Hello..." }
+    activate Python
+    Python->>Python: Pre-processing (Tokenization)
+    Python->>Python: Model Inference (Seq2Seq)
+    Python->>Python: Post-processing (Decoding)
+    Python-->>Client: { translated_text: "Xin chào..." }
+    deactivate Python
+    Client->>User: Displays suggested text
+    
+    note over User, Client: Persistence Phase
+    User->>Client: Modifies text & Clicks "Save"
+    Client->>Node: PUT /api/files/:id { content: "...", status: "in-progress" }
+    activate Node
+    Node->>Node: Validate Token (JWT)
+    Node->>DB: UPDATE SubtitleFile...
+    activate DB
+    DB-->>Node: Success
+    deactivate DB
+    Node-->>Client: 200 OK { updatedFile }
+    deactivate Node
+    Client->>User: Show "Changes Saved" Toast
+```
 
-1.  **Database**:
-    ```bash
-    npx prisma generate
-    npx prisma db push
-    ```
+### 4. Technology Stack
 
-2.  **Node Backend**:
-    ```bash
-    npm run server
-    # Runs at http://localhost:3001
-    ```
+| Layer | Technology | Key Libraries | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Frontend** | React 18 (Vite) | `react-hook-form`, `sonner`, `lucide-react` | UI/UX, State Management |
+| **Styling** | Tailwind CSS | `clsx`, `tailwind-merge`, `radix-ui` | Responsive, accessible design |
+| **Core Backend** | Node.js / Express | `prisma`, `jsonwebtoken`, `bcryptjs` | Business logic, DB operations |
+| **AI Service** | Python 3.8+ / FastAPI | `torch`, `transformers`, `uvicorn` | ML Inference, GPU acceleration |
+| **Database** | PostgreSQL | `prisma` | Relational data storage |
 
-3.  **Python NLP Service**:
-    ```bash
-    cd server/python_service
-    # Install requirements: pip install -r requirements.txt
-    python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    # Runs at http://localhost:8000
-    ```
+### 5. Database Schema
+Managed via **Prisma ORM**. The schema is normalized (3NF) to ensure data integrity.
 
-4.  **Frontend**:
-    ```bash
-    npm run dev
-    # Runs at http://localhost:5173 (default Vite port)
-    ```
+#### **User**
+| Field | Type | Attributes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | PK, default(uuid) | Unique user ID |
+| `email` | String | Unique | User login credential |
+| `password` | String | | Bcrypt hashed string |
+| `name` | String | Optional | Display name |
+
+#### **Project**
+| Field | Type | Attributes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | PK, default(uuid) | Unique project ID |
+| `name` | String | | Project title |
+| `description` | String | Optional | Project details |
+| `userId` | UUID | FK | Owner of the project |
+| `createdAt` | DateTime | default(now) | Timestamp |
+
+#### **SubtitleFile**
+| Field | Type | Attributes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | PK, default(uuid) | Unique file ID |
+| `name` | String | | Original filename |
+| `content` | Text | | Raw subtitle text content |
+| `status` | Enum | default('not-started') | `not-started`, `in-progress`, `done` |
+| `progress` | Int | default(0) | Completion percentage (0-100) |
+| `projectId` | UUID | FK, Nullable | Associated project |
+
+### 6. API Usage Specifications
+
+#### 6.1 Authentication (Node.js)
+Base URL: `http://localhost:3001/api`
+
+*   **POST /auth/register**
+    *   **Body**: `{ "email": "user@example.com", "password": "securePass123", "name": "John Doe" }`
+    *   **Response**: `{ "token": "jwt_string...", "user": { ... } }`
+*   **POST /auth/login**
+    *   **Body**: `{ "email": "user@example.com", "password": "securePass123" }`
+    *   **Response**: `{ "token": "jwt_string...", "user": { ... } }`
+*   **GET /auth/me**
+    *   **Header**: `Authorization: Bearer <token>`
+    *   **Response**: User profile object.
+
+#### 6.2 Projects & Files (Node.js)
+*   **GET /projects**: List all projects for authenticated user.
+*   **POST /projects**: Create new project. Body: `{ "name": "Movie A", "description": "..." }`.
+*   **POST /files**: Upload file content. Body: `{ "name": "subs.srt", "content": "1\n00:01...", "projectId": "..." }`.
+*   **PUT /files/:id**: Update file content/status. Body: `{ "content": "Updated...", "status": "in-progress" }`.
+
+#### 6.3 NLP Service (Python)
+Base URL: `http://localhost:8000`
+
+*   **POST /translate**
+    *   **Body**: `{ "text": "Hello world" }`
+    *   **Response**: `{ "translated_text": "Chào thế giới" }`
+*   **GET /versions**: List available local models.
+*   **POST /set_version**: Hot-swap model. Body: `{ "version": "v1.2_beta" }`.
+*   **GET /health**: Returns `{ "status": "ok", "device": "cuda" }`.
+
+### 7. Security Implementation
+1.  **JWT Authentication**: Stateless authentication mechanism. Tokens expire in 7 days.
+2.  **Password Hashing**: Bcrypt with salt rounds (default 10) for secure storage.
+3.  **CORS**: Configured on both Node.js and Python servers to allow frontend communication.
+4.  **Authorization**: Middleware ensures users can only access their own projects/files via `userId` checks.
+
+### 8. Deployment & DevOps Strategy
+
+#### Docker Deployment (Recommended)
+A `docker-compose.yml` orchestration is recommended for production.
+
+```yaml
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+  api:
+    build: ./server
+    environment:
+      DATABASE_URL: postgres://postgres:${DB_PASSWORD}@db:5432/mydb
+  nlp-service:
+    build: ./server/python_service
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+  web:
+    build: ./
+    ports:
+      - "80:80"
+```
+
+#### Environment Variables (.env)
+Create a `.env` file in the root directory:
+```bash
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/subtitle_db"
+
+# Auth
+JWT_SECRET="complex_random_string_here"
+
+# Server Port
+PORT=3001
+```
+
+### 9. Development Workflow
+
+1.  **Setup Phase**:
+    *   Install Node dependencies: `npm install`
+    *   Install Python dependencies: `pip install -r server/python_service/requirements.txt`
+    *   Start Postgres database.
+2.  **Migration Phase**:
+    *   Run `npx prisma generate` to create client.
+    *   Run `npx prisma db push` to sync schema.
+3.  **Run Phase**:
+    *   Start Backend: `npm run server`
+    *   Start NLP Service: `cd server/python_service && python -m uvicorn main:app --reload`
+    *   Start Frontend: `npm run dev`
+
+### 10. Future Enhancements Roadmap
+*   **Message Queues (Redis/RabbitMQ)**: Decouple the translation request loop to handle long documents asynchronously without timing out HTTP requests.
+*   **WebSockets**: Implement real-time progress bars for file processing.
+*   **Batch Processing**: Allow bulk upload and translation of multiple files.
+*   **Unit & Integration Tests**: Add `Jest` for backend testing and `Vitest` for frontend components.
+
