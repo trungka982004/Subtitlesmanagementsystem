@@ -69,6 +69,68 @@ usecaseDiagram
     U --> UC7
 ```
 
+#### 3.1.1 Core Use Case Specifications
+
+The following tables describe the detailed interactions for the core system functionalities identified in the Use Case Diagram.
+
+**UC1: Register / Login**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User |
+| **Preconditions** | User must have a valid email address. for Login, user must be registered. |
+| **Main Flow** | 1. User navigates to Auth page.<br>2. User enters credentials (email, password).<br>3. System validates input format.<br>4. System verifies credentials against Database.<br>5. System issues a JWT token and redirects to Dashboard. |
+| **Alternative Flows** | **Invalid Credentials**: System displays error message; user retries.<br>**Server Error**: System displays generic error message. |
+| **Postconditions** | User is authenticated and session is stored locally. |
+
+**UC2: Create & Manage Projects**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User |
+| **Preconditions** | User is logged in. |
+| **Main Flow** | 1. User clicks "New Project" on Dashboard.<br>2. User inputs Project Name and Description.<br>3. User submits the form.<br>4. System creates record in `Project` table.<br>5. System refreshes project list. |
+| **Postconditions** | A new project container is available for file uploads. |
+
+**UC3: Upload Subtitle File**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User |
+| **Preconditions** | User has selected a specific Project. |
+| **Main Flow** | 1. User clicks "Upload File".<br>2. User selects a `.srt` file from local machine.<br>3. Frontend reads file content.<br>4. Content is sent to Node.js Backend.<br>5. Backend parses and saves content to `SubtitleFile` table. |
+| **Postconditions** | Subtitle file is visible in the project and ready for editing. |
+
+**UC4: Edit Subtitle Content**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User |
+| **Preconditions** | User has opened a Subtitle File. |
+| **Main Flow** | 1. User selects a timeline block.<br>2. User modifies the text content.<br>3. User saves changes (Manual or Auto-save).<br>4. System updates the specific record in Database. |
+| **Postconditions** | The subtitle file content is permanently updated. |
+
+**UC5: Translate Text (AI)**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User, AI Inference Service |
+| **Preconditions** | Python Inference Service is healthy (`/health` returns OK). |
+| **Main Flow** | 1. User selects a subtitle line to translate.<br>2. User clicks "AI Translate" or uses shortcut.<br>3. Client sends text to Python Service (`POST /translate`).<br>4. Python Service runs inference and returns text.<br>5. UI displays suggestion for user approval. |
+| **Alternative Flows** | **Service Offline**: UI shows "AI Service Unavailable" notification. |
+| **Postconditions** | User has a translated text suggestion to merge or edit. |
+
+**UC6: Switch AI Model Version**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User (Admin) |
+| **Preconditions** | Multiple model versions exist in backend storage. |
+| **Main Flow** | 1. User navigates to Settings > System Info.<br>2. System lists available versions from Python Service.<br>3. User selects a different version.<br>4. Python Service unloads current model and loads new one.<br>5. System confirms "Model Loaded". |
+| **Postconditions** | Subsequent translations use the newly selected model weights. |
+
+**UC7: Export / Download**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User |
+| **Preconditions** | Editing is complete. |
+| **Main Flow** | 1. User clicks "Export" in Editor.<br>2. System reconstructs `.srt` format from database content.<br>3. Browser triggers file download of the updated subtitle file. |
+| **Postconditions** | User possesses the modified `.srt` file locally. |
+
 #### 3.2 Activity Diagram: Translation Workflow
 The detailed flow of how a user interacts with the system to translate a specific line of text.
 
