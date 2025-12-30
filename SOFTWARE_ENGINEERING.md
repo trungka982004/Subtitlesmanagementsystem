@@ -48,25 +48,81 @@ To better understand the system's behavior and user interactions, the following 
 #### 3.1 Use Case Diagram
 This diagram outlines the primary actors and their interactions with the major system components.
 
-```mermaid
-usecaseDiagram
-    actor U as "User"
-    package "Subtitles Management System" {
-        usecase "Register / Login" as UC1
-        usecase "Create & Manage Projects" as UC2
-        usecase "Upload Subtitle File (.srt)" as UC3
-        usecase "Edit Subtitle Content" as UC4
-        usecase "Translate Text (AI)" as UC5
-        usecase "Switch AI Model Version" as UC6
-        usecase "Export / Download" as UC7
-    }
-    U --> UC1
-    U --> UC2
-    U --> UC3
-    U --> UC4
-    U --> UC5
-    U --> UC6
-    U --> UC7
+```plantuml
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "User" as U
+actor "AI Inference Service" as AI
+actor "PostgreSQL Database" as DB
+actor "Local File System" as FS
+
+package "User Management" {
+    usecase "Register/Login" as UC1
+}
+
+package "Project Workspace" {
+    usecase "Create New Project" as UC2_1
+    usecase "Delete Project" as UC2_3
+    usecase "Move Files to Project" as UC2_4
+}
+
+package "Subtitle Processing" {
+    usecase "Upload and Parse .srt" as UC3_1
+    usecase "Analyze Subtitles (Stats/Gaps)" as UC3_3
+    usecase "Export .srt File" as UC7_1
+}
+
+package "Editor & Translation" {
+    usecase "Edit Subtitle Text" as UC4_1
+    usecase "Save Changes" as UC4_2
+    usecase "Request AI Translation (Libre/NLP)" as UC5_1
+    usecase "Run Inference" as UC5_2
+    usecase "Apply Translation" as UC5_3
+}
+
+package "System Configuration" {
+    usecase "Switch AI Model Version" as UC6_1
+    usecase "Check System Health" as UC6_2
+}
+
+' User Management
+U --> UC1
+UC1 --> DB
+
+' Project
+U --> UC2_1
+U --> UC2_3
+U --> UC2_4
+UC2_1 --> DB
+UC2_3 --> DB
+UC2_4 --> DB
+
+' Subtitling
+U --> UC3_1
+UC3_1 --> DB : Persist
+U --> UC3_3
+U --> UC7_1
+UC7_1 --> DB : Fetch
+
+' Editor
+U --> UC4_1
+U --> UC4_2
+UC4_2 --> DB
+U --> UC5_1
+UC5_1 ..> UC5_2 : <<include>>
+UC5_2 -- AI
+UC5_1 ..> UC5_3 : <<include>>
+UC5_3 --> DB
+
+' Config
+U --> UC6_1
+U --> UC6_2
+UC6_1 -- AI
+AI --> FS
+UC6_2 -- AI
+@enduml
 ```
 
 #### 3.1.1 Core Use Case Specifications
@@ -130,6 +186,14 @@ The following tables describe the detailed interactions for the core system func
 | **Preconditions** | Editing is complete. |
 | **Main Flow** | 1. User clicks "Export" in Editor.<br>2. System reconstructs `.srt` format from database content.<br>3. Browser triggers file download of the updated subtitle file. |
 | **Postconditions** | User possesses the modified `.srt` file locally. |
+
+**UC8: Analyze Subtitle Statistics**
+| Attribute | Description |
+| :--- | :--- |
+| **Actors** | User |
+| **Preconditions** | A subtitle file is selected in the Workspace/Analysis view. |
+| **Main Flow** | 1. User navigates to Analysis tab/view.<br>2. System calculates metrics (Total duration, Char count, Reading speed).<br>3. System identifies issues (Gaps > 2s, Reading speed > 20cps).<br>4. System displays visualizations (Charts, Issue lists). |
+| **Postconditions** | User is informed of potential quality issues in the subtitle file. |
 
 #### 3.2 Activity Diagram: Translation Workflow
 The detailed flow of how a user interacts with the system to translate a specific line of text.

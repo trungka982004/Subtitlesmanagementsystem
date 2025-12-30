@@ -142,17 +142,11 @@ export function Auth() {
                 </form>
 
                 <div className="social-auth">
-                    <p className="social-title">
-                        {isLogin ? t('orSignInUsing') : t('orSignUpUsing')}
-                    </p>
 
-                    <div className="social-icons">
-                        <button type="button" className="social-btn google">G</button>
-                    </div>
 
                     <div className="toggle-auth">
                         <p className="toggle-label">
-                            {isLogin ? t('orSignUpUsing') : t('haveAccount')}
+                            {isLogin ? t('dontHaveAccount') : t('haveAccount')}
                         </p>
                         <button
                             onClick={() => setIsLogin(!isLogin)}

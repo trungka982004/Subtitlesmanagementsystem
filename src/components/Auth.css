@@ -192,55 +192,7 @@
     text-align: center;
 }
 
-.social-title {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #bbb;
-    margin-bottom: 25px;
-}
 
-.social-icons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 40px;
-}
-
-.social-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.social-btn:hover {
-    transform: scale(1.1);
-}
-
-.facebook {
-    background: #3b5998;
-    font-weight: 900;
-    font-size: 18px;
-}
-
-.twitter {
-    background: #1da1f2;
-}
-
-.google {
-    background: #ea4335;
-    font-weight: bold;
-    font-size: 18px;
-}
 
 .toggle-auth {
     text-align: center;
