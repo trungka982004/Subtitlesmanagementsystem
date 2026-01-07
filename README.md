@@ -1,8 +1,6 @@
 
   # Subtitles Management System
 
-  This is a code bundle for Subtitles Management System. The original project is available at https://www.figma.com/design/9dtCgLMxOrL0rSvvzweDf8/Subtitles-Management-System.
-
 ## Running the code
 
   **Prerequisites:**
