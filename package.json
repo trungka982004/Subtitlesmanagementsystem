@@ -1,5 +1,5 @@
 {
-      "name": "Subtitles Management System",
+      "name": "subtitles-management-system",
       "version": "0.1.0",
       "private": true,
       "dependencies": {
@@ -64,11 +64,14 @@
             "prisma": "^5.22.0",
             "ts-node": "^10.9.2",
             "tsx": "^4.21.0",
-            "vite": "6.3.5"
+            "vite": "6.3.5",
+            "concurrently": "^8.2.2"
       },
       "scripts": {
             "dev": "vite",
             "build": "vite build",
-            "server": "tsx server/index.ts"
+            "server": "tsx server/index.ts",
+            "seed": "tsx scripts/seed_all.ts",
+            "start:all": "concurrently \"npm run server\" \"npm run dev\" \"python scripts/mock_libretranslate.py\" \"cd server/python_service && python main.py\""
       }
 }

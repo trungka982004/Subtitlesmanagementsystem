@@ -4,8 +4,8 @@ This project now integrates a custom NLP model (Chinese -> Vietnamese) using a P
 
 ## Prerequisites
 - Python 3.8+ installed.
-- Dependencies installed: `pip install -r server/python_service/requirements.txt` (Already done)
-- Model files placed in `server/python_service/model` (Already done)
+- Dependencies installed: `pip install -r server/python_service/requirements.txt`
+- Model files placed in `server/python_service/model` or `server/python_service/versions`.
 
 ## How to Start
 You must start the Python backend for the translation features to work.

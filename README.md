@@ -1,43 +1,90 @@
 
   # Subtitles Management System
 
-  This is a code bundle for Subtitles Management System. The original project is available at https://www.figma.com/design/9dtCgLMxOrL0rSvvzweDf8/Subtitles-Management-System.
+A comprehensive system for managing and translating subtitles with a custom NLP integration.
 
-## Running the code
+## 🚀 Quick Start (Windows)
 
-  **Prerequisites:**
-  - Run `npm i` to install the dependencies.
+If you are on a new Windows device, you can use the automated scripts:
 
-  **Initial Start:**
-  1. **Backend:** Run `npm run server` to start the backend server.
-  2. **Mock Translator:** Open a new terminal and run `python scripts/mock_libretranslate.py` for the LibreTranslate mock server.
-  3. **Custom NLP Model:** Double-click `start_nlp.bat` OR run `python -m uvicorn main:app --port 8000` in `server/python_service`. (See `README_NLP.md` for details).
-  4. **Frontend:** Open a new terminal and run `npm run dev` to start the development server.
+1.  **Environment**: Copy `.env.example` to `.env` and fill in your `DATABASE_URL`.
+2.  **Setup**: Double-click `setup_app.bat`. This installs all Node/Python dependencies and sets up your database.
+3.  **Run**: Double-click `start_all.bat`. This starts all services in a single terminal.
 
-  ## Stopping and Restarting the Application
-  
-  ### To Close the Application:
-  1. Go to your terminal(s) where the servers are running.
-  2. Press `Ctrl + C` in each terminal tab or window to stop the running processes.
-  3. Close the browser tab.
+---
 
-  ### To Reopen the Application:
-  1. Open your terminal or command prompt in the project directory.
-  2. **Start the Backend:**
-     Run `npm run server`
-  3. **Start the Translation Mock Server:**
-     Open a new terminal tab/window and run `python scripts/mock_libretranslate.py`
-  4. **Start the Custom NLP Service:**
-     Double-click `start_nlp.bat` script in the root directory.
-  5. **Start the Frontend:**
-     Open another new terminal tab/window and run `npm run dev`
-  6. Open your browser and navigate to the URL shown in the frontend terminal (usually `http://localhost:5173`).
+## Table of Contents
+1. [Prerequisites](#prerequisites)
+2. [Installation & Setup](#installation--setup)
+3. [Running the Application](#running-the-application)
+4. [Mock Accounts](#mock-accounts)
+5. [Troubleshooting](#troubleshooting)
 
-  ## Mock account
-  User 1:
-  - Email: john@example.com
-  - Password: password123
+---
 
-  User 2:
-  - Email: trung@example.com
-  - Password: 123456
+## Prerequisites
+
+Ensure you have the following installed on your device:
+- **Node.js** (v18+)
+- **PostgreSQL** (Ensure a database is created)
+- **Python** (3.8+)
+- **Git**
+
+---
+
+## Installation & Setup (Manual)
+
+### 1. Clone & Install Node Dependencies
+```bash
+npm install
+```
+
+### 2. Environment Configuration
+Update `.env` with your PostgreSQL credentials.
+
+### 3. Database Setup
+```bash
+npx prisma generate
+npx prisma db push
+npm run seed
+```
+
+### 4. NLP Service Setup (Python)
+```bash
+pip install -r server/python_service/requirements.txt
+```
+
+---
+
+## Running the Application
+
+### Unified Start (Recommended)
+```bash
+npm run start:all
+```
+
+### Individual Processes
+If you prefer running them in separate terminals:
+1. **Backend:** `npm run server`
+2. **Frontend:** `npm run dev`
+3. **Mock Translator:** `python scripts/mock_libretranslate.py`
+4. **NLP Service:** `cd server/python_service && python main.py`
+
+---
+
+## Mock Accounts
+
+Use these pre-seeded accounts:
+- **John:** `john@example.com` / `password123`
+- **Trung:** `trung@example.com` / `123456`
+- **Admin:** `admin@example.com` / `password`
+
+---
+
+## Troubleshooting
+
+- **Database Connection:** Ensure your PostgreSQL server is running and the database specified in `.env` exists.
+- **Python Path:** Ensure `python` is in your System PATH.
+- **Ports:** Check if ports 3000, 3001, 3002, and 8000 are available.
+- **Large Files:** The NLP model files (~300MB) are too large for standard GitHub tracking. If you fetch this project and the `server/python_service/model` folder is empty, you must manually copy the model files from your original device.
+
