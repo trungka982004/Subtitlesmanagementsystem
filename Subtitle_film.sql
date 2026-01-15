@@ -2,8 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict f2ZF3DXHUAqW2bQY3nlk8PsR4A39VlY57kVN8YdfJ0TqdcS4XaWbZLK8yDSljjq
-
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
 
@@ -182,6 +180,3 @@ ALTER TABLE ONLY public."SubtitleFile"
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict f2ZF3DXHUAqW2bQY3nlk8PsR4A39VlY57kVN8YdfJ0TqdcS4XaWbZLK8yDSljjq
-

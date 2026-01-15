@@ -4,8 +4,13 @@ export interface SubtitleEntry {
     endTime: string;
     text: string;
     translation?: string;
-    googleTranslation?: string;
-    nlpTranslation?: string;
+    libreTranslation?: string;
+    opusTranslation?: string;
+    mbartTranslation?: string;
+    nllbTranslation?: string;
+    googleTranslation?: string; // Kept for backward compatibility
+    nlpTranslation?: string; // Kept for backward compatibility
+    selectedModel?: 'libre' | 'opus' | 'mbart' | 'nllb' | 'google' | 'nlp';
 }
 
 export interface Project {

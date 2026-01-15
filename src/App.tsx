@@ -3,17 +3,18 @@ import { db } from './services/db';
 import { SubtitleUploader } from './components/SubtitleUploader';
 import { serializeEntriesToJSON } from './utils/srt';
 import { SubtitleEditor } from './components/SubtitleEditor';
+import { FileHorizontalSelector } from './components/FileHorizontalSelector';
 import { SubtitleAnalysis } from './components/SubtitleAnalysis';
 import { QuickTranslate } from './components/QuickTranslate';
 import { Sidebar } from './components/Sidebar';
 import { ProjectDashboard } from './components/ProjectDashboard';
 import { Settings } from './components/Settings';
-import { SettingsProvider } from './contexts/SettingsContext';
+import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Auth } from './components/Auth';
 import { SubtitleEntry, Project, SubtitleFile } from './types';
 import './App.css';
-import { FileText, Settings as SettingsIcon, LogOut, Menu, X } from 'lucide-react';
+import { FileText, Settings as SettingsIcon, LogOut, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from './hooks/useTranslation';
 
 export default function App() {
@@ -165,7 +166,10 @@ function AppContent({
   setIsMobileMenuOpen
 }: any) {
   const { user, isLoading } = useAuth();
+  const { theme } = useSettings();
+  const isDark = theme === 'dark';
   const { t } = useTranslation();
+  const [showAllFiles, setShowAllFiles] = useState(false);
 
   // Helper to get tab title
   const getTabTitle = () => {
@@ -222,7 +226,7 @@ function AppContent({
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
+    <div className={`flex min-h-screen w-full font-sans transition-colors duration-300 ${isDark ? 'bg-slate-950 text-slate-200' : 'bg-slate-50 text-slate-900'}`}>
       <div className="flex flex-1 min-h-0">
         {/* Mobile Sidebar Overlay */}
         {isMobileMenuOpen && (
@@ -245,14 +249,15 @@ function AppContent({
         </div>
 
         {/* Main Content Area - This container now handles scrolling for the 'covering' effect */}
-        <div className="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-slate-950 overflow-y-auto relative h-screen transition-colors duration-300">
+        <div className={`flex-1 flex flex-col min-w-0 overflow-y-auto relative h-screen transition-colors duration-300 ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
           {/* Header - Part of the page workspace (right of sidebar) */}
-          <header className="sticky top-0 w-full px-8 py-6 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0 z-[100] shadow-sm transition-colors duration-300">
+          <header className={`sticky top-0 w-full px-8 py-6 backdrop-blur-md border-b flex items-center justify-center shrink-0 z-[100] shadow-sm transition-colors duration-300 ${isDark ? 'bg-slate-950/80 border-white/10' : 'bg-white/80 border-slate-200'
+            }`}>
             <div className="flex flex-col items-center">
-              <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3">
+              <h1 className={`text-3xl font-black tracking-tight flex items-center gap-3 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
                 <span className="text-blue-600">Sino-Viet Subtitle Studio</span>
                 <span className="text-slate-300 font-light mx-1">|</span>
-                <span className="text-slate-500 font-light">
+                <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>
                   {getTabTitle()}
                 </span>
               </h1>
@@ -263,63 +268,30 @@ function AppContent({
           </header>
 
           {/* Workspace Area */}
-          <main className="flex-1 p-4 lg:p-8 scroll-smooth">
-            <div className="mx-auto w-full">
+          <main className={`flex-1 p-0 overflow-hidden flex flex-col h-full transition-colors duration-300 ${isDark ? 'bg-[#0f172a]' : 'bg-slate-50'}`}>
+            <div className="mx-auto w-full h-full flex flex-col">
               {activeTab === 'manage' && (
-                <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in zoom-in-95 duration-300" style={{ height: '82vh', minHeight: '600px' }}>
-                  {/* File List Sidebar - Constrained on mobile, full-height on desktop */}
-                  <div className="w-full lg:w-72 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-white/10 flex flex-col shrink-0 shadow-sm overflow-hidden h-[300px] lg:h-full transition-colors duration-300">
-                    <div className="p-4 border-b border-gray-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900">
-                      <h3 className="font-bold text-slate-700 dark:text-slate-200 text-sm uppercase tracking-wide flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-slate-400" />
-                        {t('projectFiles')}
-                      </h3>
-                    </div>
-                    <div className="p-2 space-y-1 bg-slate-50 dark:bg-slate-950 overflow-y-auto flex-1 custom-scrollbar">
-                      {subtitleFiles.length === 0 ? (
-                        <div className="p-8 text-center text-slate-400 text-sm italic">
-                          {t('noFilesFound')}
-                        </div>
-                      ) : (
-                        subtitleFiles.map((file: any) => (
-                          <button
-                            key={file.id}
-                            onClick={() => handleFileSelect(file)}
-                            className={`w-full text-left px-4 py-3 rounded-md text-base transition-all duration-200 border group ${selectedFile?.id === file.id
-                              ? 'bg-blue-600/10 dark:bg-blue-600 text-blue-700 dark:text-white border-blue-200 dark:border-blue-500 shadow-sm'
-                              : 'bg-white dark:bg-slate-900 border-transparent text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:border-gray-200 dark:hover:border-white/10 hover:shadow-sm'
-                              }`}
-                          >
-                            <div className="text-lg font-bold font-mono tracking-tight truncate mb-1">{file.name}</div>
-                            <div className="flex justify-between items-center text-xs">
-                              <span className={`font-medium ${selectedFile?.id === file.id ? 'text-blue-500' : 'text-slate-400'}`}>
-                                {file.entries?.length || 0} {t('lines')}
-                              </span>
-                              {file.status === 'done' && <span className="w-2 h-2 rounded-full bg-green-500"></span>}
-                              {file.status === 'in-progress' && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
+                <div className="flex flex-col w-full h-full">
+                  {/* Horizontal File Slider */}
+                  <FileHorizontalSelector
+                    files={subtitleFiles}
+                    selectedFileId={selectedFile?.id}
+                    onSelectFile={handleFileSelect}
+                  />
 
-                  {/* Editor Area - Always takes remaining space */}
-                  <div className="w-full lg:flex-1 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-white/10 shadow-sm flex flex-col relative overflow-hidden flex-1 lg:h-full transition-colors duration-300">
+                  {/* Main Editor Area */}
+                  <div className="flex-1 overflow-hidden relative">
                     {selectedFile ? (
-                      <div className="w-full flex flex-col overflow-hidden h-full">
-                        <SubtitleEditor
-                          file={selectedFile}
-                          onUpdate={handleUpdateFile}
-                        />
-                      </div>
+                      <SubtitleEditor
+                        file={selectedFile}
+                        onUpdate={handleUpdateFile}
+                      />
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-slate-500 min-h-[400px]">
-                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700">
-                          <FileText className="w-8 h-8 text-slate-300 dark:text-slate-500" />
+                      <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                        <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-700">
+                          <FileText className="w-8 h-8 text-slate-600" />
                         </div>
-                        <h3 className="font-bold text-lg text-slate-700">{t('selectFileTitle')}</h3>
-                        <p className="text-slate-400 text-sm mt-1">{t('selectFileDesc')}</p>
+                        <h3 className="font-bold text-lg text-slate-400">Select a file from above</h3>
                       </div>
                     )}
                   </div>
@@ -327,7 +299,7 @@ function AppContent({
               )}
 
               {activeTab !== 'manage' && (
-                <div className="max-w-[1600px] mx-auto space-y-6">
+                <div className="p-8 h-full overflow-y-auto custom-scrollbar">
                   {activeTab === 'upload' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <SubtitleUploader

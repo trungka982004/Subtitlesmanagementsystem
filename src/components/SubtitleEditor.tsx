@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { SubtitleFile, SubtitleEntry } from '../types';
-import { Download, Sparkles, Globe, Clock, Save, CheckCircle2 } from 'lucide-react';
+import { Download, Sparkles, Globe, Clock, Save, ArrowRight, Video, FileText, CheckCircle2, RefreshCw } from 'lucide-react';
 import { translateText } from '../services/libreTranslate';
-import { translateWithCustomModel } from '../services/customNLP';
+import { fetchMockTranslations } from '../services/mockTranslationService';
+import { TranslationCard } from './ui/TranslationCard';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface SubtitleEditorProps {
   file: SubtitleFile;
@@ -10,6 +12,8 @@ interface SubtitleEditorProps {
 }
 
 export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
+  const { theme } = useSettings();
+  const isDark = theme === 'dark';
   const [editedEntries, setEditedEntries] = useState<SubtitleEntry[]>(file.entries);
   const [isTranslating, setIsTranslating] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -19,290 +23,273 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     setEditedEntries(file.entries);
   }, [file.id, file.entries]);
 
-  // Update the translation when user types or selects a suggestion
-  const handleTranslationChange = (id: number, translation: string) => {
-    const updated = editedEntries.map(entry =>
-      entry.id === id ? { ...entry, translation } : entry
-    );
+  const handleModelSelection = (id: number, model: 'libre' | 'opus' | 'mbart' | 'nllb', text: string) => {
+    const updated = editedEntries.map(entry => {
+      if (entry.id === id) {
+        return {
+          ...entry,
+          translation: text,
+          selectedModel: model,
+          // Update specific model field if selection happens (though usually pre-filled)
+          [model === 'libre' ? 'libreTranslation' : `${model}Translation`]: text
+        };
+      }
+      return entry;
+    });
+
+    updateFileState(updated);
+  };
+
+  const handleTextEdit = (id: number, model: 'libre' | 'opus' | 'mbart' | 'nllb', newText: string) => {
+    const updated = editedEntries.map(entry => {
+      if (entry.id === id) {
+        const fieldName = model === 'libre' ? 'libreTranslation' : `${model}Translation`;
+        return {
+          ...entry,
+          [fieldName]: newText,
+          // If this model was already selected, update the main translation too
+          ...(entry.selectedModel === model ? { translation: newText } : {})
+        };
+      }
+      return entry;
+    });
     setEditedEntries(updated);
+    // We don't necessarily autosave on every keystroke/blur, but let's keep local state fresh
+  };
 
-    // Calculate progress (Split 50/50 between models)
-    const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
-    const googleCount = updated.filter(e => e.googleTranslation).length;
-    const nlpCount = updated.filter(e => e.nlpTranslation).length;
-    const progress = updated.length > 0 ? Math.round(((googleCount / updated.length) * 50) + ((nlpCount / updated.length) * 50)) : 0;
+  const updateFileState = (updatedEntries: SubtitleEntry[]) => {
+    setEditedEntries(updatedEntries);
 
+    // Calculate progress
+    const completedCount = updatedEntries.filter(e => e.selectedModel).length;
+    const progress = updatedEntries.length > 0 ? Math.round((completedCount / updatedEntries.length) * 100) : 0;
     const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
 
     // Propagate up
-    onUpdate({ ...file, entries: updated, progress, status });
+    onUpdate({ ...file, entries: updatedEntries, progress, status });
   };
 
-  const applySuggestion = (id: number, text: string) => {
-    handleTranslationChange(id, text);
-  };
-
-  const handleAutoTranslate = async (type: 'google' | 'nlp') => {
+  const handleGenerateAll = async () => {
     setIsTranslating(true);
-
-    if (type === 'google') {
-      try {
-        const translationPromises = editedEntries.map(async (entry) => {
-          // If already has google trans, ensure it's selected
-          if (entry.googleTranslation) return { ...entry, translation: entry.googleTranslation };
-
-          // Otherwise fetch new
-          const translated = await translateText(entry.text, 'vi', 'auto');
-          return { ...entry, googleTranslation: translated, translation: translated };
-        });
-
-        const updated = await Promise.all(translationPromises);
-
-        // Update stats
-        const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
-        const googleCount = updated.filter(e => e.googleTranslation).length;
-        const nlpCount = updated.filter(e => e.nlpTranslation).length;
-        const progress = updated.length > 0 ? Math.round(((googleCount / updated.length) * 50) + ((nlpCount / updated.length) * 50)) : 0;
-
-        const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
-
-        setEditedEntries(updated);
-        onUpdate({ ...file, entries: updated, progress, status });
-      } catch (error) {
-        console.error("Translation failed", error);
-      } finally {
-        setIsTranslating(false);
-      }
-    } else {
-      // Real NLP Translation using Python Service
-      try {
-        const translationPromises = editedEntries.map(async (entry) => {
-          // If already has NLP trans, ensure it's selected
-          if (entry.nlpTranslation) return { ...entry, translation: entry.nlpTranslation };
-
+    try {
+      // Parallelize requests per segment for demo speed (in prod, queueing might be better)
+      const promises = editedEntries.map(async (entry) => {
+        // 1. Fetch LibreTranslate (Real)
+        // If already exists, skip
+        let libreText = entry.libreTranslation || entry.googleTranslation;
+        if (!libreText) {
           try {
-            const translated = await translateWithCustomModel(entry.text);
-            return { ...entry, nlpTranslation: translated, translation: translated };
+            libreText = await translateText(entry.text, 'vi', 'auto');
           } catch (e) {
-            console.error(`Failed to translate entry ${entry.id}`, e);
-            return entry;
+            console.error("Libre failed", e);
           }
-        });
+        }
 
-        const updated = await Promise.all(translationPromises);
+        // 2. Fetch Mock Models (Opus, MBART, NLLB)
+        let opusText = entry.opusTranslation;
+        let mbartText = entry.mbartTranslation || entry.nlpTranslation; // Map old nlp to mbart
+        let nllbText = entry.nllbTranslation;
 
-        // Update stats (NLP also contributes to progress now)
-        const translatedCount = updated.filter(e => e.translation && e.translation.trim().length > 0).length;
-        const googleCount = updated.filter(e => e.googleTranslation).length;
-        const nlpCount = updated.filter(e => e.nlpTranslation).length;
-        const progress = updated.length > 0 ? Math.round(((googleCount / updated.length) * 50) + ((nlpCount / updated.length) * 50)) : 0;
+        if (!opusText || !mbartText || !nllbText) {
+          try {
+            const mocks = await fetchMockTranslations(entry.text);
+            if (!opusText) opusText = mocks.translations.opus;
+            if (!mbartText) mbartText = mocks.translations.mbart;
+            if (!nllbText) nllbText = mocks.translations.nllb;
+          } catch (e) {
+            console.error("Mock fetch failed", e);
+          }
+        }
 
-        const status = progress === 100 ? 'done' : progress > 0 ? 'in-progress' : 'not-started';
+        return {
+          ...entry,
+          libreTranslation: libreText,
+          opusTranslation: opusText,
+          mbartTranslation: mbartText,
+          nllbTranslation: nllbText
+        };
+      });
 
-        setEditedEntries(updated);
-        onUpdate({ ...file, entries: updated, progress, status });
-        setIsTranslating(false);
-      } catch (error) {
-        console.error("NLP Translation failed", error);
-        setIsTranslating(false);
-      }
+      const updated = await Promise.all(promises);
+      updateFileState(updated);
+
+    } catch (error) {
+      console.error("Batch generation failed", error);
+    } finally {
+      setIsTranslating(false);
     }
   };
 
-  const handleExport = (translationType: 'target' | 'source') => {
+  const handleExport = () => {
     let srtContent = '';
     editedEntries.forEach(entry => {
       srtContent += `${entry.id}\n`;
       srtContent += `${entry.startTime} --> ${entry.endTime}\n`;
-      if (translationType === 'target') {
-        srtContent += `${entry.translation || ''}\n\n`;
-      } else {
-        srtContent += `${entry.text}\n\n`;
-      }
+      srtContent += `${entry.translation || ''}\n\n`;
     });
 
     const blob = new Blob([srtContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = file.name.replace('.srt', `_${translationType}.srt`);
+    a.download = file.name.replace('.srt', '_final.srt');
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const timeToSeconds = (time: string): number => {
-    const parts = time.split(':');
-    const hours = parseInt(parts[0]);
-    const minutes = parseInt(parts[1]);
-    const secondsParts = parts[2].split(',');
-    const seconds = parseInt(secondsParts[0]);
-    const milliseconds = parseInt(secondsParts[1]) || 0;
-    return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
+  const completedCount = editedEntries.filter(e => e.selectedModel).length;
+
+  // Dummy scores for now
+  const getDummyScore = (model: string) => {
+    // deterministic random based on model name strings length
+    return 90 + (model.length % 9);
+  };
+  const getDummyLatency = (model: string) => {
+    return 100 + (model.length * 15);
   };
 
-  // Stats (Main Render)
-  const translatedCount = editedEntries.filter(e => e.translation && e.translation.trim().length > 0).length;
-  const googleCount = editedEntries.filter(e => e.googleTranslation).length;
-  const nlpCount = editedEntries.filter(e => e.nlpTranslation).length;
-  // Progress split 50/50
-  const progressPercentage = editedEntries.length > 0 ? Math.round(((googleCount / editedEntries.length) * 50) + ((nlpCount / editedEntries.length) * 50)) : 0;
-
-
-  // Helper for Duration Bar
-  const maxDuration = 10; // Assume 10s is a "long" line for visual scaling cap
-
   return (
-    <div className="flex flex-col w-full h-full bg-[#1e293b] font-sans rounded-b-lg overflow-hidden">
-
+    <div className={`flex flex-col w-full h-full font-sans overflow-hidden transition-colors duration-300 ${isDark ? 'bg-[#0f172a]' : 'bg-slate-50'
+      }`}>
       {/* 1. Slim Header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700 bg-[#1e293b] z-20 w-full shadow-lg shrink-0">
+      <div className={`flex items-center justify-between px-6 py-3 border-b z-20 w-full shadow-sm shrink-0 h-14 ${isDark ? 'bg-[#0f172a] border-slate-800' : 'bg-white border-gray-200'
+        }`}>
         <div className="flex items-center gap-4">
-          <h2 className="font-semibold text-slate-100">{file.name}</h2>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400">SRT</span>
-            <span className={`px-2 py-0.5 rounded font-medium ${progressPercentage === 100
-              ? 'bg-green-900/30 text-green-400 border border-green-500/30'
-              : 'bg-blue-900/30 text-blue-400 border border-blue-500/30'
-              }`}>
-              {progressPercentage}%
-            </span>
-            <span className="text-slate-500">
-              {translatedCount}/{editedEntries.length}
+          {/* Filename & Progress */}
+          <div className="flex items-center gap-3">
+            <h2 className={`text-sm font-bold truncate max-w-[200px] ${isDark ? 'text-slate-200' : 'text-slate-700'
+              }`} title={file.name}>
+              {file.name}
+            </h2>
+            <div className={`h-4 w-px ${isDark ? 'bg-slate-700' : 'bg-slate-300'}`}></div>
+            <span className={`text-xs font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {completedCount}/{editedEntries.length} segments
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-[#0f172a] rounded-lg shadow-sm border border-slate-700 p-1 gap-1 ml-2">
-            <span className="text-[10px] uppercase font-bold text-slate-500 px-2 tracking-wider">Model:</span>
-            <button
-              onClick={() => handleAutoTranslate('google')}
-              disabled={isTranslating}
-              className="px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700 rounded-md disabled:opacity-50 transition-all flex items-center gap-2 border border-transparent hover:border-slate-600"
-            >
-              <Globe className="w-3.5 h-3.5 text-blue-500" />
-              <span>Libre</span>
-            </button>
-            <div className="w-px h-4 bg-slate-700 mx-1"></div>
-            <button
-              onClick={() => handleAutoTranslate('nlp')}
-              disabled={isTranslating}
-              className="px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700 rounded-md disabled:opacity-50 transition-all flex items-center gap-2 border border-transparent hover:border-slate-600"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-purple-500" />
-              <span>NLP</span>
-            </button>
-          </div>
+          <button
+            onClick={handleGenerateAll}
+            disabled={isTranslating}
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all disabled:opacity-50 border ${isDark
+              ? 'text-slate-200 bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 hover:border-blue-500/50'
+              : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200 hover:border-blue-300'
+              }`}
+          >
+            {isTranslating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />}
+            <span>Generate All</span>
+          </button>
 
           <button
-            onClick={() => handleExport('target')}
-            className="p-2 text-slate-400 hover:bg-slate-700 rounded transition-colors" title="Export"
+            onClick={handleExport}
+            disabled={completedCount === 0}
+            className={`hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all disabled:opacity-50 border ${isDark
+              ? 'text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-slate-700'
+              : 'text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-50 border-slate-200'
+              }`}
           >
-            <Download className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onUpdate({ ...file, status: 'done', progress: 100 })}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded shadow-sm transition-colors"
-          >
-            <Save className="w-3 h-3" /> Save
+            <Download className="w-3.5 h-3.5" /> Export
           </button>
         </div>
       </div>
 
-      {/* 2. Distinct Column Headers */}
-      <div className="flex gap-4 px-4 py-2 border-b border-slate-700 text-xs font-bold uppercase tracking-wider bg-[#1e293b] shadow-md w-full shrink-0">
-        <div style={{ flex: 2 }} className="px-4 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg border border-slate-200 dark:border-slate-700 font-extrabold tracking-tight">
-          Source Text
-        </div>
-        <div style={{ flex: 5 }} className="px-4 py-3 bg-green-600 text-white rounded-lg border border-green-500 shadow-sm font-bold">
-          LibreTranslate (Machine)
-        </div>
-        <div style={{ flex: 5 }} className="px-4 py-3 bg-purple-600 text-white rounded-lg border border-purple-500 shadow-sm font-bold">
-          NLP Model (Advanced)
-        </div>
-      </div>
-
-      {/* 3. Main List Content */}
+      {/* 2. Main List Content */}
       <div
         ref={scrollContainerRef}
-        className="w-full bg-[#1e293b] custom-scrollbar overflow-y-auto"
-        style={{ flex: 1 }}
+        className={`flex-1 overflow-y-auto p-4 lg:p-6 space-y-8 custom-scrollbar scroll-smooth ${isDark ? 'bg-[#0f172a]' : 'bg-slate-50'
+          }`}
       >
-        {editedEntries.map((entry) => {
-          const isGoogleSelected = entry.translation === entry.googleTranslation && !!entry.googleTranslation;
-          const isNlpSelected = entry.translation === entry.nlpTranslation && !!entry.nlpTranslation;
-
-          return (
-            <div key={entry.id} className="flex gap-4 px-4 py-4 border-b border-slate-800 min-h-[100px] hover:bg-slate-800/30 transition-colors w-full">
-
-              {/* Col 1: Source (White -> Dark) */}
-              <div style={{ flex: 2 }} className="p-4 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 flex flex-col gap-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mb-1">
-                  <span className="font-bold">#{entry.id}</span>
-                  <span>{entry.startTime}</span>
-                </div>
-                <p className="leading-relaxed whitespace-pre-wrap font-medium">
-                  {entry.text}
-                </p>
-              </div>
-
-              {/* Col 2: LibreTranslate (Green) */}
-              <div
-                style={{ flex: 5 }}
-                onClick={() => entry.googleTranslation && handleTranslationChange(entry.id, entry.googleTranslation)}
-                className={`p-4 text-sm transition-all relative flex flex-col rounded-lg border
-                    ${isGoogleSelected
-                    ? 'bg-green-900/20 border-green-500 ring-1 ring-green-500 shadow-sm cursor-pointer'
-                    : entry.googleTranslation
-                      ? 'bg-green-900/10 border-green-500/20 hover:bg-green-900/30 cursor-pointer'
-                      : 'bg-slate-800/20 border-slate-700/50 cursor-default'
-                  }
-                `}
-              >
-                {isGoogleSelected && (
-                  <div className="absolute top-2 right-2 text-green-400">
-                    <CheckCircle2 className="w-5 h-5 fill-green-900/50" />
-                  </div>
-                )}
-
-                <p className={`leading-relaxed whitespace-pre-wrap flex-1 mt-1 ${isGoogleSelected
-                  ? 'text-green-300 font-medium'
-                  : 'text-slate-300'
-                  }`}>
-                  {entry.googleTranslation || <span className="text-slate-600 italic">No translation available</span>}
-                </p>
-              </div>
-
-              {/* Col 3: NLP Model (Purple) */}
-              <div
-                style={{ flex: 5 }}
-                onClick={() => entry.nlpTranslation && handleTranslationChange(entry.id, entry.nlpTranslation)}
-                className={`p-4 text-sm transition-all relative flex flex-col rounded-lg border
-                    ${isNlpSelected
-                    ? 'bg-purple-900/20 border-purple-500 ring-1 ring-purple-500 shadow-sm cursor-pointer'
-                    : entry.nlpTranslation
-                      ? 'bg-purple-900/10 border-purple-500/20 hover:bg-purple-900/30 cursor-pointer'
-                      : 'bg-slate-800/20 border-slate-700/50 cursor-default'
-                  }
-                `}
-              >
-                {isNlpSelected && (
-                  <div className="absolute top-2 right-2 text-purple-400">
-                    <CheckCircle2 className="w-5 h-5 fill-purple-900/50" />
-                  </div>
-                )}
-
-                <p className={`leading-relaxed whitespace-pre-wrap flex-1 mt-1 ${isNlpSelected
-                  ? 'text-purple-300 font-medium'
-                  : 'text-slate-300'
-                  }`}>
-                  {entry.nlpTranslation || <span className="text-slate-600 italic">No translation available</span>}
-                </p>
-              </div>
-
+        {editedEntries.map((entry) => (
+          <div key={entry.id} className="group relative flex flex-col gap-4 max-w-5xl mx-auto">
+            {/* Segment Header */}
+            <div className={`flex items-baseline gap-3 select-none ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
+              <span className={`text-sm font-bold font-mono ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>#{entry.id}</span>
+              <span className={`text-xs font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{entry.startTime} → {entry.endTime}</span>
             </div>
-          )
-        })}
+
+            {/* Source Text - Full Width & Darker */}
+            <div className={`w-full p-4 rounded-lg border transition-colors ${isDark
+              ? 'bg-[#1e293b]/50 border-slate-800 hover:border-slate-700'
+              : 'bg-slate-100 border-slate-200 hover:border-slate-300'
+              }`}>
+              <p className={`text-base leading-relaxed font-medium font-serif ${isDark ? 'text-slate-300' : 'text-slate-700'
+                }`}>
+                {entry.text}
+              </p>
+            </div>
+
+            {/* Translation Grid - Strictly 2x2 on Large Screens */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Row 1: Libre (TL) & Opus (TR) */}
+              <div className="h-full">
+                <TranslationCard
+                  modelName="LibreTranslate"
+                  translation={entry.libreTranslation || entry.googleTranslation}
+                  isLoading={isTranslating}
+                  isSelected={entry.selectedModel === 'libre'}
+                  onSelect={() => handleModelSelection(entry.id, 'libre', entry.libreTranslation || entry.googleTranslation || '')}
+                  onEdit={(val) => handleTextEdit(entry.id, 'libre', val)}
+                  colorClass="border-blue-500 bg-blue-50 dark:bg-blue-500/5"
+                  badgeColor="bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                  latency={getDummyLatency('LibreTranslate')}
+                  confidence={getDummyScore('LibreTranslate')}
+                />
+              </div>
+
+              <div className="h-full">
+                <TranslationCard
+                  modelName="Opus MT"
+                  translation={entry.opusTranslation}
+                  isLoading={isTranslating}
+                  isSelected={entry.selectedModel === 'opus'}
+                  onSelect={() => handleModelSelection(entry.id, 'opus', entry.opusTranslation || '')}
+                  onEdit={(val) => handleTextEdit(entry.id, 'opus', val)}
+                  colorClass="border-purple-500 bg-purple-50 dark:bg-purple-500/5"
+                  badgeColor="bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400"
+                  latency={getDummyLatency('Opus MT')}
+                  confidence={getDummyScore('Opus MT')}
+                />
+              </div>
+
+              {/* Row 2: MBART (BL) & NLLB (BR) */}
+              <div className="h-full">
+                <TranslationCard
+                  modelName="mBART-50"
+                  translation={entry.mbartTranslation || entry.nlpTranslation}
+                  isLoading={isTranslating}
+                  isSelected={entry.selectedModel === 'mbart'}
+                  onSelect={() => handleModelSelection(entry.id, 'mbart', entry.mbartTranslation || entry.nlpTranslation || '')}
+                  onEdit={(val) => handleTextEdit(entry.id, 'mbart', val)}
+                  colorClass="border-pink-500 bg-pink-50 dark:bg-pink-500/5"
+                  badgeColor="bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400"
+                  latency={getDummyLatency('mBART-50')}
+                  confidence={getDummyScore('mBART-50')}
+                />
+              </div>
+
+              <div className="h-full">
+                <TranslationCard
+                  modelName="NLLB-200"
+                  translation={entry.nllbTranslation}
+                  isLoading={isTranslating}
+                  isSelected={entry.selectedModel === 'nllb'}
+                  onSelect={() => handleModelSelection(entry.id, 'nllb', entry.nllbTranslation || '')}
+                  onEdit={(val) => handleTextEdit(entry.id, 'nllb', val)}
+                  colorClass="border-orange-500 bg-orange-50 dark:bg-orange-500/5"
+                  badgeColor="bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400"
+                  latency={getDummyLatency('NLLB-200')}
+                  confidence={getDummyScore('NLLB-200')}
+                />
+              </div>
+            </div>
+
+            {/* Spacer */}
+            <div className="h-px bg-slate-800/50 w-full mt-4 mb-2"></div>
+          </div>
+        ))}
+
+        <div className="h-20"></div>
       </div>
     </div>
   );
