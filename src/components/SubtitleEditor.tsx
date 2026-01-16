@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { SubtitleFile, SubtitleEntry } from '../types';
 import { Download, Sparkles, Globe, Clock, Save, ArrowRight, Video, FileText, CheckCircle2, RefreshCw } from 'lucide-react';
 import { translateText } from '../services/libreTranslate';
-import { fetchMockTranslations } from '../services/mockTranslationService';
+import { translateWithCustomModel, translateBatchWithCustomModel } from '../services/customNLP';
 import { TranslationCard } from './ui/TranslationCard';
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -16,6 +16,8 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   const isDark = theme === 'dark';
   const [editedEntries, setEditedEntries] = useState<SubtitleEntry[]>(file.entries);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [translationProgress, setTranslationProgress] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Sync state with props if file changes (e.g. switching files)
@@ -69,49 +71,116 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     onUpdate({ ...file, entries: updatedEntries, progress, status });
   };
 
+
+
+  // Helper to chunk array
+  const chunkArray = <T,>(array: T[], size: number): T[][] => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+  };
+
   const handleGenerateAll = async () => {
     setIsTranslating(true);
+    setTranslationProgress(0);
+    setShowSuccess(false);
+
+    let currentEntries = [...editedEntries];
+
+    // Calculate total operations to accurately show progress
+    // We run 4 passes: Libre, Opus, mBART, NLLB
+    // Only count entries that actually need translation
+    let totalOps = 0;
+    const opusIndices: number[] = [];
+    const mbartIndices: number[] = [];
+    const nllbIndices: number[] = [];
+
+    currentEntries.forEach((e, idx) => {
+      if (!e.libreTranslation && !e.googleTranslation) totalOps++;
+      if (!e.opusTranslation) { totalOps++; opusIndices.push(idx); }
+      if (!e.mbartTranslation && !e.nlpTranslation) { totalOps++; mbartIndices.push(idx); }
+      if (!e.nllbTranslation) { totalOps++; nllbIndices.push(idx); }
+    });
+
+    if (totalOps === 0) {
+      setIsTranslating(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      return;
+    }
+
+    let completedOps = 0;
+    const updateProgress = (increment: number = 1) => {
+      completedOps += increment;
+      setTranslationProgress(Math.min(Math.round((completedOps / totalOps) * 100), 99));
+    };
+
     try {
-      // Parallelize requests per segment for demo speed (in prod, queueing might be better)
-      const promises = editedEntries.map(async (entry) => {
-        // 1. Fetch LibreTranslate (Real)
-        // If already exists, skip
-        let libreText = entry.libreTranslation || entry.googleTranslation;
-        if (!libreText) {
+      // 1. Process LibreTranslate (External API - keep sequential/parallel for now as it's external)
+      const librePromises = currentEntries.map(async (entry, index) => {
+        if (!entry.libreTranslation && !entry.googleTranslation) {
           try {
-            libreText = await translateText(entry.text, 'vi', 'auto');
+            const text = await translateText(entry.text, 'vi', 'auto');
+            currentEntries[index] = { ...currentEntries[index], libreTranslation: text, libreError: undefined };
           } catch (e) {
             console.error("Libre failed", e);
+            currentEntries[index] = { ...currentEntries[index], libreError: "Failed" };
           }
+          updateProgress();
         }
-
-        // 2. Fetch Mock Models (Opus, MBART, NLLB)
-        let opusText = entry.opusTranslation;
-        let mbartText = entry.mbartTranslation || entry.nlpTranslation; // Map old nlp to mbart
-        let nllbText = entry.nllbTranslation;
-
-        if (!opusText || !mbartText || !nllbText) {
-          try {
-            const mocks = await fetchMockTranslations(entry.text);
-            if (!opusText) opusText = mocks.translations.opus;
-            if (!mbartText) mbartText = mocks.translations.mbart;
-            if (!nllbText) nllbText = mocks.translations.nllb;
-          } catch (e) {
-            console.error("Mock fetch failed", e);
-          }
-        }
-
-        return {
-          ...entry,
-          libreTranslation: libreText,
-          opusTranslation: opusText,
-          mbartTranslation: mbartText,
-          nllbTranslation: nllbText
-        };
       });
+      await Promise.all(librePromises);
+      setEditedEntries([...currentEntries]);
 
-      const updated = await Promise.all(promises);
-      updateFileState(updated);
+      // 2. Custom Models (Batch Processing)
+      const BATCH_SIZE = 32;
+
+      // Helper for batch processing
+      const processBatch = async (indices: number[], modelId: string, resultField: 'opusTranslation' | 'mbartTranslation' | 'nllbTranslation', errorField: 'opusError' | 'mbartError' | 'nllbError') => {
+        if (indices.length === 0) return;
+
+        const chunks = chunkArray(indices, BATCH_SIZE);
+
+        for (const chunk of chunks) {
+          const textsToTranslate = chunk.map(idx => currentEntries[idx].text);
+          try {
+            const translations = await translateBatchWithCustomModel(textsToTranslate, modelId);
+
+            // Update entries
+            chunk.forEach((entryIdx, i) => {
+              currentEntries[entryIdx] = {
+                ...currentEntries[entryIdx],
+                [resultField]: translations[i],
+                [errorField]: undefined
+              };
+            });
+          } catch (e) {
+            console.error(`${modelId} batch failed`, e);
+            // Mark entire batch as failed
+            chunk.forEach(entryIdx => {
+              currentEntries[entryIdx] = {
+                ...currentEntries[entryIdx],
+                [errorField]: "Failed"
+              };
+            });
+          }
+          // Update progress and state after each chunk
+          updateProgress(chunk.length);
+          setEditedEntries([...currentEntries]);
+        }
+      };
+
+      // Execute batches sequentially to manage VRAM
+      await processBatch(opusIndices, 'opus', 'opusTranslation', 'opusError');
+      await processBatch(mbartIndices, 'mbart', 'mbartTranslation', 'mbartError');
+      await processBatch(nllbIndices, 'nllb', 'nllbTranslation', 'nllbError');
+
+      updateFileState(currentEntries);
+      setTranslationProgress(100);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 5000);
 
     } catch (error) {
       console.error("Batch generation failed", error);
@@ -194,6 +263,29 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
         </div>
       </div>
 
+      {/* Progress Bar & Notifications */}
+      {isTranslating && (
+        <div className="w-full bg-blue-100 dark:bg-blue-900/20 h-1.5 relative overflow-hidden">
+          <div
+            className="absolute top-0 left-0 h-full bg-blue-600 dark:bg-blue-400 transition-all duration-300 ease-out"
+            style={{ width: `${translationProgress}%` }}
+          />
+        </div>
+      )}
+
+      {showSuccess && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2">
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border ${isDark ? 'bg-green-900/90 border-green-800 text-green-100' : 'bg-green-50 border-green-200 text-green-800'
+            }`}>
+            <CheckCircle2 className="w-5 h-5 text-green-500" />
+            <div>
+              <p className="font-semibold text-sm">Translation Complete</p>
+              <p className="text-xs opacity-90">All model translations generated successfully</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. Main List Content */}
       <div
         ref={scrollContainerRef}
@@ -226,7 +318,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 <TranslationCard
                   modelName="LibreTranslate"
                   translation={entry.libreTranslation || entry.googleTranslation}
-                  isLoading={isTranslating}
+                  isLoading={isTranslating && !entry.libreTranslation && !entry.googleTranslation}
                   isSelected={entry.selectedModel === 'libre'}
                   onSelect={() => handleModelSelection(entry.id, 'libre', entry.libreTranslation || entry.googleTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'libre', val)}
@@ -234,6 +326,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   badgeColor="bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400"
                   latency={getDummyLatency('LibreTranslate')}
                   confidence={getDummyScore('LibreTranslate')}
+                  errorMessage={entry.libreError}
                 />
               </div>
 
@@ -241,7 +334,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 <TranslationCard
                   modelName="Opus MT"
                   translation={entry.opusTranslation}
-                  isLoading={isTranslating}
+                  isLoading={isTranslating && !entry.opusTranslation && !entry.opusError}
                   isSelected={entry.selectedModel === 'opus'}
                   onSelect={() => handleModelSelection(entry.id, 'opus', entry.opusTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'opus', val)}
@@ -249,6 +342,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   badgeColor="bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400"
                   latency={getDummyLatency('Opus MT')}
                   confidence={getDummyScore('Opus MT')}
+                  errorMessage={entry.opusError}
                 />
               </div>
 
@@ -257,7 +351,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 <TranslationCard
                   modelName="mBART-50"
                   translation={entry.mbartTranslation || entry.nlpTranslation}
-                  isLoading={isTranslating}
+                  isLoading={isTranslating && !(entry.mbartTranslation || entry.nlpTranslation) && !entry.mbartError}
                   isSelected={entry.selectedModel === 'mbart'}
                   onSelect={() => handleModelSelection(entry.id, 'mbart', entry.mbartTranslation || entry.nlpTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'mbart', val)}
@@ -265,6 +359,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   badgeColor="bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400"
                   latency={getDummyLatency('mBART-50')}
                   confidence={getDummyScore('mBART-50')}
+                  errorMessage={entry.mbartError}
                 />
               </div>
 
@@ -272,7 +367,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                 <TranslationCard
                   modelName="NLLB-200"
                   translation={entry.nllbTranslation}
-                  isLoading={isTranslating}
+                  isLoading={isTranslating && !entry.nllbTranslation && !entry.nllbError}
                   isSelected={entry.selectedModel === 'nllb'}
                   onSelect={() => handleModelSelection(entry.id, 'nllb', entry.nllbTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'nllb', val)}
@@ -280,6 +375,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   badgeColor="bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400"
                   latency={getDummyLatency('NLLB-200')}
                   confidence={getDummyScore('NLLB-200')}
+                  errorMessage={entry.nllbError}
                 />
               </div>
             </div>

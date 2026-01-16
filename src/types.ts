@@ -11,6 +11,10 @@ export interface SubtitleEntry {
     googleTranslation?: string; // Kept for backward compatibility
     nlpTranslation?: string; // Kept for backward compatibility
     selectedModel?: 'libre' | 'opus' | 'mbart' | 'nllb' | 'google' | 'nlp';
+    libreError?: string;
+    opusError?: string;
+    mbartError?: string;
+    nllbError?: string;
 }
 
 export interface Project {

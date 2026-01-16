@@ -142,7 +142,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
       const mappedVersions = versionsData.available_versions.map(v => ({
         id: v,
         date: new Date().toISOString().split('T')[0], // Use current date for now
-        note: v === 'v1.0' ? 'Stable Release' : v === 'v2.0' ? 'New Improved Model' : 'Custom Model',
+        note: v === 'opus' ? 'High Quality (Slower)' : v === 'mbart' ? 'Balanced (Facebook)' : v === 'nllb' ? 'Max Language Support' : 'Custom Model',
         current: v === currentVer
       }));
       setModelVersionsList(mappedVersions);
@@ -167,11 +167,6 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
       }
     }
   }, [user]);
-
-  const availableVersions = [
-    { id: '1.0.0', date: '2025-01-20', note: 'Stable Release', current: true },
-    { id: '0.9.8', date: '2025-01-10', note: 'Beta Release', current: false },
-  ];
 
   const sections = [
     { id: 'account' as const, label: t('accountSettings'), icon: User },
@@ -518,7 +513,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">{t('systemInfo')}</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Version Manager - Full Width */}
+          {/* Model Manager - Full Width */}
           <div className="col-span-1 md:col-span-2 p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 transition-all">
             <div
               className="flex items-center justify-between cursor-pointer"
@@ -529,11 +524,11 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                   <HistoryIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-slate-300">{t('version')}</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-300">{t('model')}</p>
                   <div className="flex items-center gap-2">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">v{appVersion.replace(/^v/, '')}</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{appVersion}</p>
                     <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
-                      Stable
+                      Active
                     </span>
                   </div>
                 </div>
@@ -544,7 +539,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             {/* Expanded Version List */}
             {showVersions && (
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-top-2">
-                <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Version History</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Available Models</p>
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                   {modelVersionsList.map((ver) => (
                     <button
@@ -557,7 +552,7 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                           await fetchModelInfo();
                           setShowVersions(false);
                         } catch (err) {
-                          alert("Failed to switch version");
+                          alert("Failed to switch model");
                           setCheckingNlp(false);
                         }
                       }}
@@ -568,8 +563,8 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
                     >
                       <div className="text-left">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium ${appVersion === ver.id ? 'text-blue-600 dark:text-blue-400' : ''}`}>v{ver.id.replace(/^v/, '')}</span>
-                          {ver.current && <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-500 rounded border border-gray-200 dark:border-slate-700">Latest</span>}
+                          <span className={`font-medium ${appVersion === ver.id ? 'text-blue-600 dark:text-blue-400' : ''}`}>{ver.id}</span>
+                          {ver.current && <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-500 rounded border border-gray-200 dark:border-slate-700">Active</span>}
                         </div>
                         <p className="text-xs text-gray-400 mt-0.5">{ver.date} • {ver.note}</p>
                       </div>

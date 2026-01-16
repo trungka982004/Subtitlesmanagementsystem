@@ -7,3 +7,9 @@ __pycache__/
 *.bin
 server/python_service/model/
 !server/python_service/model/.keep
+server/python_service/mbart/
+!server/python_service/mbart/.keep
+server/python_service/nllb/
+!server/python_service/nllb/.keep
+server/python_service/opus/
+!server/python_service/opus/.keep

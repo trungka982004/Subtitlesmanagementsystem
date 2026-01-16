@@ -253,6 +253,7 @@ export const translations = {
     reset: 'Mặc định',
     save: 'Lưu Cấu hình',
     close: 'Đóng',
+    model: 'Mô hình',
   },
 
   en: {
@@ -509,6 +510,7 @@ export const translations = {
     reset: 'Reset',
     save: 'Save Configuration',
     close: 'Close',
+    model: 'Model',
   },
 
   zh: {
@@ -765,6 +767,7 @@ export const translations = {
     reset: '重置',
     save: '保存配置',
     close: '关闭',
+    model: '模型',
   },
 };
 

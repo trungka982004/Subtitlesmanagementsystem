@@ -29,6 +29,8 @@ export function QuickTranslate() {
   const [maxLines, setMaxLines] = useState<1 | 2>(2);
   const [smartLineBreak, setSmartLineBreak] = useState(true);
 
+  const [selectedModel, setSelectedModel] = useState<string>('mbart');
+
   const genres = [
     { value: 'ancient', label: t('genreAncient'), icon: '🧛🏻' },
     { value: 'martial', label: t('genreMartial'), icon: '⚔️' },
@@ -76,7 +78,7 @@ export function QuickTranslate() {
         });
 
       // 2. Call Custom NLP Model (Parallel)
-      const nlpPromise = translateWithCustomModel(sourceText)
+      const nlpPromise = translateWithCustomModel(sourceText, selectedModel)
         .then(res => setNlpResult(res))
         .catch(err => {
           console.error("Custom NLP failed", err);
@@ -380,9 +382,23 @@ export function QuickTranslate() {
                   <span className="p-1.5 bg-purple-500 rounded-lg text-white">
                     <Settings className="w-5 h-5" />
                   </span>
-                  <h4 className="text-purple-900 font-bold text-lg">
-                    {t('customNLPModel')}
-                  </h4>
+                  <div className="flex flex-col">
+                    <h4 className="text-purple-900 font-bold text-lg leading-tight">
+                      {t('customNLPModel')}
+                    </h4>
+
+                    {/* Model Selector within the card header */}
+                    <Select value={selectedModel} onValueChange={setSelectedModel}>
+                      <SelectTrigger className="h-6 mt-1 w-[140px] bg-white/50 border-purple-200 text-xs font-bold text-purple-700 rounded-md focus:ring-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mbart">mBART-50</SelectItem>
+                        <SelectItem value="opus">Opus MT</SelectItem>
+                        <SelectItem value="nllb">NLLB-200</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 {nlpResult && (
                   <Button

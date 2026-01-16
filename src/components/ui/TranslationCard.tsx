@@ -13,6 +13,7 @@ interface TranslationCardProps {
     badgeColor: string; // e.g., 'bg-green-100 text-green-800'
     latency?: number;
     confidence?: number;
+    errorMessage?: string;
 }
 
 export function TranslationCard({
@@ -25,7 +26,8 @@ export function TranslationCard({
     colorClass,
     badgeColor,
     latency,
-    confidence
+    confidence,
+    errorMessage
 }: TranslationCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editedText, setEditedText] = useState(translation || '');
@@ -97,9 +99,9 @@ export function TranslationCard({
                             />
                         ) : (
                             <div
-                                className="w-full h-full min-h-[100px] text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed"
+                                className={`w-full h-full min-h-[100px] text-sm whitespace-pre-wrap leading-relaxed ${errorMessage ? 'text-red-500 italic' : 'text-slate-700 dark:text-slate-300'}`}
                             >
-                                {translation || <span className="text-slate-500 dark:text-slate-600 italic">Translation pending...</span>}
+                                {errorMessage || translation || <span className="text-slate-500 dark:text-slate-600 italic">Translation pending...</span>}
                             </div>
                         )}
 
@@ -127,8 +129,8 @@ export function TranslationCard({
                     onClick={onSelect}
                     disabled={isLoading || !translation}
                     className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${isSelected
-                            ? 'bg-green-600 text-white shadow-md hover:bg-green-700 ring-2 ring-green-600 ring-offset-1 ring-offset-white dark:ring-offset-slate-900'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                        ? 'bg-green-600 text-white shadow-md hover:bg-green-700 ring-2 ring-green-600 ring-offset-1 ring-offset-white dark:ring-offset-slate-900'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed'
                         }`}
                 >
                     {isSelected ? (

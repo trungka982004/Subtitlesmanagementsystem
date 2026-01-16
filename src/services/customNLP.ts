@@ -7,13 +7,15 @@ export interface CustomTranslateResponse {
 }
 
 export async function translateWithCustomModel(
-    text: string
+    text: string,
+    modelId?: string
 ): Promise<string> {
     try {
         const response = await fetch(`${CUSTOM_NLP_API_URL}/translate`, {
             method: "POST",
             body: JSON.stringify({
                 text: text,
+                model_id: modelId
             }),
             headers: { "Content-Type": "application/json" }
         });
@@ -34,6 +36,38 @@ export async function translateWithCustomModel(
     } catch (error) {
         console.error("Custom NLP Translation error:", error);
         // Throwing error allows the caller to handle it (e.g. fallback)
+        throw error;
+    }
+}
+
+export async function translateBatchWithCustomModel(
+    texts: string[],
+    modelId?: string
+): Promise<string[]> {
+    try {
+        const response = await fetch(`${CUSTOM_NLP_API_URL}/translate_batch`, {
+            method: "POST",
+            body: JSON.stringify({
+                texts: texts,
+                model_id: modelId
+            }),
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            try {
+                const errData = await response.json();
+                if (errData.detail) throw new Error(errData.detail);
+            } catch (e) {
+                // ignore
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data: { translated_texts: string[] } = await response.json();
+        return data.translated_texts;
+    } catch (error) {
+        console.error("Custom NLP Batch Translation error:", error);
         throw error;
     }
 }
