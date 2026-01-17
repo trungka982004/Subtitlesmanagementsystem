@@ -1,29 +1,46 @@
 # Custom NLP Model Integration
 
-This project now integrates a custom NLP model (Chinese -> Vietnamese) using a Python FastAPI service.
+This project integrates custom NLP models for high-performance translation using a Python FastAPI service optimized with **CTranslate2**.
+
+## Optimization & Stability
+The system now uses **CTranslate2**, which provides:
+- **Reduced Memory Usage**: Prevents system crashes and OOM errors.
+- **Faster Inference**: Significant speed boost for batch translations.
+- **Quantization Support**: Runs efficiently on both CPU and GPU.
 
 ## Prerequisites
 - Python 3.8+ installed.
-- Dependencies installed: `pip install -r server/python_service/requirements.txt`
-- Model files placed in `server/python_service/model` or `server/python_service/versions`.
+- Install optimized dependencies:
+  ```bash
+  pip install -r server/python_service/requirements.txt
+  ```
+
+## Model Setup & Conversion
+Models should be placed in `server/python_service/models/`. 
+
+### Initial Conversion (Required for Speed)
+Before starting, you should convert your HuggingFace models to the optimized CTranslate2 format using the provided script:
+```bash
+cd server/python_service
+# Example for 'mbart' model
+python convert.py --model_id mbart
+```
+This will create a `mbart_ct2` folder. The server will automatically detect and use this optimized version.
 
 ## How to Start
-You must start the Python backend for the translation features to work.
+The Python backend must be running for translation features to work.
 
 ### Method 1: Batch Script (Windows)
 Double-click `start_nlp.bat` in the project root.
 
 ### Method 2: Manual
-Run the following command in a terminal:
 ```bash
 cd server/python_service
-python -m uvicorn main:app --port 8000
+python main.py
 ```
 
 ## Usage in App
 1. Open the application.
 2. Go to **Settings > System**.
-3. Check the "Custom NLP Service" status. It should be green (Status: ok, Model Loaded: Yes).
-4. Open a subtitle file.
-5. In the editor, click the **NLP** button (Purple Sparkles icon) to translate using your custom model.
-6. You can compare the results with Google Translate (LibreTranslate).
+3. Check the "Custom NLP Service" status. It should be green and show `backend: ctranslate2`.
+4. Open a subtitle file and use the **NLP** button to translate.

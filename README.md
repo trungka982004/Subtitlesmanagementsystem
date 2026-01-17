@@ -8,7 +8,7 @@
   **Initial Start:**
   1. **Backend:** Run `npm run server` to start the backend server.
   2. **Mock Translator:** Open a new terminal and run `python scripts/mock_libretranslate.py` for the LibreTranslate mock server.
-  3. **Custom NLP Model:** Double-click `start_nlp.bat` OR run `python -m uvicorn main:app --port 8000` in `server/python_service`. (See `README_NLP.md` for details).
+  3. **Custom NLP Model:** Double-click `start_nlp.bat` OR run `python main.py` in `server/python_service`. (See `README_NLP.md` for optimization details).
   4. **Frontend:** Open a new terminal and run `npm run dev` to start the development server.
 
   ## Stopping and Restarting the Application

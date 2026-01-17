@@ -6,3 +6,4 @@ sentencepiece
 sacremoses
 safetensors
 python-multipart
+ctranslate2
