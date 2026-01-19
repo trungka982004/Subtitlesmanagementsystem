@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react';
 import { db } from './services/db';
-import { SubtitleUploader } from './components/SubtitleUploader';
 import { serializeEntriesToJSON } from './utils/srt';
-import { SubtitleEditor } from './components/SubtitleEditor';
-import { FileHorizontalSelector } from './components/FileHorizontalSelector';
-import { SubtitleAnalysis } from './components/SubtitleAnalysis';
-import { QuickTranslate } from './components/QuickTranslate';
 import { Sidebar } from './components/Sidebar';
-import { ProjectDashboard } from './components/ProjectDashboard';
-import { Settings } from './components/Settings';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Auth } from './components/Auth';
 import { SubtitleEntry, Project, SubtitleFile } from './types';
 import './App.css';
-import { FileText, Settings as SettingsIcon, LogOut, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from './hooks/useTranslation';
+
+// Pages
+import { Dashboard } from './pages/Dashboard';
+import { EditorPage } from './pages/EditorPage';
+import { QuickTranslate } from './pages/QuickTranslate';
+import { SubtitleAnalysis } from './pages/SubtitleAnalysis';
+import { Settings } from './pages/Settings';
+import { Auth } from './pages/Auth';
 
 export default function App() {
   const [subtitleFiles, setSubtitleFiles] = useState<SubtitleFile[]>([]);
@@ -48,7 +47,7 @@ export default function App() {
     }
   };
 
-  const handleCreateProject = async (name: string, description?: string) => {
+  const handleCreateProject = async (name: string, description?: string): Promise<string> => {
     try {
       const newProject = await db.createProject(name, description);
       setProjects(prev => [...prev, newProject]);
@@ -169,7 +168,6 @@ function AppContent({
   const { theme } = useSettings();
   const isDark = theme === 'dark';
   const { t } = useTranslation();
-  const [showAllFiles, setShowAllFiles] = useState(false);
 
   // Helper to get tab title
   const getTabTitle = () => {
@@ -192,6 +190,9 @@ function AppContent({
     if (user) {
       const loadUserData = async () => {
         try {
+          // Initialize DB if needed (usually handled by seed/backend but safe to ensure)
+          // await db.init(); 
+
           const [loadedProjects, loadedFiles] = await Promise.all([
             db.getProjects(),
             db.getFiles()
@@ -271,58 +272,27 @@ function AppContent({
           <main className={`flex-1 p-0 overflow-hidden flex flex-col h-full transition-colors duration-300 ${isDark ? 'bg-[#0f172a]' : 'bg-slate-50'}`}>
             <div className="mx-auto w-full h-full flex flex-col">
               {activeTab === 'manage' && (
-                <div className="flex flex-col w-full h-full">
-                  {/* Horizontal File Slider */}
-                  <FileHorizontalSelector
-                    files={subtitleFiles}
-                    selectedFileId={selectedFile?.id}
-                    onSelectFile={handleFileSelect}
-                  />
-
-                  {/* Main Editor Area */}
-                  <div className="flex-1 overflow-hidden relative">
-                    {selectedFile ? (
-                      <SubtitleEditor
-                        file={selectedFile}
-                        onUpdate={handleUpdateFile}
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                        <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-700">
-                          <FileText className="w-8 h-8 text-slate-600" />
-                        </div>
-                        <h3 className="font-bold text-lg text-slate-400">Select a file from above</h3>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <EditorPage
+                  files={subtitleFiles}
+                  selectedFile={selectedFile}
+                  onSelectFile={handleFileSelect}
+                  onUpdateFile={handleUpdateFile}
+                />
               )}
 
               {activeTab !== 'manage' && (
                 <div className="p-8 h-full overflow-y-auto custom-scrollbar">
                   {activeTab === 'upload' && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <SubtitleUploader
-                        onFileUpload={handleFileUpload}
-                        projects={projects}
-                        onCreateProject={handleCreateProject}
-                        files={subtitleFiles}
-                      />
-                      <div style={{ marginTop: '2rem' }}>
-                        <ProjectDashboard
-                          projects={projects}
-                          files={subtitleFiles}
-                          onDeleteProject={handleDeleteProject}
-                          onCreateProject={handleCreateProject}
-                          onMoveFile={handleMoveFileToProject}
-                          onFileUpload={handleFileUpload}
-                          onFileSelect={(file: any) => {
-                            handleFileSelect(file);
-                            setActiveTab('manage');
-                          }}
-                        />
-                      </div>
-                    </div>
+                    <Dashboard
+                      files={subtitleFiles}
+                      projects={projects}
+                      onFileUpload={handleFileUpload}
+                      onCreateProject={handleCreateProject}
+                      onDeleteProject={handleDeleteProject}
+                      onMoveFile={handleMoveFileToProject}
+                      onFileSelect={handleFileSelect}
+                      setActiveTab={setActiveTab}
+                    />
                   )}
 
                   {activeTab === 'quick-translate' && (

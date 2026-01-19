@@ -86,7 +86,8 @@ def get_available_models():
         full_path = os.path.join(BASE_MODELS_PATH, entry)
         if os.path.isdir(full_path):
             # Hide the internal _ct2 folders from the frontend list to avoid duplicates
-            if not entry.endswith("_ct2"):
+            # Also hide backup folders
+            if not entry.endswith("_ct2") and "ct2_backup" not in entry:
                 models.append(entry)
     
     return sorted(models)

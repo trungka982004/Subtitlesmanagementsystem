@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { parseContent } from '../utils/srt';
 import { SubtitleFile, Project, SubtitleEntry } from '../types';
 import { CheckCircle2, Folder, Trash2, FolderOpen, CloudUpload, FileText, X } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
@@ -28,35 +29,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Parsing Logic (Duplicated for now to keep components self-contained/swappable)
-  const parseSRT = (content: string): SubtitleEntry[] => {
-    const normalizeContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const entries: SubtitleEntry[] = [];
-    const blocks = normalizeContent.trim().split(/\n\s*\n/);
-
-    blocks.forEach(block => {
-      const lines = block.split('\n').map(l => l.trim());
-      if (lines.length >= 3) {
-        const idStr = lines[0];
-        const id = parseInt(idStr);
-        const timeLineIndex = lines.findIndex(l => l.includes('-->'));
-
-        if (timeLineIndex !== -1) {
-          const timeMatch = lines[timeLineIndex].match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
-          if (timeMatch) {
-            const text = lines.slice(timeLineIndex + 1).join('\n');
-            entries.push({
-              id: !isNaN(id) ? id : entries.length + 1,
-              startTime: timeMatch[1],
-              endTime: timeMatch[2],
-              text,
-            });
-          }
-        }
-      }
-    });
-    return entries;
-  };
+  // Parsing Logic via Utility
+  const parseSRT = parseContent;
 
   // Upload Logic : Progress Simulation
   useEffect(() => {
@@ -204,7 +178,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
         <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 group/card flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-6 border-b border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center bg-slate-50/30 dark:bg-slate-950/30">
-            <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide" style={{ fontSize: '20px', fontWeight: 'bold' }}>
+            <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide">
               {t('importSubtitles')}
             </h3>
             <p className="text-xs font-bold text-slate-500 mt-1.5 uppercase tracking-wider">
@@ -297,8 +271,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
         {/* Projects Section (Right Column) */}
         <div className="h-full flex flex-col">
-          <div className="flex justify-center items-center mb-6" style={{ marginTop: '30px' }}>
-            <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide" style={{ fontSize: '20px', fontWeight: 'bold' }}>{t('projectsTitle')}</h3>
+          <div className="flex justify-center items-center mb-6 mt-8">
+            <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide">{t('projectsTitle')}</h3>
           </div>
 
           <div className="grid grid-cols-1 gap-4 flex-1 overflow-y-auto max-h-[600px] custom-scrollbar pr-2">
@@ -406,8 +380,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
       {/* Unassigned Files */}
       {getUnassignedFiles().length > 0 && (
-        <div style={{ marginBottom: '3rem' }}>
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500" style={{ marginBottom: '24px' }}>{t('unassignedFiles')}</h3>
+        <div className="mb-12">
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 pl-3 border-l-4 border-blue-500 mb-6">{t('unassignedFiles')}</h3>
           <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm divide-y divide-slate-100 dark:divide-white/5">
             {getUnassignedFiles().map(file => (
               <div

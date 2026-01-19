@@ -32,7 +32,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject, file
       {/* Project Creation - Top Left */}
       <div className="h-full">
         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 hover:shadow-lg hover:border-slate-300 dark:hover:border-blue-500/30 transition-all duration-300 h-full flex flex-col">
-          <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2 uppercase tracking-wide mb-6 mt-0" style={{ marginTop: '30px', fontSize: '20px', fontWeight: 'bold' }}>
+          <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2 uppercase tracking-wide mb-6 mt-8">
             <FolderPlus className="w-5 h-5 text-blue-500" />
             {t('createNewProject')}
           </h3>
@@ -84,8 +84,8 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject, file
 
       {/* Overview Stats - Top Right */}
       <div className="h-full flex flex-col">
-        <div className="flex justify-center items-center mb-6" style={{ marginTop: '30px' }}>
-          <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide" style={{ fontSize: '20px', fontWeight: 'bold' }}>{t('overview')}</h3>
+        <div className="flex justify-center items-center mb-6 mt-8">
+          <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide">{t('overview')}</h3>
         </div>
         <div className="grid grid-cols-3 gap-6">
           {/* Done Card */}
