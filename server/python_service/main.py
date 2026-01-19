@@ -7,6 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import glob
 import time
+import psutil
+from typing import Optional
+import asyncio
+from collections import deque
 
 app = FastAPI()
 
@@ -35,12 +39,37 @@ class VersionRequest(BaseModel):
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_MODELS_PATH = os.path.join(SCRIPT_DIR, "models")
 
+# CPU Optimization Settings
+CPU_THREADS = os.cpu_count() or 4  # Use all available CPU cores
+INTER_THREADS = max(1, CPU_THREADS // 2)  # Threads for inter-op parallelism
+INTRA_THREADS = max(1, CPU_THREADS // 2)  # Threads for intra-op parallelism
+
 # Global state
 model = None # HF Model
 translator = None # CTranslate2 Translator
 tokenizer = None
 current_model_id = None
 is_ct2_model = False
+
+# Performance monitoring
+request_times = deque(maxlen=100)  # Track last 100 request times
+
+def contains_english(text):
+    """
+    Simple heuristic to detect if text contains significant English content.
+    Returns True if more than 30% of alphabetic characters are ASCII (likely English).
+    """
+    if not text:
+        return False
+    
+    alpha_chars = [c for c in text if c.isalpha()]
+    if not alpha_chars:
+        return False
+    
+    ascii_alpha = [c for c in alpha_chars if ord(c) < 128]
+    ratio = len(ascii_alpha) / len(alpha_chars)
+    
+    return ratio > 0.3  # More than 30% ASCII letters suggests English content
 
 def get_available_models():
     """Scan the models directory for available models."""
@@ -64,6 +93,14 @@ def get_available_models():
 
 @app.on_event("startup")
 async def startup_event():
+    # Configure PyTorch for CPU optimization (must be done before any model loading)
+    torch.set_num_threads(CPU_THREADS)
+    if hasattr(torch, 'set_num_interop_threads'):
+        try:
+            torch.set_num_interop_threads(INTER_THREADS)
+        except RuntimeError as e:
+            print(f"Warning: Could not set interop threads: {e}")
+    
     # Try to find available models
     models = get_available_models()
     if models:
@@ -91,19 +128,24 @@ async def load_model(model_id: str):
     ct2_model_path = os.path.join(BASE_MODELS_PATH, f"{model_id}_ct2")
     
     # Check if optimized version exists
+    # IMPORTANT: Disable CT2 for mBART due to repetition issues in conversion
     use_ct2 = False
     model_path_to_load = original_model_path
     
-    if os.path.exists(ct2_model_path):
+    if os.path.exists(ct2_model_path) and "mbart" not in model_id.lower():
         print(f"Found optimized CTranslate2 model at {ct2_model_path}")
         use_ct2 = True
         model_path_to_load = ct2_model_path
+    elif "mbart" in model_id.lower():
+        print(f"Using original HuggingFace model for mBART (CT2 version has repetition issues)")
+        use_ct2 = False
+        model_path_to_load = original_model_path
     elif not os.path.exists(original_model_path):
         # Path resolution fallback
         if os.path.exists(os.path.join("../../../models", model_id)):
              original_model_path = os.path.join("../../../models", model_id)
              ct2_model_path = os.path.join("../../../models", f"{model_id}_ct2")
-             if os.path.exists(ct2_model_path):
+             if os.path.exists(ct2_model_path) and "mbart" not in model_id.lower():
                  use_ct2 = True
                  model_path_to_load = ct2_model_path
              else:
@@ -111,6 +153,14 @@ async def load_model(model_id: str):
         else:
              print(f"Model path failed: {original_model_path}")
              raise HTTPException(status_code=404, detail=f"Model {model_id} not found")
+
+    # Check for nested final_model in original path if NOT using CT2 or if CT2 failed
+    # Actually, even for CT2, we assume it's flat. For original, we check.
+    if not use_ct2:
+        nested_path = os.path.join(model_path_to_load, "final_model")
+        if os.path.exists(nested_path) and os.path.isdir(nested_path):
+             print(f"Adjusting path to nested 'final_model': {nested_path}")
+             model_path_to_load = nested_path
 
     try:
         # Unload previous
@@ -139,7 +189,20 @@ async def load_model(model_id: str):
         if use_ct2:
             print(f"Loading CTranslate2 engine from {model_path_to_load}...")
             device = "cuda" if torch.cuda.is_available() else "cpu"
-            translator = ctranslate2.Translator(model_path_to_load, device=device)
+            
+            # CPU-optimized CTranslate2 configuration
+            if device == "cpu":
+                print(f"Configuring CTranslate2 for CPU with {INTER_THREADS} inter_threads, {INTRA_THREADS} intra_threads")
+                translator = ctranslate2.Translator(
+                    model_path_to_load, 
+                    device=device,
+                    inter_threads=INTER_THREADS,
+                    intra_threads=INTRA_THREADS,
+                    compute_type="auto"  # Let CTranslate2 choose optimal compute type
+                )
+            else:
+                translator = ctranslate2.Translator(model_path_to_load, device=device)
+            
             is_ct2_model = True
             
             # Special handling for mBART: It needs to know the target language code
@@ -147,6 +210,13 @@ async def load_model(model_id: str):
                 # Ensure compatibility with mBART tokenizer which might be multilingual
                 if tokenizer.pad_token is None:
                     tokenizer.pad_token = tokenizer.eos_token
+                # Set source and target languages
+                if not hasattr(tokenizer, 'src_lang') or not tokenizer.src_lang:
+                     print("Setting default src_lang to zh_CN for mBART")
+                     tokenizer.src_lang = "zh_CN"
+                # Force target language to Vietnamese
+                tokenizer.tgt_lang = "vi_VN"
+                print(f"mBART config: src_lang={tokenizer.src_lang}, tgt_lang={tokenizer.tgt_lang}")
                 
             print("CTranslate2 model loaded successfully!")
         else:
@@ -181,63 +251,125 @@ async def translate_batch(request: BatchTranslationRequest):
         raise HTTPException(status_code=503, detail="Model not loaded.")
 
     try:
+        start_time = time.time()
         texts = request.texts
         
         if is_ct2_model:
-            # CTranslate2 Path
+            # CTranslate2 Path with optimizations
             
             # Special handling for mBART to force Vietnamese target
             target_prefix = None
+            beam_size = 1
+            max_decoding_length = 512
+            
             if "mbart" in current_model_id.lower():
-                # mBART-50 uses specific language codes. 'vi_VN' for Vietnamese.
-                # When using CTranslate2 with mBART, we typically need to provide the target token
-                # or ensure the tokenizer adds it?
-                # Actually, for CT2 + mBART, we usually force the target prefix in the translate call.
-                # However, the tokenizer usually handles the source language.
-                # Let's try forcing the target token.
-                # Common tokens: vi_VN, en_XX, zh_CN
-                # For translation TO Vietnamese, we likely need to pass target_prefix=[['vi_VN']] or similar
+                # Ensure target language is set
+                if not hasattr(tokenizer, 'tgt_lang') or not tokenizer.tgt_lang:
+                    tokenizer.tgt_lang = "vi_VN"
+                if not hasattr(tokenizer, 'src_lang') or not tokenizer.src_lang:
+                    tokenizer.src_lang = "zh_CN"
                 
-                # We need to find the correct token ID or string for 'vi_VN'
-                target_prefix = [["vi_VN"]] 
+                # CRITICAL: For mBART with CTranslate2, we need to use the language token
+                # The target_prefix should contain the actual language token, not just the string
+                # We need to ensure the tokenizer properly encodes this
+                try:
+                    # Set the target language in tokenizer
+                    tokenizer.tgt_lang = "vi_VN"
+                    # Get the language token - for mBART this is typically at the end of vocab
+                    # The token should be in the format "vi_VN"
+                    lang_token = "vi_VN"
+                    
+                    # Verify the token exists
+                    test_id = tokenizer.convert_tokens_to_ids(lang_token)
+                    if test_id != tokenizer.unk_token_id:
+                        target_prefix = [[lang_token]] * len(texts)
+                        print(f"Using target_prefix with token: {lang_token} (ID: {test_id})")
+                    else:
+                        print(f"Warning: Language token {lang_token} not found in vocabulary")
+                        target_prefix = [[lang_token]] * len(texts)
+                except Exception as e:
+                    print(f"Error setting target prefix: {e}")
+                    target_prefix = [["vi_VN"]] * len(texts)
+                
+                # Use beam search for better quality and language adherence
+                beam_size = 5  # Higher beam size for better quality
+                print(f"mBART translation: src_lang={tokenizer.src_lang}, tgt_lang={tokenizer.tgt_lang}, beam_size={beam_size}")
             
-            # Tokenize
-            # tokenizer.tokenize returns list of strings if passed a single string, 
-            # but for batch we need to iterate or use batch_encode_plus?
-            # CT2 expects list of list of tokens (strings)
+            print(f"Batch translating {len(texts)} items with CTranslate2...")
             
-            # For mBART, the source language usually needs to be set in tokenizer too
-            # tokenizer.src_lang = "zh_CN" (assuming Chinese source)
-           
+            # Tokenize (optimized batch tokenization)
             source_tokens = [tokenizer.convert_ids_to_tokens(tokenizer.encode(t)) for t in texts]
             
-            # Translate
-            results = translator.translate_batch(
-                source_tokens,
-                target_prefix=target_prefix
-            )
+            # Translate with optimized settings
+            # Note: Keep parameters simple - repetition_penalty can cause issues with mBART
+            translate_params = {
+                "source": source_tokens,
+                "target_prefix": target_prefix,
+                "beam_size": beam_size,
+                "max_batch_size": 32,
+                "batch_type": "tokens"
+            }
+            
+            # Only add max_decoding_length if not mBART (it can cause repetition issues)
+            if "mbart" not in current_model_id.lower():
+                translate_params["max_decoding_length"] = max_decoding_length
+            
+            results = translator.translate_batch(**translate_params)
             
             # Detokenize
             translated_texts = [tokenizer.decode(tokenizer.convert_tokens_to_ids(res.hypotheses[0]), skip_special_tokens=True) for res in results]
             
-            return {"translated_texts": translated_texts, "model_used": current_model_id, "backend": "ctranslate2"}
+            # Detect English output in mBART translations (diagnostic)
+            if "mbart" in current_model_id.lower():
+                english_count = sum(1 for text in translated_texts if contains_english(text))
+                if english_count > 0:
+                    print(f"Warning: {english_count}/{len(translated_texts)} translations contain English text")
+                    print(f"Note: This is a known limitation of the current model training")
+            
+            # Track performance
+            elapsed = time.time() - start_time
+            request_times.append(elapsed)
+            
+            return {
+                "translated_texts": translated_texts, 
+                "model_used": current_model_id, 
+                "backend": "ctranslate2",
+                "processing_time_ms": round(elapsed * 1000, 2)
+            }
             
         else:
-            # Transformers Path
+            # Transformers Path (used for mBART to avoid CT2 repetition issues)
             device = model.device
             inputs = tokenizer(texts, return_tensors="pt", padding=True, truncation=True, max_length=512).to(device)
             
+            # Special handling for mBART to force Vietnamese output
+            generate_kwargs = {"max_length": 512}
+            if "mbart" in current_model_id.lower():
+                # Force Vietnamese output
+                vi_token_id = tokenizer.convert_tokens_to_ids("vi_VN")
+                generate_kwargs.update({
+                    "forced_bos_token_id": vi_token_id,
+                    "num_beams": 5,
+                    "early_stopping": True,
+                    "no_repeat_ngram_size": 3,
+                    "repetition_penalty": 1.5
+                })
+                print(f"mBART (Transformers): Using forced_bos_token_id={vi_token_id} for Vietnamese")
+            
             with torch.no_grad():
-                outputs = model.generate(**inputs, max_length=512)
+                outputs = model.generate(**inputs, **generate_kwargs)
             
             translated_texts = tokenizer.batch_decode(outputs, skip_special_tokens=True)
             return {"translated_texts": translated_texts, "model_used": current_model_id, "backend": "transformers"}
             
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         print(f"Batch Translation Error: {e}")
+        import traceback
+        traceback.print_exc()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.post("/translate") 
 async def translate(request: TranslationRequest):
@@ -255,27 +387,66 @@ async def translate(request: TranslationRequest):
         
         if is_ct2_model:
             target_prefix = None
+            beam_size = 1
+            max_decoding_length = 512
+            
             if "mbart" in current_model_id.lower():
+                # Ensure languages are set
+                if not hasattr(tokenizer, 'tgt_lang') or not tokenizer.tgt_lang:
+                    tokenizer.tgt_lang = "vi_VN"
+                if not hasattr(tokenizer, 'src_lang') or not tokenizer.src_lang:
+                    tokenizer.src_lang = "zh_CN"
+                
                 target_prefix = [["vi_VN"]]
+                beam_size = 5  # Use beam search for better quality
 
-            source_tokens = tokenizer.convert_ids_to_tokens(tokenizer.encode(text))
-            results = translator.translate_batch(
-                [source_tokens],
-                target_prefix=target_prefix
-            )
+            print(f"Tokenizing text: {text[:50]}...")
+            input_ids = tokenizer.encode(text)
+            source_tokens = tokenizer.convert_ids_to_tokens(input_ids)
+            print(f"Source tokens (first 10): {source_tokens[:10]}")
+            
+            # Simplified parameters for mBART to avoid repetition issues
+            translate_params = {
+                "source": [source_tokens],
+                "target_prefix": target_prefix,
+                "beam_size": beam_size
+            }
+            
+            # Only add max_decoding_length if not mBART
+            if "mbart" not in current_model_id.lower():
+                translate_params["max_decoding_length"] = max_decoding_length
+            
+            results = translator.translate_batch(**translate_params)
             translated_text = tokenizer.decode(tokenizer.convert_tokens_to_ids(results[0].hypotheses[0]), skip_special_tokens=True)
             return {"translated_text": translated_text, "model_used": current_model_id, "backend": "ctranslate2"}
         else:
+            # Transformers Path (used for mBART)
             device = model.device
             inputs = tokenizer(text, return_tensors="pt", padding=True).to(device)
+            
+            # Special handling for mBART
+            generate_kwargs = {"max_length": 512}
+            if "mbart" in current_model_id.lower():
+                vi_token_id = tokenizer.convert_tokens_to_ids("vi_VN")
+                generate_kwargs.update({
+                    "forced_bos_token_id": vi_token_id,
+                    "num_beams": 5,
+                    "early_stopping": True,
+                    "no_repeat_ngram_size": 3,
+                    "repetition_penalty": 1.5
+                })
+            
             with torch.no_grad():
-                outputs = model.generate(**inputs, max_length=512)
+                outputs = model.generate(**inputs, **generate_kwargs)
             translated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return {"translated_text": translated_text, "model_used": current_model_id, "backend": "transformers"}
             
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         print(f"Translation Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.get("/versions")
 async def get_versions():
@@ -295,11 +466,22 @@ async def set_version(request: VersionRequest):
 
 @app.get("/health")
 async def health():
+    # Get memory usage
+    process = psutil.Process()
+    memory_mb = process.memory_info().rss / (1024 ** 2)
+    
+    # Calculate average request time
+    avg_request_time = sum(request_times) / len(request_times) if request_times else 0
+    
     return {
         "status": "ok", 
         "model_loaded": (model is not None or translator is not None),
         "backend": "ctranslate2" if is_ct2_model else ("transformers" if model else "none"),
-        "current_version": current_model_id
+        "current_version": current_model_id,
+        "cpu_threads": CPU_THREADS,
+        "memory_mb": round(memory_mb, 2),
+        "avg_request_time_ms": round(avg_request_time * 1000, 2) if avg_request_time else None,
+        "total_requests": len(request_times)
     }
 
 if __name__ == "__main__":

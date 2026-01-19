@@ -1,0 +1,9 @@
+{
+  "model_id": "nllb",
+  "quantization": "int8_float16",
+  "conversion_time": 41.26163721084595,
+  "original_size_mb": 2381.800135612488,
+  "converted_size_mb": 632.3035831451416,
+  "compression_ratio": 3.7668616770526184,
+  "timestamp": "2026-01-19 17:16:39"
+}

@@ -1,0 +1,9 @@
+{
+  "model_id": "mbart",
+  "quantization": "float16",
+  "conversion_time": 59.59321355819702,
+  "original_size_mb": 2352.5023889541626,
+  "converted_size_mb": 1193.0031776428223,
+  "compression_ratio": 1.9719162807280362,
+  "timestamp": "2026-01-19 18:19:15"
+}

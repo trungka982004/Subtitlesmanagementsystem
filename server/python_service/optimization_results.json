@@ -1,0 +1,10 @@
+{
+  "mbart": {
+    "success": true,
+    "quantization": "int8_float16"
+  },
+  "nllb": {
+    "success": true,
+    "quantization": "int8_float16"
+  }
+}
