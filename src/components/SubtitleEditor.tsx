@@ -18,6 +18,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationProgress, setTranslationProgress] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('Translation Complete');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Sync state with props if file changes (e.g. switching files)
@@ -71,7 +72,23 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
     onUpdate({ ...file, entries: updatedEntries, progress, status });
   };
 
+  const handleSave = () => {
+    // Calculate progress
+    const completedCount = editedEntries.filter(e => e.selectedModel).length;
+    const progress = editedEntries.length > 0 ? Math.round((completedCount / editedEntries.length) * 100) : 0;
 
+    // Explicitly set status to 'done' as requested by user ("Save button... In Upload Subtitle: that file will change status into Completed")
+    onUpdate({
+      ...file,
+      entries: editedEntries,
+      progress,
+      status: 'done'
+    });
+
+    setSuccessMessage('Project Saved Successfully');
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
 
   // Helper to chunk array
   const chunkArray = <T,>(array: T[], size: number): T[][] => {
@@ -106,6 +123,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
 
     if (totalOps === 0) {
       setIsTranslating(false);
+      setSuccessMessage('Translation Complete');
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       return;
@@ -179,6 +197,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
 
       updateFileState(currentEntries);
       setTranslationProgress(100);
+      setSuccessMessage('Translation Complete');
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 5000);
 
@@ -251,6 +270,17 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
           </button>
 
           <button
+            onClick={handleSave}
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all border ${isDark
+                ? 'text-green-400 bg-green-900/10 hover:bg-green-900/20 border-green-500/30 hover:border-green-500/50'
+                : 'text-green-700 bg-green-50 hover:bg-green-100 border-green-200 hover:border-green-300'
+              }`}
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save</span>
+          </button>
+
+          <button
             onClick={handleExport}
             disabled={completedCount === 0}
             className={`hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all disabled:opacity-50 border ${isDark
@@ -279,8 +309,8 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
             }`}>
             <CheckCircle2 className="w-5 h-5 text-green-500" />
             <div>
-              <p className="font-semibold text-sm">Translation Complete</p>
-              <p className="text-xs opacity-90">All model translations generated successfully</p>
+              <p className="font-semibold text-sm">{successMessage}</p>
+              <p className="text-xs opacity-90">{successMessage === 'Translation Complete' ? 'All model translations generated successfully' : 'Your progress has been saved'}</p>
             </div>
           </div>
         </div>
