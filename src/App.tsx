@@ -139,8 +139,8 @@ export default function App() {
           handleUpdateFile={handleUpdateFile}
           setSubtitleFiles={setSubtitleFiles}
           setProjects={setProjects}
-          isMobileMenuOpen={isMobileMenuOpen}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
+          handleDeleteFile={handleDeleteFile}
         />
       </AuthProvider>
     </SettingsProvider>
@@ -162,7 +162,8 @@ function AppContent({
   setSubtitleFiles,
   setProjects,
   isMobileMenuOpen,
-  setIsMobileMenuOpen
+  setIsMobileMenuOpen,
+  handleDeleteFile
 }: any) {
   const { user, isLoading } = useAuth();
   const { theme } = useSettings();
@@ -292,6 +293,7 @@ function AppContent({
                       onMoveFile={handleMoveFileToProject}
                       onFileSelect={handleFileSelect}
                       setActiveTab={setActiveTab}
+                      onDeleteFile={handleDeleteFile}
                     />
                   )}
 

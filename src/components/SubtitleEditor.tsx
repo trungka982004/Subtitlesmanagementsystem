@@ -75,15 +75,46 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   };
 
   const handleSave = () => {
-    // Calculate progress
-    const completedCount = editedEntries.filter(e => e.selectedModel).length;
-    const progress = editedEntries.length > 0 ? Math.round((completedCount / editedEntries.length) * 100) : 0;
+    // Auto-select best model for unselected entries to ensure 'done' status is valid and persistent
+    // Priority: NLLB > mBART > Opus > Libre
+    const finalEntries = editedEntries.map(entry => {
+      if (entry.selectedModel && entry.translation) return entry;
 
-    // Explicitly set status to 'done' as requested by user ("Save button... In Upload Subtitle: that file will change status into Completed")
+      // Find best available translation
+      let selectedModel: 'nllb' | 'mbart' | 'opus' | 'libre' | undefined;
+      let translation = '';
+
+      if (entry.nllbTranslation) { selectedModel = 'nllb'; translation = entry.nllbTranslation; }
+      else if (entry.mbartTranslation) { selectedModel = 'mbart'; translation = entry.mbartTranslation; }
+      else if (entry.opusTranslation) { selectedModel = 'opus'; translation = entry.opusTranslation; }
+      else if (entry.libreTranslation) { selectedModel = 'libre'; translation = entry.libreTranslation; }
+      else if (entry.googleTranslation) { selectedModel = 'google' as any; translation = entry.googleTranslation; }
+
+      if (selectedModel) {
+        return {
+          ...entry,
+          selectedModel,
+          translation
+        };
+      }
+      return entry;
+    });
+
+    setEditedEntries(finalEntries);
+
+    // Calculate progress with fully populated entries
+    const completedCount = finalEntries.filter(e => e.selectedModel).length;
+    const progress = finalEntries.length > 0 ? Math.round((completedCount / finalEntries.length) * 100) : 0;
+
+    // If we have translations, we treat it as done. If not, we respect the calculation.
+    // However, existing requirement was to force 'done' on save. 
+    // We'll trust the calculated progress if it's 100, otherwise force done if requested but best effort.
+    // Actually, let's keep the user's forced 'done' behavior but now backed by actual data (progress 100).
+
     onUpdate({
       ...file,
-      entries: editedEntries,
-      progress,
+      entries: finalEntries,
+      progress: progress === 100 ? 100 : progress, // Ensure 100 if complete
       status: 'done'
     });
 

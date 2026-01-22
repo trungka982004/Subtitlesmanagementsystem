@@ -11,6 +11,7 @@ interface DashboardProps {
     onMoveFile: (fileId: string, projectId: string) => void;
     onFileSelect: (file: SubtitleFile) => void;
     setActiveTab: (tab: any) => void;
+    onDeleteFile: (fileId: string) => void;
 }
 
 export function Dashboard({
@@ -21,7 +22,8 @@ export function Dashboard({
     onDeleteProject,
     onMoveFile,
     onFileSelect,
-    setActiveTab
+    setActiveTab,
+    onDeleteFile
 }: DashboardProps) {
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -39,6 +41,7 @@ export function Dashboard({
                     onCreateProject={onCreateProject}
                     onMoveFile={onMoveFile}
                     onFileUpload={onFileUpload}
+                    onDeleteFile={onDeleteFile}
                     onFileSelect={(file: any) => {
                         onFileSelect(file);
                         setActiveTab('manage');

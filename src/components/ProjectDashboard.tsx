@@ -12,6 +12,7 @@ interface ProjectDashboardProps {
   onMoveFile: (fileId: string, projectId: string) => void;
   onFileUpload: (file: SubtitleFile) => void;
   onFileSelect: (file: SubtitleFile) => void;
+  onDeleteFile: (fileId: string) => void;
 }
 
 interface StagedFile {
@@ -22,7 +23,7 @@ interface StagedFile {
   status: 'uploading' | 'completed' | 'error';
 }
 
-export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile, onFileUpload, onFileSelect }: ProjectDashboardProps) {
+export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile, onFileUpload, onFileSelect, onDeleteFile }: ProjectDashboardProps) {
   const { t } = useTranslation();
   const [dragActiveProject, setDragActiveProject] = useState<string | null>(null);
   const [uploadDragActive, setUploadDragActive] = useState(false);
@@ -348,8 +349,18 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                               onClick={(e) => e.stopPropagation()}
                             >
                               <option value={project.id}>{t('move')}</option>
-                              <option value="">{t('unassign')}</option>
                             </select>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm('Are you sure you want to delete this file?')) {
+                                  onDeleteFile(file.id);
+                                }
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -402,6 +413,17 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                 </div>
 
                 <div className="flex items-center gap-4">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('Are you sure you want to delete this file?')) {
+                        onDeleteFile(file.id);
+                      }
+                    }}
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-slate-500">{t('moveTo')}</span>
                     <select
@@ -423,7 +445,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
             ))}
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
