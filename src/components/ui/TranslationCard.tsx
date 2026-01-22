@@ -14,6 +14,7 @@ interface TranslationCardProps {
     latency?: number;
     confidence?: number;
     errorMessage?: string;
+    isLocked?: boolean;
 }
 
 export function TranslationCard({
@@ -27,19 +28,20 @@ export function TranslationCard({
     badgeColor,
     latency,
     confidence,
-    errorMessage
+    errorMessage,
+    isLocked
 }: TranslationCardProps) {
 
     // Allow selection via card click
     const handleClick = () => {
-        if (!isLoading && translation && !errorMessage) {
+        if (!isLoading && translation && !errorMessage && !isLocked) {
             onSelect();
         }
     };
 
     return (
         <div
-            className={`relative flex flex-col h-full rounded-xl border-2 transition-all duration-300 bg-white dark:bg-slate-900 overflow-hidden shadow-sm hover:shadow-lg ${isLoading || !translation ? 'cursor-default' : 'cursor-pointer'
+            className={`relative flex flex-col h-full rounded-xl border-2 transition-all duration-300 bg-white dark:bg-slate-900 overflow-hidden shadow-sm ${isLoading || !translation || isLocked ? 'cursor-default' : 'cursor-pointer hover:shadow-lg'
                 } ${isSelected ? `${colorClass} shadow-md ring-1 ring-opacity-50` : 'border-slate-200 dark:border-slate-800'
                 }`}
             onClick={handleClick}

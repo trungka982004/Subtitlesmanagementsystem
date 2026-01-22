@@ -128,12 +128,12 @@ async def load_model(model_id: str):
     original_model_path = os.path.join(BASE_MODELS_PATH, model_id)
     ct2_model_path = os.path.join(BASE_MODELS_PATH, f"{model_id}_ct2")
     
-    # Check if optimized version exists
-    # IMPORTANT: Disable CT2 for mBART due to repetition issues in conversion
+    # Check if optimized version exists and is valid (contains model.bin)
     use_ct2 = False
     model_path_to_load = original_model_path
     
-    if os.path.exists(ct2_model_path) and "mbart" not in model_id.lower():
+    # Check for model.bin specifically to verify CT2 model validity
+    if os.path.exists(ct2_model_path) and os.path.exists(os.path.join(ct2_model_path, "model.bin")) and "mbart" not in model_id.lower():
         print(f"Found optimized CTranslate2 model at {ct2_model_path}")
         use_ct2 = True
         model_path_to_load = ct2_model_path
@@ -146,7 +146,7 @@ async def load_model(model_id: str):
         if os.path.exists(os.path.join("../../../models", model_id)):
              original_model_path = os.path.join("../../../models", model_id)
              ct2_model_path = os.path.join("../../../models", f"{model_id}_ct2")
-             if os.path.exists(ct2_model_path) and "mbart" not in model_id.lower():
+             if os.path.exists(ct2_model_path) and os.path.exists(os.path.join(ct2_model_path, "model.bin")) and "mbart" not in model_id.lower():
                  use_ct2 = True
                  model_path_to_load = ct2_model_path
              else:
@@ -155,13 +155,13 @@ async def load_model(model_id: str):
              print(f"Model path failed: {original_model_path}")
              raise HTTPException(status_code=404, detail=f"Model {model_id} not found")
 
-    # Check for nested final_model in original path if NOT using CT2 or if CT2 failed
-    # Actually, even for CT2, we assume it's flat. For original, we check.
+    # Check for nested final_model in original path if NOT using CT2
     if not use_ct2:
         nested_path = os.path.join(model_path_to_load, "final_model")
         if os.path.exists(nested_path) and os.path.isdir(nested_path):
              print(f"Adjusting path to nested 'final_model': {nested_path}")
              model_path_to_load = nested_path
+             original_model_path = nested_path # Keep original path updated too
 
     try:
         # Unload previous
@@ -189,49 +189,78 @@ async def load_model(model_id: str):
 
         if use_ct2:
             print(f"Loading CTranslate2 engine from {model_path_to_load}...")
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            
-            # CPU-optimized CTranslate2 configuration
-            if device == "cpu":
-                print(f"Configuring CTranslate2 for CPU with {INTER_THREADS} inter_threads, {INTRA_THREADS} intra_threads")
-                translator = ctranslate2.Translator(
-                    model_path_to_load, 
-                    device=device,
-                    inter_threads=INTER_THREADS,
-                    intra_threads=INTRA_THREADS,
-                    compute_type="auto"  # Let CTranslate2 choose optimal compute type
-                )
-            else:
-                translator = ctranslate2.Translator(model_path_to_load, device=device)
-            
-            is_ct2_model = True
-            
-            # Special handling for mBART: It needs to know the target language code
-            if "mbart" in model_id.lower():
-                # Ensure compatibility with mBART tokenizer which might be multilingual
-                if tokenizer.pad_token is None:
-                    tokenizer.pad_token = tokenizer.eos_token
-                # Set source and target languages
-                if not hasattr(tokenizer, 'src_lang') or not tokenizer.src_lang:
-                     print("Setting default src_lang to zh_CN for mBART")
-                     tokenizer.src_lang = "zh_CN"
-                # Force target language to Vietnamese
-                tokenizer.tgt_lang = "vi_VN"
-                print(f"mBART config: src_lang={tokenizer.src_lang}, tgt_lang={tokenizer.tgt_lang}")
+            # Robust CUDA effort with CPU fallback
+            try:
+                try:
+                    if torch.cuda.is_available():
+                        print("Attempting to load CTranslate2 on CUDA...")
+                        translator = ctranslate2.Translator(model_path_to_load, device="cuda")
+                        print("CTranslate2 model loaded successfully on CUDA!")
+                    else:
+                        raise RuntimeError("CUDA not available")
+                except Exception as e:
+                    # Handle cases where CUDA is available but fails to initialize (e.g. driver issues)
+                    if torch.cuda.is_available():
+                        print(f"CUDA initialization failed (likely driver version mismatch): {e}")
+                    
+                    print(f"Falling back to CPU configuration...")
+                    print(f"Configuring CTranslate2 for CPU with {INTER_THREADS} inter_threads, {INTRA_THREADS} intra_threads")
+                    translator = ctranslate2.Translator(
+                        model_path_to_load, 
+                        device="cpu",
+                        inter_threads=INTER_THREADS,
+                        intra_threads=INTRA_THREADS,
+                        compute_type="auto"
+                    )
+                    print("CTranslate2 model loaded successfully on CPU!")
                 
-            print("CTranslate2 model loaded successfully!")
-        else:
+                is_ct2_model = True
+                
+                # Special handling for mBART: It needs to know the target language code
+                if "mbart" in model_id.lower():
+                    # Ensure compatibility with mBART tokenizer which might be multilingual
+                    if tokenizer.pad_token is None:
+                        tokenizer.pad_token = tokenizer.eos_token
+                    # Set source and target languages
+                    if not hasattr(tokenizer, 'src_lang') or not tokenizer.src_lang:
+                         print("Setting default src_lang to zh_CN for mBART")
+                         tokenizer.src_lang = "zh_CN"
+                    # Force target language to Vietnamese
+                    tokenizer.tgt_lang = "vi_VN"
+                    print(f"mBART config: src_lang={tokenizer.src_lang}, tgt_lang={tokenizer.tgt_lang}")
+                    
+                print("CTranslate2 model loaded successfully!")
+            except Exception as e:
+                print(f"CTranslate2 loading failed completely: {e}. Falling back to standard Transformers...")
+                use_ct2 = False
+                # If CT2 fails, we'll fall through to the Transformers path below
+                # We need to update model_path_to_load to the original path
+                model_path_to_load = original_model_path
+                # Check for nested final_model again just in case
+                nested_path = os.path.join(model_path_to_load, "final_model")
+                if os.path.exists(nested_path) and os.path.isdir(nested_path):
+                     model_path_to_load = nested_path
+
+        if not use_ct2:
             print(f"Loading standard Transformers model from {model_path_to_load}...")
             model = AutoModelForSeq2SeqLM.from_pretrained(model_path_to_load, local_files_only=True)
+            
             if torch.cuda.is_available():
-                model = model.to("cuda")
+                try:
+                    model = model.to("cuda")
+                    print("Transformers model loaded successfully on CUDA!")
+                except Exception as e:
+                    print(f"Failed to move Transformers model to CUDA, falling back to CPU: {e}")
+                    model = model.to("cpu")
+                    print("Transformers model loaded successfully on CPU!")
+            else:
+                print("Transformers model loaded successfully on CPU!")
             is_ct2_model = False
-            print("Transformers model loaded successfully!")
 
         current_model_id = model_id
         return True
     except Exception as e:
-        print(f"Error loading model: {e}")
+        print(f"Critical error loading model {model_id}: {e}")
         import traceback
         traceback.print_exc()
         return False

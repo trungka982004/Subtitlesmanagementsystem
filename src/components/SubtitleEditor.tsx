@@ -27,6 +27,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   }, [file.id, file.entries]);
 
   const handleModelSelection = (id: number, model: 'libre' | 'opus' | 'mbart' | 'nllb', text: string) => {
+    if (file.status === 'done') return;
     const updated = editedEntries.map(entry => {
       if (entry.id === id) {
         return {
@@ -44,6 +45,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   };
 
   const handleTextEdit = (id: number, model: 'libre' | 'opus' | 'mbart' | 'nllb', newText: string) => {
+    if (file.status === 'done') return;
     const updated = editedEntries.map(entry => {
       if (entry.id === id) {
         const fieldName = model === 'libre' ? 'libreTranslation' : `${model}Translation`;
@@ -100,6 +102,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   };
 
   const handleGenerateAll = async () => {
+    if (file.status === 'done') return;
     setIsTranslating(true);
     setTranslationProgress(0);
     setShowSuccess(false);
@@ -257,23 +260,32 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleGenerateAll}
-            disabled={isTranslating}
-            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all disabled:opacity-50 border ${isDark
-              ? 'text-slate-200 bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 hover:border-blue-500/50'
-              : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200 hover:border-blue-300'
-              }`}
-          >
-            {isTranslating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />}
-            <span>Generate All</span>
-          </button>
+          {file.status === 'done' && (
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded border ${isDark ? 'text-green-400 bg-green-400/10 border-green-400/20' : 'text-green-700 bg-green-50 border-green-200'}`}>
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Completed</span>
+            </div>
+          )}
+
+          {file.status !== 'done' && (
+            <button
+              onClick={handleGenerateAll}
+              disabled={isTranslating}
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all disabled:opacity-50 border ${isDark
+                ? 'text-slate-200 bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 hover:border-blue-500/50'
+                : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200 hover:border-blue-300'
+                }`}
+            >
+              {isTranslating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />}
+              <span>Generate All</span>
+            </button>
+          )}
 
           <button
             onClick={handleSave}
             className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all border ${isDark
-                ? 'text-green-400 bg-green-900/10 hover:bg-green-900/20 border-green-500/30 hover:border-green-500/50'
-                : 'text-green-700 bg-green-50 hover:bg-green-100 border-green-200 hover:border-green-300'
+              ? 'text-green-400 bg-green-900/10 hover:bg-green-900/20 border-green-500/30 hover:border-green-500/50'
+              : 'text-green-700 bg-green-50 hover:bg-green-100 border-green-200 hover:border-green-300'
               }`}
           >
             <Save className="w-3.5 h-3.5" />
@@ -357,6 +369,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   latency={getDummyLatency('LibreTranslate')}
                   confidence={getDummyScore('LibreTranslate')}
                   errorMessage={entry.libreError}
+                  isLocked={file.status === 'done'}
                 />
               </div>
 
@@ -373,6 +386,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   latency={getDummyLatency('Opus MT')}
                   confidence={getDummyScore('Opus MT')}
                   errorMessage={entry.opusError}
+                  isLocked={file.status === 'done'}
                 />
               </div>
 
@@ -390,6 +404,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   latency={getDummyLatency('mBART-50')}
                   confidence={getDummyScore('mBART-50')}
                   errorMessage={entry.mbartError}
+                  isLocked={file.status === 'done'}
                 />
               </div>
 
@@ -406,6 +421,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   latency={getDummyLatency('NLLB-200')}
                   confidence={getDummyScore('NLLB-200')}
                   errorMessage={entry.nllbError}
+                  isLocked={file.status === 'done'}
                 />
               </div>
             </div>
