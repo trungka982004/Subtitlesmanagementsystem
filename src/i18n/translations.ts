@@ -254,6 +254,9 @@ export const translations = {
     save: 'Lưu Cấu hình',
     close: 'Đóng',
     model: 'Mô hình',
+    page: 'Trang',
+    next: 'Tiếp theo',
+    back: 'Quay lại',
   },
 
   en: {
@@ -511,6 +514,9 @@ export const translations = {
     save: 'Save Configuration',
     close: 'Close',
     model: 'Model',
+    page: 'Page',
+    next: 'Next',
+    back: 'Back',
   },
 
   zh: {
@@ -768,6 +774,9 @@ export const translations = {
     save: '保存配置',
     close: '关闭',
     model: '模型',
+    page: '页',
+    next: '下一页',
+    back: '上一页',
   },
 };
 

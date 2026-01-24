@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { parseContent } from '../utils/srt';
 import { SubtitleFile, Project, SubtitleEntry } from '../types';
-import { CheckCircle2, Folder, Trash2, FolderOpen, CloudUpload, FileText, X } from 'lucide-react';
+import { CheckCircle2, Folder, Trash2, FolderOpen, CloudUpload, FileText, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface ProjectDashboardProps {
@@ -28,6 +28,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
   const [dragActiveProject, setDragActiveProject] = useState<string | null>(null);
   const [uploadDragActive, setUploadDragActive] = useState(false);
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
+  const [projectPages, setProjectPages] = useState<Record<string, number>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Parsing Logic via Utility
@@ -162,8 +163,20 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
     setDragActiveProject(null);
   };
 
-  const getProjectFiles = (projectId: string) => files.filter(f => f.projectId === projectId);
-  const getUnassignedFiles = () => files.filter(f => !f.projectId);
+  const handlePageChange = (projectId: string, delta: number) => {
+    setProjectPages(prev => ({
+      ...prev,
+      [projectId]: (prev[projectId] || 0) + delta
+    }));
+  };
+
+  const getProjectFiles = (projectId: string) => files
+    .filter(f => f.projectId === projectId)
+    .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+
+  const getUnassignedFiles = () => files
+    .filter(f => !f.projectId)
+    .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
   const getProjectProgress = (projectId: string) => {
     const pFiles = getProjectFiles(projectId);
@@ -281,6 +294,9 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
               const pFiles = getProjectFiles(project.id);
               const progress = getProjectProgress(project.id);
               const isDragActive = dragActiveProject === project.id;
+              const currentPage = projectPages[project.id] || 0;
+              const totalPages = Math.ceil(pFiles.length / 5);
+              const currentFiles = pFiles.slice(currentPage * 5, (currentPage + 1) * 5);
 
               return (
                 <div
@@ -325,7 +341,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                   {/* File list preview */}
                   {pFiles.length > 0 ? (
                     <div className="mt-4 space-y-2 border-t border-slate-100 dark:border-white/5 pt-3">
-                      {pFiles.slice(0, 3).map(file => (
+                      {currentFiles.map(file => (
                         <div
                           key={file.id}
                           className="flex items-center justify-between text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-1 -mx-1 rounded"
@@ -364,8 +380,37 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                           </div>
                         </div>
                       ))}
-                      {pFiles.length > 3 && (
-                        <p className="text-xs text-slate-500 text-center">+ {pFiles.length - 3} {t('moreFiles')}</p>
+
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (currentPage > 0) handlePageChange(project.id, -1);
+                            }}
+                            disabled={currentPage === 0}
+                            className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-blue-500 disabled:opacity-30 disabled:hover:text-slate-500 transition-colors px-1"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                            {t('back')}
+                          </button>
+
+                          <span className="text-[10px] font-bold text-slate-500 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md uppercase tracking-tighter">
+                            {t('page')} {currentPage + 1} / {totalPages}
+                          </span>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (currentPage < totalPages - 1) handlePageChange(project.id, 1);
+                            }}
+                            disabled={currentPage >= totalPages - 1}
+                            className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-blue-500 disabled:opacity-30 disabled:hover:text-slate-500 transition-colors px-1"
+                          >
+                            {t('next')}
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   ) : (
@@ -445,8 +490,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
             ))}
           </div>
         </div>
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }

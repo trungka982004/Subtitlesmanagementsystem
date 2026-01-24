@@ -291,26 +291,39 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          {file.status === 'done' && (
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded border ${isDark ? 'text-green-400 bg-green-400/10 border-green-400/20' : 'text-green-700 bg-green-50 border-green-200'}`}>
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Completed</span>
-            </div>
-          )}
+          {(() => {
+            const isAllGenerated = editedEntries.every(e =>
+              (e.libreTranslation || e.googleTranslation) &&
+              e.opusTranslation &&
+              (e.mbartTranslation || e.nlpTranslation) &&
+              e.nllbTranslation
+            );
+            const isFinished = file.status === 'done' || isAllGenerated;
 
-          {file.status !== 'done' && (
-            <button
-              onClick={handleGenerateAll}
-              disabled={isTranslating}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all disabled:opacity-50 border ${isDark
-                ? 'text-slate-200 bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 hover:border-blue-500/50'
-                : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200 hover:border-blue-300'
-                }`}
-            >
-              {isTranslating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />}
-              <span>Generate All</span>
-            </button>
-          )}
+            return (
+              <button
+                onClick={handleGenerateAll}
+                disabled={isTranslating || isFinished}
+                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded transition-all disabled:opacity-50 border ${isDark
+                  ? isFinished
+                    ? 'text-slate-500 bg-slate-800/50 border-slate-700'
+                    : 'text-slate-200 bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 hover:border-blue-500/50'
+                  : isFinished
+                    ? 'text-slate-400 bg-slate-100 border-slate-200'
+                    : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200 hover:border-blue-300'
+                  }`}
+              >
+                {isTranslating ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : isFinished ? (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                ) : (
+                  <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
+                )}
+                <span>{isFinished ? 'Generated All' : 'Generate All'}</span>
+              </button>
+            );
+          })()}
 
           <button
             onClick={handleSave}
