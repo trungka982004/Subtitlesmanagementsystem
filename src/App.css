@@ -44,6 +44,77 @@ body,
     font-weight: 700;
 }
 
+/* Sidebar Navigation Button Overrides */
+.sidebar-nav-button {
+    color: #94a3b8 !important;
+    /* text-slate-400 */
+    background: transparent !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sidebar-nav-button .icon {
+    color: #94a3b8 !important;
+}
+
+/* Hover effect for non-active buttons */
+.sidebar-nav-button:not(.active):hover {
+    background: #1e293b !important;
+    /* bg-slate-800 */
+    color: #ffffff !important;
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+}
+
+.sidebar-nav-button:not(.active):hover .icon {
+    color: #60a5fa !important;
+    /* text-blue-400 */
+    transform: scale(1.1) !important;
+}
+
+/* Active state */
+.sidebar-nav-button.active {
+    background: #2563eb !important;
+    /* bg-blue-600 */
+    color: #ffffff !important;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4) !important;
+    transform: scale(1.02) !important;
+}
+
+.sidebar-nav-button.active .icon {
+    color: #ffffff !important;
+    transform: scale(1.1) !important;
+}
+
+.sidebar-nav-button.active .label {
+    font-weight: 700 !important;
+}
+
+/* Logout Button Special Style */
+.sidebar-logout-button {
+    color: #f87171 !important;
+    /* text-red-400 */
+    background: rgba(239, 68, 68, 0.08) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sidebar-logout-button .icon {
+    color: #f87171 !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar-logout-button:hover {
+    background: #ef4444 !important;
+    /* bg-red-500 */
+    color: #ffffff !important;
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 20px 25px -5px rgba(239, 68, 68, 0.3), 0 10px 10px -5px rgba(239, 68, 68, 0.2) !important;
+}
+
+.sidebar-logout-button:hover .icon {
+    color: #ffffff !important;
+    transform: scale(1.1) rotate(-8deg) !important;
+}
+
 /* Scrollbar refinement */
 ::-webkit-scrollbar {
     width: 8px;

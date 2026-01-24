@@ -21,6 +21,9 @@ export const translations = {
 
     // App
     professionalWorkflow: 'Quy trình dịch thuật chuyên nghiệp',
+    brandName: 'V-Studio',
+    brandSubtitle: 'Subtitle AI',
+    userAdmin: 'Quản trị viên',
     projectFiles: 'File dự án',
     noFilesFound: 'Không tìm thấy file nào',
     selectFileTitle: 'Chọn file',
@@ -248,6 +251,7 @@ export const translations = {
     projects: 'dự án',
     clearAllData: 'Xóa tất cả dữ liệu',
     clearAllDataWarning: 'Xóa tất cả các file phụ đề, bản dịch và cài đặt. Hành động này không thể hoàn tác.',
+    searchPlaceholder: 'Tìm kiếm dự án, tệp...',
 
     // Common
     reset: 'Mặc định',
@@ -281,6 +285,9 @@ export const translations = {
 
     // App
     professionalWorkflow: 'Professional Translation Workflow',
+    brandName: 'V-Studio',
+    brandSubtitle: 'Subtitle AI',
+    userAdmin: 'Admin',
     projectFiles: 'Project Files',
     noFilesFound: 'No files found',
     selectFileTitle: 'Select a File',
@@ -508,6 +515,7 @@ export const translations = {
     projects: 'projects',
     clearAllData: 'Clear All Data',
     clearAllDataWarning: 'Delete all subtitle files, translations, and settings. This action cannot be undone.',
+    searchPlaceholder: 'Search projects, files...',
 
     // Common
     reset: 'Reset',
@@ -541,6 +549,9 @@ export const translations = {
 
     // App
     professionalWorkflow: '专业翻译流程',
+    brandName: 'V-Studio',
+    brandSubtitle: '字幕 AI',
+    userAdmin: '管理员',
     projectFiles: '项目文件',
     noFilesFound: '未找到文件',
     selectFileTitle: '选择文件',
@@ -768,6 +779,7 @@ export const translations = {
     projects: '个项目',
     clearAllData: '清除所有数据',
     clearAllDataWarning: '删除所有字幕文件、翻译和设置。此操作无法撤销。',
+    searchPlaceholder: '搜索项目、文件...',
 
     // Common
     reset: '重置',

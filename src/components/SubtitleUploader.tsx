@@ -28,7 +28,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject, file
   };
 
   return (
-    <div className="grid grid-cols-2 gap-12">
+    <div className="grid grid-cols-2 gap-12 lg:gap-16 max-w-full overflow-x-hidden">
       {/* Project Creation - Top Left */}
       <div className="h-full">
         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 hover:shadow-lg hover:border-slate-300 dark:hover:border-blue-500/30 transition-all duration-300 h-full flex flex-col">
@@ -84,12 +84,13 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject, file
 
       {/* Overview Stats - Top Right */}
       <div className="h-full flex flex-col">
-        <div className="flex justify-center items-center mb-6 mt-8">
-          <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide">{t('overview')}</h3>
+        <div className="flex flex-col justify-center items-center mb-6 mt-8">
+          <h3 className="dashboard-section-title">{t('overview')}</h3>
+          <div className="dashboard-section-title-container w-full"></div>
         </div>
         <div className="grid grid-cols-3 gap-6">
           {/* Done Card */}
-          <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:shadow-md transition-all duration-200 h-full min-h-[200px]">
+          <div className="p-6 bg-green-50 dark:bg-slate-900 rounded-3xl shadow-sm border border-green-200 dark:border-green-900/30 flex flex-col justify-between group hover:shadow-md transition-all duration-200 h-full min-h-[200px]">
             <div className="flex justify-between items-start">
               <div className="p-4 rounded-2xl text-green-600 dark:text-green-400">
                 <CheckCircle2 className="w-6 h-6" />
@@ -118,7 +119,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject, file
           </div>
 
           {/* In Progress Card */}
-          <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:shadow-md transition-all duration-200 h-full min-h-[200px]">
+          <div className="p-6 bg-blue-50 dark:bg-slate-900 rounded-3xl shadow-sm border border-blue-200 dark:border-blue-900/30 flex flex-col justify-between group hover:shadow-md transition-all duration-200 h-full min-h-[200px]">
             <div className="flex justify-between items-start">
               <div className="p-4 rounded-2xl text-blue-600 dark:text-blue-400">
                 <Clock className="w-6 h-6" />
@@ -147,7 +148,7 @@ export function SubtitleUploader({ onFileUpload, projects, onCreateProject, file
           </div>
 
           {/* Not Started Card */}
-          <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:shadow-md transition-all duration-200 h-full min-h-[200px]">
+          <div className="p-6 bg-orange-50 dark:bg-slate-900 rounded-3xl shadow-sm border border-orange-200 dark:border-orange-900/30 flex flex-col justify-between group hover:shadow-md transition-all duration-200 h-full min-h-[200px]">
             <div className="flex justify-between items-start">
               <div className="p-4 rounded-2xl text-orange-600 dark:text-orange-400">
                 <AlertCircle className="w-6 h-6" />

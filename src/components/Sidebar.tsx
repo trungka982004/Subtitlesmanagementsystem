@@ -1,6 +1,6 @@
-import { Upload, FileText, BarChart3, Settings, LogOut, User, Languages } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { Upload, FileText, BarChart3, Settings, Languages, LogOut, User as UserIcon, Mail } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   activeTab: 'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings';
@@ -8,8 +8,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
-  const { user, logout } = useAuth();
   const { t } = useTranslation();
+  const { user, logout } = useAuth();
 
   const menuItems = [
     { id: 'upload' as const, label: t('uploadSubtitle'), icon: Upload },
@@ -21,43 +21,63 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
   return (
     <div
-      className="w-64 h-full bg-slate-900 dark:bg-slate-950 text-white flex flex-col shrink-0 transition-all duration-300 relative z-20 shadow-xl border-r border-transparent dark:border-white/10"
-      style={{ minWidth: '250px' }}
+      className="w-full h-full bg-slate-900 dark:bg-slate-950 text-white flex flex-col transition-all duration-300 relative z-20 shadow-xl border-r border-transparent dark:border-white/10"
     >
-      {/* User Profile */}
-      <div className="p-6 bg-slate-950 dark:bg-slate-950/50 flex flex-col gap-4 border-b border-white/10 dark:border-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
-            <User className="w-5 h-5" />
+      {/* Brand Logo & Profile Section */}
+      <div className="p-8 flex flex-col gap-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <Languages className="w-6 h-6 text-white" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm text-white truncate">{user?.name || 'Admin'}</p>
-            <p className="text-xs text-slate-400 truncate" title={user?.email}>{user?.email || 'admin@example.com'}</p>
+          <div className="flex flex-col">
+            <span className="font-black text-lg tracking-tighter leading-none">{t('brandName')}</span>
+            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1">{t('brandSubtitle')}</span>
+          </div>
+        </div>
+
+        {/* Separated User Info Boxes */}
+        <div className="flex flex-col gap-2.5">
+          {/* Username Box */}
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm group hover:bg-white/10 transition-colors">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
+              <UserIcon className="w-4 h-4 text-blue-400" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{t('username')}</span>
+              <span className="text-xs font-bold text-slate-100 truncate">{user?.name || t('userAdmin')}</span>
+            </div>
+          </div>
+
+          {/* Email Box */}
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm group hover:bg-white/10 transition-colors">
+            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center shrink-0">
+              <Mail className="w-4 h-4 text-indigo-400" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{t('email')}</span>
+              <span className="text-xs font-bold text-slate-100 truncate">{user?.email || 'admin@vstudio.com'}</span>
+            </div>
           </div>
         </div>
 
         <button
           onClick={logout}
-          className="flex items-center justify-center gap-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 py-2 px-4 rounded-lg transition-all w-fit shadow-md"
+          className="sidebar-logout-button flex items-center gap-3 w-full px-6 py-4 rounded-full transition-all duration-300 group mt-2"
         >
-          <LogOut className="w-4 h-4" />
-          {t('logout')}
+          <LogOut className="icon w-5 h-5 transition-all duration-300" />
+          <span className="label text-sm font-semibold tracking-tight transition-colors duration-300">{t('logout')}</span>
         </button>
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-3 overflow-y-auto">
         {menuItems.map(item => (
           <button
             key={item.id}
             onClick={() => onTabChange(item.id)}
-            className={`w-full flex items-center gap-3 px-6 py-3 text-sm font-medium transition-all duration-200 rounded-md ${activeTab === item.id
-              ? 'bg-blue-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/10 hover:translate-x-1'
-              }`}
+            className={`sidebar-nav-button group w-full flex items-center gap-4 px-6 py-4 text-sm font-semibold rounded-full transition-all duration-300 ${activeTab === item.id ? 'active' : ''}`}
           >
-            <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-slate-400'}`} />
-            <span>{item.label}</span>
+            <item.icon className="icon w-5 h-5 transition-all duration-300" />
+            <span className="label tracking-tight transition-colors duration-300">{item.label}</span>
           </button>
         ))}
       </nav>

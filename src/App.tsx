@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from './services/db';
 import { serializeEntriesToJSON } from './utils/srt';
 import { Sidebar } from './components/Sidebar';
+import { Header } from './components/Header';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SubtitleEntry, Project, SubtitleFile } from './types';
@@ -21,8 +22,8 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeTab, setActiveTab] = useState<'upload' | 'manage' | 'quick-translate' | 'analysis' | 'settings'>('upload');
 
-  // Mobile Menu State
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // Sidebar State (Desktop & Mobile)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedFile, setSelectedFile] = useState<SubtitleFile | null>(null);
 
   // Data loading is now handled inside AppContent to react to user changes
@@ -139,7 +140,8 @@ export default function App() {
           handleUpdateFile={handleUpdateFile}
           setSubtitleFiles={setSubtitleFiles}
           setProjects={setProjects}
-          setIsMobileMenuOpen={setIsMobileMenuOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          isSidebarOpen={isSidebarOpen}
           handleDeleteFile={handleDeleteFile}
         />
       </AuthProvider>
@@ -161,8 +163,8 @@ function AppContent({
   handleUpdateFile,
   setSubtitleFiles,
   setProjects,
-  isMobileMenuOpen,
-  setIsMobileMenuOpen,
+  isSidebarOpen,
+  setIsSidebarOpen,
   handleDeleteFile
 }: any) {
   const { user, isLoading } = useAuth();
@@ -229,100 +231,87 @@ function AppContent({
 
   return (
     <div className={`flex min-h-screen w-full font-sans transition-colors duration-300 ${isDark ? 'bg-slate-950 text-slate-200' : 'bg-slate-50 text-slate-900'}`}>
-      <div className="flex flex-1 min-h-0">
-        {/* Mobile Sidebar Overlay */}
-        {isMobileMenuOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden backdrop-blur-sm transition-opacity"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-        {/* Sidebar - Responsive Structure */}
-        <div className={`
-          fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out
-          lg:sticky lg:top-0 lg:h-screen lg:translate-x-0
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}>
+      {/* Sidebar Container */}
+      <div
+        className={`fixed inset-y-0 left-0 z-40 bg-slate-900 transition-all duration-300 ease-in-out lg:relative lg:inset-auto lg:h-screen`}
+        style={{
+          width: isSidebarOpen ? '256px' : '0px',
+          minWidth: isSidebarOpen ? '256px' : '0px',
+          maxWidth: isSidebarOpen ? '256px' : '0px',
+          opacity: isSidebarOpen ? 1 : 0,
+          overflow: 'hidden'
+        }}
+      >
+        <div style={{ width: '256px', height: '100%' }}>
           <Sidebar activeTab={activeTab} onTabChange={(tab: any) => {
             setActiveTab(tab);
-            setIsMobileMenuOpen(false);
+            if (window.innerWidth < 1024) setIsSidebarOpen(false);
           }} />
         </div>
+      </div>
 
-        {/* Main Content Area - This container now handles scrolling for the 'covering' effect */}
-        <div className={`flex-1 flex flex-col min-w-0 overflow-y-auto relative h-screen transition-colors duration-300 ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
-          {/* Header - Part of the page workspace (right of sidebar) */}
-          <header className={`sticky top-0 w-full px-8 py-6 backdrop-blur-md border-b flex items-center justify-center shrink-0 z-[100] shadow-sm transition-colors duration-300 ${isDark ? 'bg-slate-950/80 border-white/10' : 'bg-white/80 border-slate-200'
-            }`}>
-            <div className="flex flex-col items-center">
-              <h1 className={`text-3xl font-black tracking-tight flex items-center gap-3 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                <span className="text-blue-600">Sino-Viet Subtitle Studio</span>
-                <span className="text-slate-300 font-light mx-1">|</span>
-                <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>
-                  {getTabTitle()}
-                </span>
-              </h1>
-              <p className="text-slate-400 text-[10px] font-bold tracking-[0.3em] uppercase mt-2">
-                {t('professionalWorkflow')}
-              </p>
-            </div>
-          </header>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 relative">
+        <Header
+          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          getTabTitle={getTabTitle}
+        />
 
-          {/* Workspace Area */}
-          <main className={`flex-1 p-0 overflow-hidden flex flex-col h-full transition-colors duration-300 ${isDark ? 'bg-[#0f172a]' : 'bg-slate-50'}`}>
-            <div className="mx-auto w-full h-full flex flex-col">
-              {activeTab === 'manage' && (
-                <EditorPage
-                  files={subtitleFiles}
-                  selectedFile={selectedFile}
-                  onSelectFile={handleFileSelect}
-                  onUpdateFile={handleUpdateFile}
-                />
-              )}
-
-              {activeTab !== 'manage' && (
-                <div className="p-8 h-full overflow-y-auto custom-scrollbar">
-                  {activeTab === 'upload' && (
-                    <Dashboard
+        <main className={`flex-1 overflow-y-auto custom-scrollbar transition-colors duration-300 ${isDark ? 'bg-[#0f172a]' : 'bg-slate-50'}`}>
+          <div className="p-8">
+            {activeTab === 'manage' ? (
+              <EditorPage
+                files={subtitleFiles}
+                selectedFile={selectedFile}
+                onSelectFile={handleFileSelect}
+                onUpdateFile={handleUpdateFile}
+              />
+            ) : (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {activeTab === 'upload' && (
+                  <Dashboard
+                    files={subtitleFiles}
+                    projects={projects}
+                    onFileUpload={handleFileUpload}
+                    onCreateProject={handleCreateProject}
+                    onDeleteProject={handleDeleteProject}
+                    onMoveFile={handleMoveFileToProject}
+                    onFileSelect={handleFileSelect}
+                    setActiveTab={setActiveTab}
+                    onDeleteFile={handleDeleteFile}
+                  />
+                )}
+                {activeTab === 'quick-translate' && (
+                  <div className="max-w-4xl mx-auto">
+                    <QuickTranslate />
+                  </div>
+                )}
+                {activeTab === 'analysis' && (
+                  <div className="max-w-7xl mx-auto">
+                    <SubtitleAnalysis
                       files={subtitleFiles}
-                      projects={projects}
-                      onFileUpload={handleFileUpload}
-                      onCreateProject={handleCreateProject}
-                      onDeleteProject={handleDeleteProject}
-                      onMoveFile={handleMoveFileToProject}
-                      onFileSelect={handleFileSelect}
-                      setActiveTab={setActiveTab}
-                      onDeleteFile={handleDeleteFile}
+                      selectedFile={selectedFile}
+                      onSelectFile={handleFileSelect}
                     />
-                  )}
-
-                  {activeTab === 'quick-translate' && (
-                    <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-right-8 duration-500">
-                      <QuickTranslate />
-                    </div>
-                  )}
-
-                  {activeTab === 'analysis' && (
-                    <div className="max-w-7xl mx-auto animate-in fade-in zoom-in-95 duration-500">
-                      <SubtitleAnalysis
-                        files={subtitleFiles}
-                        selectedFile={selectedFile}
-                        onSelectFile={handleFileSelect}
-                      />
-                    </div>
-                  )}
-
-                  {activeTab === 'settings' && (
-                    <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <Settings projectsCount={projects.length} />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </main>
-        </div>
+                  </div>
+                )}
+                {activeTab === 'settings' && (
+                  <div className="max-w-2xl mx-auto">
+                    <Settings projectsCount={projects.length} />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );

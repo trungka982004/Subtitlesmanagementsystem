@@ -28,9 +28,11 @@ export interface SubtitleFile {
     id: string;
     projectId?: string;
     name: string;
+    content?: string;
     language?: string;
     entries: SubtitleEntry[];
     uploadedAt: Date;
     status: 'not-started' | 'in-progress' | 'done';
     progress: number;
 }
+

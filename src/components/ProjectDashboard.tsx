@@ -187,7 +187,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid grid-cols-2 gap-12">
+      <div className="grid grid-cols-2 gap-12 lg:gap-16 max-w-full overflow-x-hidden">
         {/* Upload and Attach Files - Left Column (Moved from Top) */}
         <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 group/card flex flex-col h-full">
           {/* Header */}
@@ -285,8 +285,9 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
 
         {/* Projects Section (Right Column) */}
         <div className="h-full flex flex-col">
-          <div className="flex justify-center items-center mb-6 mt-8">
-            <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide">{t('projectsTitle')}</h3>
+          <div className="flex flex-col justify-center items-center mb-6 mt-8">
+            <h3 className="dashboard-section-title">{t('projectsTitle')}</h3>
+            <div className="dashboard-section-title-container w-full"></div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 flex-1 overflow-y-auto max-h-[600px] custom-scrollbar pr-2">

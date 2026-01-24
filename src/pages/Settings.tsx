@@ -115,6 +115,32 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   const [backupEnabled, setBackupEnabled] = useState<boolean>(true);
   const [appVersion, setAppVersion] = useState<string>('1.0.0');
   const [showVersions, setShowVersions] = useState<boolean>(false);
+  const [storageUsed, setStorageUsed] = useState<string>('0 B');
+
+  const fetchStorageUsage = async () => {
+    try {
+      const files = await db.getFiles();
+      const completedFiles = files.filter(f => f.status === 'done');
+
+      const totalBytes = completedFiles.reduce((acc, file) => {
+        // Use content length as a representation of bytes
+        return acc + (file.content?.length || 0);
+      }, 0);
+
+      setStorageUsed(formatSize(totalBytes));
+    } catch (error) {
+      console.error('Failed to fetch storage usage:', error);
+    }
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
 
   // NLP Status
   const [nlpStatus, setNlpStatus] = useState<{ status: string; model_loaded: boolean; device?: string } | null>(null);
@@ -154,8 +180,10 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
   useEffect(() => {
     if (activeSection === 'system') {
       fetchModelInfo();
+      fetchStorageUsage();
     }
   }, [activeSection]);
+
 
   // Synchronize state when user context changes
   useEffect(() => {
@@ -634,9 +662,10 @@ export function Settings({ onClose, projectsCount = 0 }: SettingsProps) {
             </div>
             <div>
               <span className="block text-xs text-gray-500 dark:text-slate-300">{t('storageUsed')}</span>
-              <span className="block text-base font-bold text-gray-900 dark:text-white">256 MB / 10 GB</span>
+              <span className="block text-base font-bold text-gray-900 dark:text-white">{storageUsed} / 10 GB</span>
             </div>
           </div>
+
 
           <div className="col-span-1 md:col-span-2 p-4 bg-slate-50 dark:bg-slate-950 rounded-lg border border-gray-100 dark:border-white/5 flex items-center gap-3 hover:bg-white dark:hover:bg-slate-900 transition-all cursor-default">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
