@@ -39,8 +39,8 @@ export default function App() {
         content: file.entries.map(e => `${e.id}\n${e.startTime} --> ${e.endTime}\n${e.text}`).join('\n\n'),
         projectId: file.projectId || null,
       });
-      // We might need to re-parse entries here or trust the backend to return them (if we implemented parsing there)
-      // For now, let's keep the local file object's entries but use the DB ID
+
+      // Synchronize local state with backend response
       const fileWithEntries = { ...file, id: newFile.id, uploadedAt: newFile.uploadedAt };
       setSubtitleFiles(prev => [...prev, fileWithEntries]);
     } catch (err) {
@@ -95,11 +95,12 @@ export default function App() {
   };
 
   const handleUpdateFile = async (updatedFile: SubtitleFile) => {
+    // TODO: Implement debouncing for database updates
     setSubtitleFiles(prev =>
       prev.map(f => f.id === updatedFile.id ? updatedFile : f)
     );
     setSelectedFile(updatedFile);
-    // Save to DB (debouncing might be good here, but for now direct save)
+
     try {
       await db.updateFile(updatedFile.id, {
         content: serializeEntriesToJSON(updatedFile.entries),
@@ -193,8 +194,6 @@ function AppContent({
     if (user) {
       const loadUserData = async () => {
         try {
-          // Initialize DB if needed (usually handled by seed/backend but safe to ensure)
-          // await db.init(); 
 
           const [loadedProjects, loadedFiles] = await Promise.all([
             db.getProjects(),

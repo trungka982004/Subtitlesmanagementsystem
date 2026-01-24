@@ -20,7 +20,7 @@ export function Header({ onMenuClick, getTabTitle }: HeaderProps) {
                 borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(226,232,240,1)'
             }}
         >
-            {/* 1. LEFT SECTION */}
+            {/* Left Section: Navigation & Title */}
             <div className="flex flex-1 items-center gap-6 min-w-0">
                 <button
                     onClick={onMenuClick}
@@ -45,7 +45,7 @@ export function Header({ onMenuClick, getTabTitle }: HeaderProps) {
                 </div>
             </div>
 
-            {/* 2. CENTER SECTION (Solid Colors to fix visibility) */}
+            {/* Center Section: Branding */}
             <div className="flex-none flex items-center justify-center mx-4">
                 <div className="px-24 py-6 rounded-full bg-white dark:bg-slate-800 border-4 border-blue-600 dark:border-blue-400 shadow-xl flex justify-center items-center">
                     <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em] whitespace-nowrap text-center drop-shadow-sm leading-relaxed">
@@ -54,7 +54,7 @@ export function Header({ onMenuClick, getTabTitle }: HeaderProps) {
                 </div>
             </div>
 
-            {/* 3. RIGHT SECTION */}
+            {/* Right Section: Actions */}
             <div className="flex flex-1 items-center justify-end min-w-0">
             </div>
         </header>

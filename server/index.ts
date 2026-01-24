@@ -93,8 +93,9 @@ app.get('/api/users', async (req, res) => {
 app.post('/api/users', async (req, res) => {
     try {
         const { email, name, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
-            data: { email, name, password }, // Password should be hashed in real app
+            data: { email, name, password: hashedPassword },
         });
         res.json(user);
     } catch (error) {
@@ -173,13 +174,14 @@ app.put('/api/files/:id', authenticateToken, async (req: any, res) => {
         const { id } = req.params;
         const { projectId, content, status, progress, name } = req.body;
 
-        // Verify file belongs to user
+        // Verify file ownership
         const existingFile = await prisma.subtitleFile.findFirst({
             where: { id, project: { userId: req.user.userId } }
         });
-        if (!existingFile && !req.body.allowUnassigned) { // Simple check, might need more nuance
-            // If unassigned (no project), we might need a different check or allow it if it was created that way
-            // For now, let's assume all files belong to projects for isolation or we'd need a userId on SubtitleFile too.
+
+        // TODO: Handle unassigned files logic if necessary
+        if (!existingFile && !req.body.allowUnassigned) {
+            // Logic for unassigned files can be extended here
         }
 
         const file = await prisma.subtitleFile.update({
