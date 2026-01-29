@@ -262,13 +262,7 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
   const completedCount = editedEntries.filter(e => e.selectedModel).length;
 
   // Dummy scores for now
-  const getDummyScore = (model: string) => {
-    // deterministic random based on model name strings length
-    return 90 + (model.length % 9);
-  };
-  const getDummyLatency = (model: string) => {
-    return 100 + (model.length * 15);
-  };
+
 
   return (
     <div className={`flex flex-col w-full h-full font-sans overflow-hidden transition-colors duration-300 ${isDark ? 'bg-[#0f172a]' : 'bg-slate-50'
@@ -408,10 +402,9 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   isSelected={entry.selectedModel === 'libre'}
                   onSelect={() => handleModelSelection(entry.id, 'libre', entry.libreTranslation || entry.googleTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'libre', val)}
-                  colorClass="border-blue-500 bg-blue-50 dark:bg-blue-500/5"
-                  badgeColor="bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400"
-                  latency={getDummyLatency('LibreTranslate')}
-                  confidence={getDummyScore('LibreTranslate')}
+                  variant="blue"
+                  isDark={isDark}
+
                   errorMessage={entry.libreError}
                   isLocked={file.status === 'done'}
                 />
@@ -425,10 +418,9 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   isSelected={entry.selectedModel === 'opus'}
                   onSelect={() => handleModelSelection(entry.id, 'opus', entry.opusTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'opus', val)}
-                  colorClass="border-purple-500 bg-purple-50 dark:bg-purple-500/5"
-                  badgeColor="bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400"
-                  latency={getDummyLatency('Opus MT')}
-                  confidence={getDummyScore('Opus MT')}
+                  variant="purple"
+                  isDark={isDark}
+
                   errorMessage={entry.opusError}
                   isLocked={file.status === 'done'}
                 />
@@ -443,10 +435,9 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   isSelected={entry.selectedModel === 'mbart'}
                   onSelect={() => handleModelSelection(entry.id, 'mbart', entry.mbartTranslation || entry.nlpTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'mbart', val)}
-                  colorClass="border-pink-500 bg-pink-50 dark:bg-pink-500/5"
-                  badgeColor="bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400"
-                  latency={getDummyLatency('mBART-50')}
-                  confidence={getDummyScore('mBART-50')}
+                  variant="pink"
+                  isDark={isDark}
+
                   errorMessage={entry.mbartError}
                   isLocked={file.status === 'done'}
                 />
@@ -460,10 +451,9 @@ export function SubtitleEditor({ file, onUpdate }: SubtitleEditorProps) {
                   isSelected={entry.selectedModel === 'nllb'}
                   onSelect={() => handleModelSelection(entry.id, 'nllb', entry.nllbTranslation || '')}
                   onEdit={(val) => handleTextEdit(entry.id, 'nllb', val)}
-                  colorClass="border-orange-500 bg-orange-50 dark:bg-orange-500/5"
-                  badgeColor="bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400"
-                  latency={getDummyLatency('NLLB-200')}
-                  confidence={getDummyScore('NLLB-200')}
+                  variant="orange"
+                  isDark={isDark}
+
                   errorMessage={entry.nllbError}
                   isLocked={file.status === 'done'}
                 />
