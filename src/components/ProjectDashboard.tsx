@@ -189,7 +189,8 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
     <div className="flex flex-col gap-8">
       <div className="grid grid-cols-2 gap-12 lg:gap-16 max-w-full overflow-x-hidden">
         {/* Upload and Attach Files - Left Column (Moved from Top) */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 group/card flex flex-col h-full">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 group/card flex flex-col h-full">
+
           {/* Header */}
           <div className="px-6 py-6 border-b border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center bg-slate-50/30 dark:bg-slate-950/30">
             <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide">
@@ -370,7 +371,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (confirm('Are you sure you want to delete this file?')) {
+                                if (confirm(t('deleteFileConfirm'))) {
                                   onDeleteFile(file.id);
                                 }
                               }}
@@ -454,7 +455,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-slate-800 dark:text-slate-200">{file.name}</h4>
-                    <p className="text-xs text-slate-400">{file.entries.length} entries • {file.progress}% complete</p>
+                    <p className="text-xs text-slate-400">{file.entries.length} {t('entriesLower')} • {t('percentComplete').replace('{{val}}', Math.round(file.progress).toString())}</p>
                   </div>
                 </div>
 
@@ -462,7 +463,7 @@ export function ProjectDashboard({ files, projects, onDeleteProject, onMoveFile,
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm('Are you sure you want to delete this file?')) {
+                      if (confirm(t('deleteFileConfirm'))) {
                         onDeleteFile(file.id);
                       }
                     }}

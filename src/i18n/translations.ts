@@ -58,6 +58,9 @@ export const translations = {
     startDragging: 'Bắt đầu kéo file vào đây',
     moreFiles: 'file khác',
     created: 'Đã tạo',
+    deleteFileConfirm: 'Bạn có chắc chắn muốn xóa file này không?',
+    entriesLower: 'dòng',
+    percentComplete: '{{val}}% hoàn thành',
 
     // Sidebar
     dashboard: 'Dashboard',
@@ -322,6 +325,9 @@ export const translations = {
     startDragging: 'Start by dragging files here',
     moreFiles: 'more files',
     created: 'Created',
+    deleteFileConfirm: 'Are you sure you want to delete this file?',
+    entriesLower: 'entries',
+    percentComplete: '{{val}}% complete',
 
     // Sidebar
     dashboard: 'Dashboard',
@@ -586,6 +592,9 @@ export const translations = {
     startDragging: '开始拖放文件到此处',
     moreFiles: '更多文件',
     created: '创建于',
+    deleteFileConfirm: '您确定要删除此文件吗？',
+    entriesLower: '条目',
+    percentComplete: '完成 {{val}}%',
 
     // Sidebar
     dashboard: '仪表板',
