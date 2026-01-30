@@ -52,8 +52,6 @@ Thumbs.db
 *.swo
 
 # Misc
-!database/*.sql
-*.sql
 *.ipynb_checkpoints/
 validation_report.json
 test_output.txt
